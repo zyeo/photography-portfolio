@@ -1,33 +1,22 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getHomepageData, getPhotoVisualStyle } from "@/lib/public/photos";
 import styles from "./page.module.css";
 
-const latestEntries = [
-  {
-    date: "May 14",
-    title: "Rain holding on the tram window",
-    location: "Setagaya",
-  },
-  {
-    date: "May 13",
-    title: "Late light on vending glass",
-    location: "Koenji",
-  },
-  {
-    date: "May 12",
-    title: "Cyclist beneath the overpass",
-    location: "Nakano",
-  },
-];
-
-export default function Home() {
+export default async function Home() {
+  const { heroPhotos, entries } = await getHomepageData();
+  const hero = heroPhotos.find((photo) => photo.pinned_hero) ?? heroPhotos[0];
   return (
     <>
       <SiteHeader />
       <main>
         <section className={`${styles.hero} shell`} aria-label="Featured photograph">
-          <div className={styles.heroImage} aria-hidden="true" />
+          <div
+            className={styles.heroImage}
+            aria-hidden="true"
+            style={{ background: hero ? getPhotoVisualStyle(hero.id) : undefined }}
+          />
           <div className={styles.heroOverlay} />
           <div className={styles.heroContent}>
             <p className="eyebrow">Daily photography journal</p>
@@ -68,11 +57,11 @@ export default function Home() {
             </h2>
           </div>
           <ol>
-            {latestEntries.map((entry) => (
-              <li key={entry.title}>
-                <span>{entry.date}</span>
+            {entries.map((entry) => (
+              <li key={entry.entry_date}>
+                <span>{entry.entry_date}</span>
                 <strong className="serif">{entry.title}</strong>
-                <em>{entry.location}</em>
+                <em>{entry.photos?.location_name ?? "Tokyo"}</em>
               </li>
             ))}
           </ol>
