@@ -1,0 +1,10 @@
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Local tool installs
+.codex/
+
+# OS
+.DS_Store
