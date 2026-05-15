@@ -52,7 +52,12 @@ Plans:
   1. Daily journal entry can be published in a few steps.
   2. Mixed archive batches can be uploaded without mandatory cleanup.
   3. Selected work, collections, and homepage heroes can be curated visually.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 03-01: Build dashboard and daily publishing.
+- [x] 03-02: Build archive and library workflows.
+- [x] 03-03: Build curation workspaces.
 
 ### Phase 4: Public experience
 **Goal**: Build the visitor-facing site around the content system.
@@ -80,6 +85,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Project foundation and design system | 3/3 | Complete | 2026-05-15 |
 | 2. Data, auth, storage, and image ingestion | 3/3 | Complete | 2026-05-16 |
-| 3. Admin workflows | 0/TBD | Not started | - |
+| 3. Admin workflows | 3/3 | In progress | - |
 | 4. Public experience | 0/TBD | Not started | - |
 | 5. Polish, QA, and launch readiness | 0/TBD | Not started | - |

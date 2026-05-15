@@ -69,10 +69,10 @@
 | DATA-03 | Phase 2 | Complete |
 | DATA-04 | Phase 2 | Complete |
 | ADMIN-01 | Phase 2 | Complete |
-| ADMIN-02 | Phase 3 | Pending |
-| ADMIN-03 | Phase 3 | Pending |
-| ADMIN-04 | Phase 3 | Pending |
-| ADMIN-05 | Phase 3 | Pending |
+| ADMIN-02 | Phase 3 | In Progress |
+| ADMIN-03 | Phase 3 | In Progress |
+| ADMIN-04 | Phase 3 | In Progress |
+| ADMIN-05 | Phase 3 | In Progress |
 | PUBLIC-01 | Phase 4 | Pending |
 | PUBLIC-02 | Phase 4 | Pending |
 | PUBLIC-03 | Phase 4 | Pending |
