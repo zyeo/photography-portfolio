@@ -14,10 +14,10 @@ export default async function Home() {
       <section className={styles.identity}>
         <Image
           className={styles.wordmark}
-          src="/zach-yeo-wordmark.svg"
+          src="/brand/zach-yeo-signature-white-transparent.png"
           alt="Zach Yeo"
-          width={388}
-          height={158}
+          width={1100}
+          height={650}
           priority
         />
         <p>Tokyo, for now</p>

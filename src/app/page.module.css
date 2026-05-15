@@ -1,16 +1,16 @@
 .home { position:relative; min-height:100svh; overflow:hidden; color:#f6f1e7; background:#171513; }
 .overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,9,8,.16), rgba(10,9,8,.5)); }
 .identity { position:relative; z-index:1; display:grid; place-content:center; justify-items:center; min-height:100svh; text-align:center; transform:translateY(-2rem); }
-.wordmark { width:min(58vw, 25rem); height:auto; }
-.identity p { margin:1rem 0 .7rem; font-size:clamp(.72rem,.68rem + .2vw,.84rem); letter-spacing:.34em; text-transform:uppercase; }
-.identity span { font-family:var(--font-serif); font-size:clamp(1.02rem,.96rem + .3vw,1.22rem); }
+.wordmark { width:min(70vw, 31rem); height:auto; }
+.identity p { margin:1rem 0 .7rem; font-size:clamp(.82rem,.76rem + .22vw,.94rem); letter-spacing:.34em; text-transform:uppercase; }
+.identity span { font-family:var(--font-serif); font-size:clamp(1.12rem,1.04rem + .32vw,1.34rem); }
 .ritual { position:absolute; z-index:1; left:50%; bottom:clamp(2rem, 4vh, 2.9rem); display:grid; justify-items:center; gap:1rem; transform:translateX(-50%); }
 .ritual nav,.ritual div { display:flex; justify-content:center; gap:1.55rem; }
-.ritual nav { font-size:clamp(.68rem,.64rem + .12vw,.76rem); letter-spacing:.28em; text-transform:uppercase; }
-.ritual div { font-size:clamp(.88rem,.82rem + .16vw,.98rem); opacity:.94; }
+.ritual nav { font-size:clamp(.76rem,.7rem + .16vw,.86rem); letter-spacing:.28em; text-transform:uppercase; }
+.ritual div { font-size:clamp(.98rem,.9rem + .2vw,1.12rem); opacity:.94; }
 @media (max-width:36rem){
   .identity { transform:translateY(-1.5rem); padding-inline:1.25rem; }
-  .wordmark { width:min(82vw, 22rem); }
+  .wordmark { width:min(90vw, 28rem); }
   .identity span { max-width:18rem; }
   .ritual nav { gap:1.1rem; }
 }

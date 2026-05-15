@@ -13,7 +13,7 @@ export function SiteHeader() {
     <header className={`${styles.header} shell`}>
       <span aria-hidden="true" />
       <Link className={styles.signature} href="/" aria-label="Zach Yeo home">
-        <Image src="/zach-yeo-wordmark.svg" alt="" width={194} height={79} />
+        <Image src="/brand/zach-yeo-signature-charcoal-transparent.png" alt="" width={1100} height={650} />
       </Link>
       <nav aria-label="Primary navigation">
         {links.map((link) => (
