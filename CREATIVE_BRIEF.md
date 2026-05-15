@@ -8,6 +8,7 @@ A visitor should be able to quickly understand the photographer's eye, then stay
 
 ## Desired feeling
 - Beautiful, calm, and image-led
+- Paper-white background with dark charcoal text
 - Minimal, but not anonymous
 - Personal and authored rather than template-like
 - Reflective, observant, and quietly alive
@@ -37,7 +38,7 @@ The site is not just a gallery of finished work. It reveals the practice behind 
   - date
   - title or short caption
   - location
-  - tags
+  - hidden organizational tags later, not visibly foregrounded
   - aperture
   - ISO
   - shutter speed
@@ -74,6 +75,7 @@ The system should handle image optimization, responsive sizes, and presentation 
 ## Visual direction
 - Minimal composition with strong rhythm
 - Typography should carry personality without overpowering the photographs
+- Palette should feel like paper and ink rather than sterile white UI
 - Layout should feel editorial rather than generic portfolio-template
 - Character should come from proportion, sequencing, typography, and small rituals—not decoration for its own sake
 
@@ -88,6 +90,13 @@ The system should handle image optimization, responsive sizes, and presentation 
 - Complex commerce features
 - Too many categories before the work asks for them
 - Visual gimmicks that slow the site down or age quickly
+
+## Current visual decisions
+- Overall direction: poetic first, with some urban-editorial sharpness
+- Background: paper-white / warm near-white
+- Text: dark charcoal rather than pure black
+- Visible metadata: restrained; location, date, aperture, shutter speed, ISO
+- Tags: hidden for organization/search rather than visibly shown in the interface
 
 ## Open design questions
 - Should the overall mood lean more cinematic, documentary, poetic, or urban-editorial?
