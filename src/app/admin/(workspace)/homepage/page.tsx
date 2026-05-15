@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { HeroManager } from "./hero-manager";
 import styles from "./page.module.css";
 
 export default async function HomepageAdminPage() {
@@ -13,15 +14,7 @@ export default async function HomepageAdminPage() {
     <main className={styles.page}>
       <p className="eyebrow">Homepage</p>
       <h1 className="display">Hero rotation</h1>
-      <div className={styles.list}>
-        {photos?.map((photo) => (
-          <article key={photo.id}>
-            <strong className="serif">{photo.original_filename}</strong>
-            <span>{photo.pinned_hero ? "Pinned hero" : "Rotation-ready"}</span>
-            <span>Focal point {photo.focal_point_x}, {photo.focal_point_y}</span>
-          </article>
-        ))}
-      </div>
+      <HeroManager initialPhotos={photos ?? []} />
     </main>
   );
 }

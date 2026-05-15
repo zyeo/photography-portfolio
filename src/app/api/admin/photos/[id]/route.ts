@@ -22,6 +22,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     selected_size: body.selected_size,
     selected_order: body.selected_order,
     published: body.published,
+    focal_point_x: body.focal_point_x,
+    focal_point_y: body.focal_point_y,
   };
 
   const { data, error } = await supabase.from("photos").update(update).eq("id", id).select().single();
