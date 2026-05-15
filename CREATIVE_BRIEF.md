@@ -319,3 +319,74 @@ Many-to-many join table between photos and collections.
 
 ### Admin UX principle
 Let the user do the obvious thing in the context where they are already working whenever possible.
+
+## Technical blueprint — public routes
+- `/`
+- `/selected`
+- `/journal`
+- `/journal/[yyyy-mm-dd]`
+- `/collections`
+- `/collections/[slug]`
+- `/about`
+- `/admin`
+
+### Collections landing page
+- Simple landing page with one cover image, title, short description, and quiet CTA per collection
+- Designed as a table of contents rather than a giant gallery wall
+
+### Collection pages
+- Shared template for all v1 collections
+- Distinction comes from title, description, cover image, and ordered photos rather than unique page types
+
+### Photo viewing
+- Selected and collection pages use lightboxes in v1
+- No dedicated public photo detail pages required initially
+- Future option: add a subtle lightbox action to open a photo on its own dedicated URL later
+
+## Technical blueprint — storage, deployment, and security
+### Stack
+- Next.js for the public site and custom admin
+- Supabase for Postgres, Auth, and Storage
+- Vercel for hosting and deployment
+- Public domain target: `photos.zachyeo.com`
+
+### Storage
+- `originals` bucket: private source files
+- `public-images` bucket: optimized web delivery assets / transform source
+- Preserve originals separately from public delivery concerns
+
+### Image pipeline
+- Extract EXIF on upload where available
+- Serve responsive image sizes
+- Use optimized formats where supported
+- Lazy-load below-the-fold imagery
+- Preserve layout stability with known dimensions / aspect ratios
+- Use focal points and optional mobile crop behavior for hero images
+- Preload only the active hero image; do not load the entire rotation pool at once
+
+### Auth and permissions
+- Private authenticated `/admin`
+- One admin user initially
+- Public can read only published public content
+- Only admin can create, edit, delete, or manage unpublished content
+- Originals remain private
+- MFA can be added later if desired
+
+### Public/private split
+Public:
+- published journal entries
+- published collections
+- selected photos
+- approved hero photos
+- public web image variants
+
+Private:
+- drafts
+- unpublished collections
+- hidden tags
+- originals
+- admin UI
+
+### Durability principle
+- The website is not the sole archive of original photographs
+- Maintain independent backups of master photo files outside the site infrastructure
