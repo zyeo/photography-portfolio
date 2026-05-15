@@ -102,3 +102,26 @@ Homepage hero images should come from a curated subset selected during publishin
 - Should the overall mood lean more cinematic, documentary, poetic, or urban-editorial?
 - Should the journal feel like a clean archive, a diary, or a magazine column?
 - Should locations be practical filters, or a more central part of the site's identity?
+
+## Page architecture — current decisions
+### Selected
+- Editorial gallery rather than plain uniform grid
+- Purely visual and minimal on first view
+- Some images may be intentionally larger to create rhythm
+- Clicking an image opens a larger lightbox / detail view
+- Detail view may show only quiet supporting metadata such as location and date, kept visually secondary
+
+### Journal index
+- Reverse-chronological feed
+- Latest entry receives a larger featured treatment with image, short text, and read-more path
+- Older entries continue below in a quieter list / feed
+- Minimal archive controls should make older dates reachable without cluttering the interface
+
+### Journal entry
+- Image-first article page
+- Order: image, title, date/location, camera metadata, reflection, previous/next navigation
+- The photograph should arrive before the explanation
+
+### About
+- Minimal personal page with short bio, optional portrait, and contact path
+- Include a quiet availability line for portrait / editorial inquiries without turning the page into a sales page
