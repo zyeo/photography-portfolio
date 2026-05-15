@@ -7,10 +7,10 @@ const links = [
   { href: "/about", label: "About" },
 ];
 
-export function SiteHeader({ section }: { section?: string }) {
+export function SiteHeader() {
   return (
     <header className={`${styles.header} shell`}>
-      <span className="page-kicker">{section}</span>
+      <span aria-hidden="true" />
       <Link className={`${styles.signature} signature`} href="/" aria-label="Zach Yeo home">
         Zach Yeo
       </Link>

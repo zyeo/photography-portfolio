@@ -27,7 +27,7 @@ export default async function CollectionDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <SiteHeader section="Collection" />
+      <SiteHeader />
       <main className={`${styles.page} shell`}>
         <p className="eyebrow">Collection</p>
         <h1 className="display">{collection.title}</h1>

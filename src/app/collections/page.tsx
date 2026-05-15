@@ -14,7 +14,7 @@ export default async function CollectionsPage() {
 
   return (
     <>
-      <SiteHeader section="Collections" />
+      <SiteHeader />
       <main className={`${styles.page} shell`}>
         <p className="eyebrow">Collections</p>
         <h1 className="display">Ways through the archive.</h1>

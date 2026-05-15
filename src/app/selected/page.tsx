@@ -15,7 +15,7 @@ export default async function SelectedPage() {
 
   return (
     <>
-      <SiteHeader section="1 · Selected" />
+      <SiteHeader />
       <main className={`${styles.page} shell`}>
         <h1 className="display">Selected</h1>
         <p className="page-kicker">A selection of photographs from recent years.</p>

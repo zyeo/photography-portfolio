@@ -37,7 +37,7 @@ export default async function JournalEntryPage({ params }: PageProps) {
 
   return (
     <>
-      <SiteHeader section="3 · Entry" />
+      <SiteHeader />
       <main className={`${styles.page} shell`}>
         <div className={styles.image} style={{ background: getPhotoVisualStyle(journalEntry.photos?.id ?? journalEntry.entry_date) }} />
         <article>

@@ -22,7 +22,7 @@ export default async function JournalPage() {
 
   return (
     <>
-      <SiteHeader section="2 · Journal" />
+      <SiteHeader />
       <main className={`${styles.page} shell`}>
         <h1 className="display">Journal</h1>
         <p className="page-kicker">A journal of photographs, places, and the practice of noticing.</p>

@@ -15,7 +15,7 @@ export default async function Home() {
         <p>Tokyo, for now</p>
         <span>Photographs and notes from an ongoing practice.</span>
       </section>
-      <footer className={styles.footer}>
+      <footer className={styles.ritual}>
         <nav aria-label="Primary navigation">
           <Link href="/selected">Selected</Link>
           <Link href="/journal">Journal</Link>

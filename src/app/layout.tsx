@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Geist, Newsreader, Allura } from "next/font/google";
+import { Cormorant_Garamond, Geist, Newsreader, WindSong } from "next/font/google";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -14,10 +14,10 @@ const serif = Newsreader({
   display: "swap",
 });
 
-const signature = Allura({
+const signature = WindSong({
   variable: "--font-signature",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500"],
 });
 
 const sans = Geist({
