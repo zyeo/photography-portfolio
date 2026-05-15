@@ -18,13 +18,20 @@ export default async function JournalEntryPage({ params }: PageProps) {
     .eq("published", true)
     .maybeSingle();
   if (!entry) notFound();
+  const journalEntry = entry as {
+    entry_date: string;
+    title: string;
+    reflection: string;
+    weather: string | null;
+    photos: { id: string; location_name: string | null; aperture: string | null; shutter_speed: string | null; iso: number | null } | null;
+  };
   const { data: neighbors } = await supabase
     .from("journal_entries")
     .select("entry_date")
     .eq("published", true)
     .order("entry_date", { ascending: true });
   const dates = ((neighbors ?? []) as Array<{ entry_date: string }>).map((item) => item.entry_date);
-  const index = dates.indexOf(entry.entry_date);
+  const index = dates.indexOf(journalEntry.entry_date);
   const previous = dates[index - 1];
   const next = dates[index + 1];
 
@@ -32,16 +39,16 @@ export default async function JournalEntryPage({ params }: PageProps) {
     <>
       <SiteHeader />
       <main className={`${styles.page} shell`}>
-        <div className={styles.image} style={{ background: getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date) }} />
+        <div className={styles.image} style={{ background: getPhotoVisualStyle(journalEntry.photos?.id ?? journalEntry.entry_date) }} />
         <article>
-          <h1 className="display">{entry.title}</h1>
-          <p>{entry.entry_date} · {entry.photos?.location_name ?? "Tokyo"}</p>
+          <h1 className="display">{journalEntry.title}</h1>
+          <p>{journalEntry.entry_date} · {journalEntry.photos?.location_name ?? "Tokyo"}</p>
           <dl>
-            <div><dt>Aperture</dt><dd>{entry.photos?.aperture ?? "—"}</dd></div>
-            <div><dt>Shutter</dt><dd>{entry.photos?.shutter_speed ?? "—"}</dd></div>
-            <div><dt>ISO</dt><dd>{entry.photos?.iso ?? "—"}</dd></div>
+            <div><dt>Aperture</dt><dd>{journalEntry.photos?.aperture ?? "—"}</dd></div>
+            <div><dt>Shutter</dt><dd>{journalEntry.photos?.shutter_speed ?? "—"}</dd></div>
+            <div><dt>ISO</dt><dd>{journalEntry.photos?.iso ?? "—"}</dd></div>
           </dl>
-          <p className="serif">{entry.reflection}</p>
+          <p className="serif">{journalEntry.reflection}</p>
         </article>
         <nav>
           {previous ? <Link href={`/journal/${previous}`}>← Previous</Link> : <span />}
