@@ -21,10 +21,12 @@ export async function POST(request: Request) {
 
   const photos = [];
   const skippedDuplicates: string[] = [];
+  const failedFiles: Array<{ name: string; error: string }> = [];
 
   for (const file of files) {
-    assertAcceptedImage(file);
-    const buffer = await file.arrayBuffer();
+    try {
+      assertAcceptedImage(file);
+      const buffer = await file.arrayBuffer();
     const contentHash = createHash("sha256").update(Buffer.from(buffer)).digest("hex");
 
     const { data: existingPhoto } = await supabase
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
       contentType: file.type,
       upsert: false,
     });
-    if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
+      if (uploadError) throw new Error(uploadError.message);
 
     const { data, error } = await supabase
       .from("photos")
@@ -64,6 +66,7 @@ export async function POST(request: Request) {
         medium,
         selected,
         selected_size: selected ? "normal" : null,
+        published: selected,
       })
       .select("id, original_filename, location_name, medium, selected, date_taken, camera")
       .single();
@@ -74,10 +77,16 @@ export async function POST(request: Request) {
         skippedDuplicates.push(file.name);
         continue;
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      throw new Error(error.message);
     }
     photos.push(data);
+    } catch (error) {
+      failedFiles.push({
+        name: file.name,
+        error: error instanceof Error ? error.message : "Upload failed.",
+      });
+    }
   }
 
-  return NextResponse.json({ photos, skippedDuplicates }, { status: 201 });
+  return NextResponse.json({ photos, skippedDuplicates, failedFiles }, { status: 201 });
 }

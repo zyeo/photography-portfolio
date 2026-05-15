@@ -16,6 +16,7 @@ type Photo = {
 type UploadResult = {
   photos?: Photo[];
   skippedDuplicates?: string[];
+  failedFiles?: Array<{ name: string; error: string }>;
   error?: string;
 };
 
@@ -52,11 +53,13 @@ export function ArchiveUploadForm() {
 
       setPhotos(payload.photos ?? []);
       const skipped = payload.skippedDuplicates ?? [];
+      const failed = payload.failedFiles ?? [];
       setStatus(
-        skipped.length
-          ? `Uploaded ${payload.photos?.length ?? 0}; skipped ${skipped.length} duplicate${skipped.length === 1 ? "" : "s"}.`
-          : `Uploaded ${payload.photos?.length ?? 0} photograph${payload.photos?.length === 1 ? "" : "s"}.`,
+        `Uploaded ${payload.photos?.length ?? 0}${
+          skipped.length ? `; skipped ${skipped.length} duplicate${skipped.length === 1 ? "" : "s"}` : ""
+        }${failed.length ? `; ${failed.length} failed` : ""}.`,
       );
+      setError(failed.length ? failed.map((file) => `${file.name}: ${file.error}`).join(" ") : null);
       form.reset();
     } catch {
       setError("Upload failed. Please try again.");
@@ -88,7 +91,7 @@ export function ArchiveUploadForm() {
         </div>
         <label className={styles.checkbox}>
           <input name="selected" type="checkbox" disabled={isUploading} />
-          Add uploaded photos to Selected
+          Add uploaded photos to public Selected
         </label>
         <button type="submit" disabled={isUploading}>
           {isUploading ? "Uploading…" : "Upload archive batch"}

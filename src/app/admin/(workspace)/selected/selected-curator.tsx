@@ -8,6 +8,7 @@ type Photo = {
   original_filename: string;
   selected_size: "normal" | "large" | null;
   selected_order: number | null;
+  published: boolean;
 };
 
 export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
@@ -62,7 +63,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
         {orderedPhotos.map((photo, index) => (
           <article key={photo.id}>
             <strong className="serif">{photo.original_filename}</strong>
-            <span>{photo.selected_size ?? "normal"}</span>
+            <span>{photo.selected_size ?? "normal"} · {photo.published ? "public" : "draft"}</span>
             <div>
               <button onClick={() => move(index, -1)} disabled={index === 0}>↑</button>
               <button onClick={() => move(index, 1)} disabled={index === orderedPhotos.length - 1}>↓</button>
