@@ -125,3 +125,51 @@ Homepage hero images should come from a curated subset selected during publishin
 ### About
 - Minimal personal page with short bio, optional portrait, and contact path
 - Include a quiet availability line for portrait / editorial inquiries without turning the page into a sales page
+
+## Content model — current decisions
+### Daily Journal
+- Strictly one photograph per day
+- Daily discipline should remain conceptually separate from future multi-image projects / sets
+- Fields:
+  - photo
+  - date (auto-filled from EXIF when available, editable)
+  - title
+  - reflection
+  - location
+  - camera (auto from EXIF when available)
+  - lens (auto from EXIF when available)
+  - aperture (auto from EXIF when available)
+  - shutter speed (auto from EXIF when available)
+  - ISO (auto from EXIF when available)
+  - weather (optional)
+  - hero-approved toggle
+  - pin-as-homepage-hero toggle
+  - hidden organizational tags
+  - focal point
+  - optional mobile crop
+- Metadata fields should be optional, not required
+
+### Selected
+- Separate from the daily journal; can include older archive work and images from dedicated shoots
+- Minimal public presentation
+- Public detail view should show only location and date for now
+- Fields:
+  - photo
+  - location
+  - date
+  - gallery size: normal / large
+  - display order
+  - optional hidden metadata retained for future use
+
+### Future Projects / Sets
+- Planned future content type for grouped bodies of work such as trips, challenges, or themed series
+- Kept separate from Daily Journal to preserve the one-photo-per-day concept
+
+## Publishing system
+- Use a small custom admin / CMS-style publishing interface rather than relying on raw markdown files
+- Ideal workflow:
+  1. Upload image
+  2. System extracts EXIF automatically where available
+  3. Photographer fills only the human fields: title, reflection, location, optional weather
+  4. Photographer optionally curates hero status, selected status, focal point, and crop behavior
+  5. Publish
