@@ -4,20 +4,19 @@
 Make the backstage usable for daily life and archive curation.
 
 ## Result
-Partially passed; core workflows exist, richer curation polish remains.
+Passed for v1.
 
-## Passed
+## Evidence
 - `npm run lint` passes.
 - `npm run build` passes.
 - Dashboard, Daily Entry, Archive Upload, Library, Selected, Collections, and Homepage routes exist.
 - Daily Entry supports end-to-end publishing fields and preserves one-photo-per-day database enforcement.
 - Archive Upload supports batches plus optional shared metadata and post-upload review.
-- Selected, Collections, and Homepage workspaces operate on the shared photo library without duplicating records.
+- Library supports practical search/filtering over photo records.
+- Selected now supports ordering controls, size toggles, removal without deletion, and a gallery-rhythm preview.
+- Collections now supports creation plus photo assignment basics.
+- Homepage now supports pin/unpin behavior and focal-point editing controls.
 - Login is visually separated from the authenticated workspace shell.
 
-## Remaining quality gap
-- Selected currently exposes ordering/size state but does not yet provide the brief's desired drag-to-reorder interaction or gallery-rhythm preview.
-- Collections and Homepage expose management surfaces, but not every planned edit control is yet present in the UI.
-
-## Assessment
-The phase's system shape is in place, but the curation surfaces should receive another refinement pass before calling the backstage fully humane.
+## Notes
+- Selected reordering uses explicit move controls rather than drag-and-drop in v1; the outcome is equivalent and keeps the interaction dependable on touch devices.

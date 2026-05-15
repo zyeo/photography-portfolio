@@ -21,10 +21,10 @@
 ### Admin
 
 - [x] **ADMIN-01**: Admin user can authenticate into a private admin area.
-- [ ] **ADMIN-02**: Admin can publish one daily journal entry end to end.
-- [ ] **ADMIN-03**: Admin can upload archive photos in batches with optional shared metadata and per-photo review.
-- [ ] **ADMIN-04**: Admin can search, filter, and edit library records.
-- [ ] **ADMIN-05**: Admin can curate Selected work, collections, and homepage hero behavior.
+- [x] **ADMIN-02**: Admin can publish one daily journal entry end to end.
+- [x] **ADMIN-03**: Admin can upload archive photos in batches with optional shared metadata and per-photo review.
+- [x] **ADMIN-04**: Admin can search, filter, and edit library records.
+- [x] **ADMIN-05**: Admin can curate Selected work, collections, and homepage hero behavior.
 
 ### Public Experience
 
@@ -69,10 +69,10 @@
 | DATA-03 | Phase 2 | Complete |
 | DATA-04 | Phase 2 | Complete |
 | ADMIN-01 | Phase 2 | Complete |
-| ADMIN-02 | Phase 3 | In Progress |
-| ADMIN-03 | Phase 3 | In Progress |
-| ADMIN-04 | Phase 3 | In Progress |
-| ADMIN-05 | Phase 3 | In Progress |
+| ADMIN-02 | Phase 3 | Complete |
+| ADMIN-03 | Phase 3 | Complete |
+| ADMIN-04 | Phase 3 | Complete |
+| ADMIN-05 | Phase 3 | Complete |
 | PUBLIC-01 | Phase 4 | Pending |
 | PUBLIC-02 | Phase 4 | Pending |
 | PUBLIC-03 | Phase 4 | Pending |

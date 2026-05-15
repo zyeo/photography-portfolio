@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-15)
 
 **Core value:** A visitor can encounter Zach's visual voice immediately, then follow the daily discipline that produces it.
-**Current focus:** Phase 3 — Admin workflows
+**Current focus:** Phase 4 — Public experience
 
 ## Current Position
 
-Phase: 3 of 5 (Admin workflows)
-Plan: 3 of 3 in current phase
-Status: Refinement needed
-Last activity: 2026-05-16 — Implemented Phase 3 admin surfaces; curation polish remains.
+Phase: 4 of 5 (Public experience)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-05-16 — Completed Phase 3 admin refinement pass.
 
 Progress: [██████░░░░] 60%
 
@@ -52,7 +52,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 3]: Curation workspaces need a refinement pass for drag ordering, gallery rhythm preview, and fuller edit controls.
+None yet.
 
 ## Deferred Items
 
@@ -63,5 +63,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-15 23:45 JST
-Stopped at: Phase 3 implemented; curation refinement remains before closure.
+Stopped at: Phase 3 verified; Phase 4 is ready to plan.
 Resume file: None

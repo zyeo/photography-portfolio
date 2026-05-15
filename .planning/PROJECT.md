@@ -14,6 +14,7 @@ A visitor can encounter Zach's visual voice immediately, then follow the daily d
 
 - ✓ Public shell expresses the approved poetic/minimal direction — Phase 1
 - ✓ Data, auth, storage, and nullable ingestion spine works against hosted Supabase — Phase 2
+- ✓ Admin supports daily publishing, archive intake, library browsing, and v1 curation workflows — Phase 3
 
 ### Active
 
