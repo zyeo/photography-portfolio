@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import styles from "./page.module.css";
@@ -36,12 +37,12 @@ export default function Home() {
               noticing before the moment disappears.
             </p>
             <div className={styles.heroLinks}>
-              <a className="utility-link" href="/selected">
+              <Link className="utility-link" href="/selected">
                 View selected work
-              </a>
-              <a className="utility-link" href="/journal">
+              </Link>
+              <Link className="utility-link" href="/journal">
                 Read the journal
-              </a>
+              </Link>
             </div>
           </div>
         </section>

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const links = [
   { href: "/selected", label: "Selected" },
   { href: "/journal", label: "Journal" },
@@ -8,14 +10,14 @@ const links = [
 export function SiteHeader() {
   return (
     <header className="shell site-header">
-      <a className="wordmark display" href="/" aria-label="Zach Yeo home">
+      <Link className="wordmark display" href="/" aria-label="Zach Yeo home">
         Zach Yeo
-      </a>
+      </Link>
       <nav aria-label="Primary navigation">
         <ul>
           {links.map((link) => (
             <li key={link.href}>
-              <a href={link.href}>{link.label}</a>
+              <Link href={link.href}>{link.label}</Link>
             </li>
           ))}
         </ul>
