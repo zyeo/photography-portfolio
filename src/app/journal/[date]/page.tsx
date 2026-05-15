@@ -23,7 +23,7 @@ export default async function JournalEntryPage({ params }: PageProps) {
     .select("entry_date")
     .eq("published", true)
     .order("entry_date", { ascending: true });
-  const dates = (neighbors ?? []).map((item) => item.entry_date);
+  const dates = ((neighbors ?? []) as Array<{ entry_date: string }>).map((item) => item.entry_date);
   const index = dates.indexOf(entry.entry_date);
   const previous = dates[index - 1];
   const next = dates[index + 1];
