@@ -19,5 +19,18 @@ export async function getHomepageData() {
       .limit(3),
   ]);
 
-  return { heroPhotos: heroPhotos ?? [], entries: entries ?? [] };
+  return {
+    heroPhotos: (heroPhotos ?? []) as Array<{
+      id: string;
+      original_filename: string;
+      public_image_path: string | null;
+      location_name: string | null;
+      pinned_hero: boolean;
+    }>,
+    entries: (entries ?? []) as Array<{
+      entry_date: string;
+      title: string;
+      photos: { location_name: string | null } | null;
+    }>,
+  };
 }
