@@ -6,7 +6,7 @@ Build the site from its foundation outward: first establish the visual language 
 
 ## Phases
 
-- [ ] **Phase 1: Project foundation and design system** - Establish the Next.js shell and approved visual language.
+- [x] **Phase 1: Project foundation and design system** - Establish the Next.js shell and approved visual language.
 - [ ] **Phase 2: Data, auth, storage, and image ingestion** - Build the content spine and secure upload path.
 - [ ] **Phase 3: Admin workflows** - Make daily publishing and curation genuinely usable.
 - [ ] **Phase 4: Public experience** - Deliver the visitor-facing routes and browsing flows.
@@ -25,9 +25,9 @@ Build the site from its foundation outward: first establish the visual language 
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Scaffold the Next.js application and developer tooling.
-- [ ] 01-02: Build design tokens, typography, and responsive layout primitives.
-- [ ] 01-03: Assemble the public shell and homepage hero placeholder.
+- [x] 01-01: Scaffold the Next.js application and developer tooling.
+- [x] 01-02: Build design tokens, typography, and responsive layout primitives.
+- [x] 01-03: Assemble the public shell and homepage hero placeholder.
 
 ### Phase 2: Data, auth, storage, and image ingestion
 **Goal**: Create the system spine that all content features depend on.
@@ -73,7 +73,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project foundation and design system | 0/3 | In progress | - |
+| 1. Project foundation and design system | 3/3 | Complete | 2026-05-15 |
 | 2. Data, auth, storage, and image ingestion | 0/TBD | Not started | - |
 | 3. Admin workflows | 0/TBD | Not started | - |
 | 4. Public experience | 0/TBD | Not started | - |

@@ -12,7 +12,7 @@ A visitor can encounter Zach's visual voice immediately, then follow the daily d
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Public shell expresses the approved poetic/minimal direction — Phase 1
 
 ### Active
 
@@ -48,4 +48,4 @@ The product begins from a detailed creative brief and implementation plan rather
 | Keep public presentation restrained and metadata secondary | The photographs should lead; interface chrome should recede | — Pending |
 
 ---
-*Last updated: 2026-05-15 after project initialization*
+*Last updated: 2026-05-15 after Phase 1 verification*

@@ -7,9 +7,9 @@
 
 ### Foundation
 
-- [ ] **FOUND-01**: Public application shell runs locally with responsive navigation and layout primitives.
-- [ ] **FOUND-02**: Visual system expresses the approved paper-white, charcoal, poetic-minimal direction.
-- [ ] **FOUND-03**: Homepage supports contrast-safe hero presentation behavior.
+- [x] **FOUND-01**: Public application shell runs locally with responsive navigation and layout primitives.
+- [x] **FOUND-02**: Visual system expresses the approved paper-white, charcoal, poetic-minimal direction.
+- [x] **FOUND-03**: Homepage supports contrast-safe hero presentation behavior.
 
 ### Data & Media
 
@@ -61,9 +61,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | In Progress |
-| FOUND-02 | Phase 1 | In Progress |
-| FOUND-03 | Phase 1 | In Progress |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
+| FOUND-03 | Phase 1 | Complete |
 | DATA-01 | Phase 2 | Pending |
 | DATA-02 | Phase 2 | Pending |
 | DATA-03 | Phase 2 | Pending |
@@ -89,4 +89,4 @@
 
 ---
 *Requirements defined: 2026-05-15*
-*Last updated: 2026-05-15 after project initialization*
+*Last updated: 2026-05-15 after Phase 1 verification*
