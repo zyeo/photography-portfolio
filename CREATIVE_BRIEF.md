@@ -260,3 +260,62 @@ Many-to-many join table between photos and collections.
 - Only one pinned hero at a time
 - Selected size required only when selected is true
 - `location_name` remains free-text in v1; normalize later only if a Places feature justifies it
+
+## Technical blueprint — admin experience
+### Admin navigation
+- Dashboard
+- Daily Entry
+- Archive Upload
+- Library
+- Selected
+- Collections
+- Homepage
+
+### Dashboard
+- Show today's journal status
+- Primary shortcut for creating a new Daily Entry
+- Keep the page calm and sparse
+
+### Daily Entry
+- Single-photo publishing flow
+- Upload one image
+- Extract EXIF automatically
+- Auto-fill date from EXIF when available, editable
+- Manually enter title, reflection, location, optional weather
+- Optional hero approval, focal point, pinning
+- Preview before publish
+
+### Archive Upload
+- Upload individual photos or batches / folders
+- Extract EXIF per image automatically
+- Offer optional batch metadata, never required
+- Support shared medium, collection(s), selected status, date, and location when useful
+- Review grid for correcting exceptions before save
+- Archive uploads never become journal entries unless explicitly linked later
+
+### Library
+- Master archive for all photos
+- Search and filter by medium, collection, selected state, hero approval, and date
+- Open individual photo records to edit metadata and relationships
+
+### Selected
+- Dedicated curation workspace
+- Show only selected photos
+- Drag to reorder
+- Toggle normal / large sizing
+- Preview actual gallery rhythm
+- Removing from Selected should not delete the underlying photo
+
+### Collections
+- Create and manage mediums, projects, and themes
+- Configure title, slug, type, description, cover image, publish state, and display order
+- Add and reorder photos within collections
+
+### Homepage
+- See all hero-approved photos
+- Pin / unpin a current hero image
+- Resume slow rotation when no image is pinned
+- Preview desktop and mobile crop behavior
+
+### Admin UX principle
+Let the user do the obvious thing in the context where they are already working whenever possible.
