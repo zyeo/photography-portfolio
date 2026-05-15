@@ -22,7 +22,8 @@ export default async function CollectionDetailPage({ params }: PageProps) {
     .select("display_order, photos(id, original_filename, location_name, date_taken)")
     .eq("collection_id", collection.id)
     .order("display_order", { ascending: true, nullsFirst: false });
-  const photos = (links ?? []).flatMap((link) => link.photos ? [link.photos] : []);
+  const photos = ((links ?? []) as Array<{ photos: { id: string; original_filename: string; location_name: string | null; date_taken: string | null } | null }>)
+    .flatMap((link) => link.photos ? [link.photos] : []);
 
   return (
     <>
