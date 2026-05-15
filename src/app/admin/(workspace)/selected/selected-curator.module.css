@@ -1,0 +1,10 @@
+.layout { display:grid; gap:2rem; }
+.layout section { display:grid; gap:.8rem; }
+.layout article { display:grid; gap:.5rem; border:1px solid var(--line); padding:1rem; }
+.layout article span { color:var(--ink-soft); font-size:.78rem; }
+.layout article div { display:flex; flex-wrap:wrap; gap:.5rem; }
+.layout button { border:1px solid var(--line); background:transparent; padding:.45rem .65rem; }
+.preview { display:grid; grid-template-columns:repeat(3,1fr); gap:.45rem; margin-top:1rem; }
+.preview span { min-height:4rem; background:var(--paper-deep); }
+.preview span[data-size="large"] { grid-column:span 2; min-height:6rem; }
+@media (min-width:52rem){ .layout{grid-template-columns:minmax(0,1fr) 16rem;} }

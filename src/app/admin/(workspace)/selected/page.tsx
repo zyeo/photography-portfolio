@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { SelectedCurator } from "./selected-curator";
 import styles from "./page.module.css";
 
 export default async function SelectedPage() {
@@ -13,15 +14,7 @@ export default async function SelectedPage() {
     <main className={styles.page}>
       <p className="eyebrow">Selected</p>
       <h1 className="display">Curate the gallery</h1>
-      <div className={styles.grid}>
-        {photos?.map((photo) => (
-          <article key={photo.id}>
-            <strong className="serif">{photo.original_filename}</strong>
-            <span>{photo.selected_size ?? "normal"}</span>
-            <span>Order {photo.selected_order ?? "—"}</span>
-          </article>
-        ))}
-      </div>
+      <SelectedCurator initialPhotos={photos ?? []} />
     </main>
   );
 }
