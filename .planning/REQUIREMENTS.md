@@ -28,11 +28,11 @@
 
 ### Public Experience
 
-- [ ] **PUBLIC-01**: Visitor can browse an immersive homepage with approved hero imagery.
-- [ ] **PUBLIC-02**: Visitor can browse Selected work in an editorial gallery and lightbox.
-- [ ] **PUBLIC-03**: Visitor can browse a reverse-chronological journal and individual image-first entries.
-- [ ] **PUBLIC-04**: Visitor can browse collections and collection detail pages.
-- [ ] **PUBLIC-05**: Visitor can read an About page with quiet contact availability.
+- [x] **PUBLIC-01**: Visitor can browse an immersive homepage with approved hero imagery.
+- [x] **PUBLIC-02**: Visitor can browse Selected work in an editorial gallery and lightbox.
+- [x] **PUBLIC-03**: Visitor can browse a reverse-chronological journal and individual image-first entries.
+- [x] **PUBLIC-04**: Visitor can browse collections and collection detail pages.
+- [x] **PUBLIC-05**: Visitor can read an About page with quiet contact availability.
 
 ### Launch Readiness
 
@@ -73,11 +73,11 @@
 | ADMIN-03 | Phase 3 | Complete |
 | ADMIN-04 | Phase 3 | Complete |
 | ADMIN-05 | Phase 3 | Complete |
-| PUBLIC-01 | Phase 4 | Pending |
-| PUBLIC-02 | Phase 4 | Pending |
-| PUBLIC-03 | Phase 4 | Pending |
-| PUBLIC-04 | Phase 4 | Pending |
-| PUBLIC-05 | Phase 4 | Pending |
+| PUBLIC-01 | Phase 4 | Complete |
+| PUBLIC-02 | Phase 4 | Complete |
+| PUBLIC-03 | Phase 4 | Complete |
+| PUBLIC-04 | Phase 4 | Complete |
+| PUBLIC-05 | Phase 4 | Complete |
 | LAUNCH-01 | Phase 5 | Pending |
 | LAUNCH-02 | Phase 5 | Pending |
 | LAUNCH-03 | Phase 5 | Pending |
