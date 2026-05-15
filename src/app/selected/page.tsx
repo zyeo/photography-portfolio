@@ -15,10 +15,10 @@ export default async function SelectedPage() {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader section="1 · Selected" />
       <main className={`${styles.page} shell`}>
-        <p className="eyebrow">Selected work</p>
-        <h1 className="display">Photographs kept for their staying power.</h1>
+        <h1 className="display">Selected</h1>
+        <p className="page-kicker">A selection of photographs from recent years.</p>
         <LightboxGallery photos={photos ?? []} />
       </main>
       <SiteFooter />

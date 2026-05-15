@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 export default function AboutPage() {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader section="4 · About" />
       <main className={`${styles.page} shell`}>
         <p className="eyebrow">About</p>
         <h1 className="display">Zach Yeo</h1>

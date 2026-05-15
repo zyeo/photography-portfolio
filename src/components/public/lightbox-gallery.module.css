@@ -1,10 +1,10 @@
-.gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; }
-.gallery button { min-height:14rem; border:0; }
-.gallery button[data-size="large"] { grid-column:span 2; min-height:22rem; }
+.gallery { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.38rem; }
+.gallery button { min-height:10rem; border:0; }
+.gallery button[data-size="large"] { grid-column:span 2; min-height:15rem; }
 .lightbox { width:min(90vw,48rem); border:0; background:var(--paper); color:var(--ink); padding:1rem; }
 .lightbox::backdrop { background:rgba(0,0,0,.6); }
 .lightbox button { margin-bottom:1rem; border:1px solid var(--line); background:transparent; padding:.55rem .75rem; }
 .lightbox div { min-height:min(60vh,32rem); }
 .lightbox p { margin:1rem 0 .15rem; }
 .lightbox span { color:var(--ink-soft); font-size:.78rem; }
-@media (min-width:48rem){ .gallery{grid-template-columns:repeat(3,minmax(0,1fr));} }
+@media (max-width:42rem){ .gallery{grid-template-columns:repeat(2,minmax(0,1fr)); gap:.45rem;} }

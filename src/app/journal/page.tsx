@@ -22,10 +22,10 @@ export default async function JournalPage() {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader section="2 · Journal" />
       <main className={`${styles.page} shell`}>
-        <p className="eyebrow">Journal</p>
-        <h1 className="display">The daily practice.</h1>
+        <h1 className="display">Journal</h1>
+        <p className="page-kicker">A journal of photographs, places, and the practice of noticing.</p>
         {latest ? (
           <article className={styles.featured}>
             <div style={{ background: getPhotoVisualStyle(latest.photos?.id ?? latest.entry_date) }} />
