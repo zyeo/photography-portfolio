@@ -39,7 +39,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   }
 
   async function toggleSize(photoId: string) {
-    const next = orderedPhotos.map((photo) =>
+    const next: Photo[] = orderedPhotos.map((photo) =>
       photo.id === photoId
         ? { ...photo, selected_size: photo.selected_size === "large" ? "normal" : "large" }
         : photo,
