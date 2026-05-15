@@ -173,3 +173,15 @@ Homepage hero images should come from a curated subset selected during publishin
   3. Photographer fills only the human fields: title, reflection, location, optional weather
   4. Photographer optionally curates hero status, selected status, focal point, and crop behavior
   5. Publish
+
+## Archive and batch upload principles
+- Two publishing flows:
+  1. Daily upload flow creates a Daily Journal entry
+  2. Archive upload flow adds individual or batched photos to the broader library
+- Archive-uploaded photos are not Daily Journal entries unless explicitly linked later
+- On upload, the system should first extract per-photo metadata automatically where available
+- Batch metadata is optional and additive, not required
+- Batch actions may apply shared collection, project, medium, location, or other metadata when useful
+- A review grid should make it easy to adjust individual exceptions after batch upload
+- Initial archive import should support bulk upload of years of selected work without requiring every field to be completed manually
+- Product principle: metadata is welcome when available, editable when wrong, optional when absent
