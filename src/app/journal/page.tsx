@@ -12,7 +12,13 @@ export default async function JournalPage() {
     .select("entry_date, title, reflection, photos(id, location_name)")
     .eq("published", true)
     .order("entry_date", { ascending: false });
-  const [latest, ...older] = entries ?? [];
+  const journalEntries = (entries ?? []) as Array<{
+    entry_date: string;
+    title: string;
+    reflection: string;
+    photos: { id: string; location_name: string | null } | null;
+  }>;
+  const [latest, ...older] = journalEntries;
 
   return (
     <>
