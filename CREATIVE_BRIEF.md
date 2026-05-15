@@ -185,3 +185,15 @@ Homepage hero images should come from a curated subset selected during publishin
 - A review grid should make it easy to adjust individual exceptions after batch upload
 - Initial archive import should support bulk upload of years of selected work without requiring every field to be completed manually
 - Product principle: metadata is welcome when available, editable when wrong, optional when absent
+
+## Visual rules — current decisions
+- Color: almost no accent color; warm paper-white background and dark charcoal text
+- Spacing:
+  - overall site: airy
+  - Selected gallery: compact-airy, with denser editorial rhythm
+  - Journal index: moderate
+  - Single entries and About: airier and more reflective
+- Images: square corners, no decorative shadows
+- Motion: subtle only; slow hero crossfades, restrained hover behavior, no gratuitous transitions
+- UI chrome: controls exist, but they should arrive quietly
+- Responsive behavior: mobile-first clarity, no hover dependence
