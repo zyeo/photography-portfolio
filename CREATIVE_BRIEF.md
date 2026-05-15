@@ -197,3 +197,66 @@ Homepage hero images should come from a curated subset selected during publishin
 - Motion: subtle only; slow hero crossfades, restrained hover behavior, no gratuitous transitions
 - UI chrome: controls exist, but they should arrive quietly
 - Responsive behavior: mobile-first clarity, no hover dependence
+
+## Technical blueprint — data model
+### `photos`
+Single source of truth for every uploaded image.
+- id
+- image_path
+- original_filename
+- date_taken
+- location_name (free text for now)
+- latitude / longitude optional
+- camera
+- lens
+- aperture
+- shutter_speed
+- iso
+- medium: digital | film
+- hidden_tags
+- hero_approved
+- pinned_hero
+- focal_point_x / focal_point_y
+- mobile_crop optional
+- selected
+- selected_size: normal | large
+- selected_order optional
+- created_at
+
+### `journal_entries`
+Strict one-photo-per-day journal records.
+- id
+- photo_id
+- entry_date
+- title
+- reflection
+- weather optional
+- published
+- created_at
+
+### `collections`
+Flexible containers for ongoing mediums and bounded projects / themes.
+- id
+- title
+- slug
+- type: medium | project | theme
+- description optional
+- cover_photo_id optional
+- start_date optional
+- end_date optional
+- published
+- display_order optional
+
+### `photo_collections`
+Many-to-many join table between photos and collections.
+- photo_id
+- collection_id
+- display_order optional
+
+### Integrity rules
+- One journal entry per date
+- One photo per journal entry
+- Collection slugs unique
+- Only one pinned hero at a time
+- Selected size required only when selected is true
+- `location_name` remains free-text in v1; normalize later only if a Places feature justifies it
