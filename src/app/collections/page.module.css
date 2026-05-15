@@ -1,0 +1,5 @@
+.page { padding-top:var(--space-4); }
+.page h1 { margin:.45rem 0 var(--space-4); font-size:clamp(2rem,1.5rem + 2.4vw,3.7rem); }
+.page div { display:grid; gap:1rem; }
+.page article { border-top:1px solid var(--line); padding-top:1rem; }
+.page h2 { margin:0 0 .5rem; font-size:2rem; }
