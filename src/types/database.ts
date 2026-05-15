@@ -92,7 +92,9 @@ export type Database = {
           collection_id: string;
           display_order: number | null;
         };
-        Insert: Database["public"]["Tables"]["photo_collections"]["Row"];
+        Insert: Omit<Database["public"]["Tables"]["photo_collections"]["Row"], "display_order"> & {
+          display_order?: number | null;
+        };
         Update: Partial<Database["public"]["Tables"]["photo_collections"]["Row"]>;
         Relationships: [];
       };
