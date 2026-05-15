@@ -44,6 +44,7 @@ The site is not just a gallery of finished work. It reveals the practice behind 
   - shutter speed
   - optional camera / lens later
   - a few lines of reflection: what happened, what was noticed, what was attempted, what to improve
+  - hero-approved toggle for inclusion in homepage background rotation
 
 ### About / Contact
 - Short personal introduction
@@ -59,9 +60,11 @@ The publishing flow should be nearly frictionless:
 5. Publish
 
 The system should handle image optimization, responsive sizes, and presentation automatically.
+Homepage hero images should come from a curated subset selected during publishing.
 
 ## UX principles
 - Images load quickly and gracefully
+- Hero imagery should use a subtle dark overlay and contrast-safe text treatment
 - Mobile experience is first-class
 - Navigation is obvious without being loud
 - Reading and browsing both feel natural
