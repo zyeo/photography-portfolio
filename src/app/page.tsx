@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { HeroRotator } from "@/components/public/hero-rotator";
 import { getHomepageData } from "@/lib/public/photos";
@@ -11,7 +12,14 @@ export default async function Home() {
       <HeroRotator photos={heroPhotos} />
       <div className={styles.overlay} />
       <section className={styles.identity}>
-        <h1 className="signature">Zach Yeo</h1>
+        <Image
+          className={styles.wordmark}
+          src="/zach-yeo-wordmark.svg"
+          alt="Zach Yeo"
+          width={388}
+          height={158}
+          priority
+        />
         <p>Tokyo, for now</p>
         <span>Photographs and notes from an ongoing practice.</span>
       </section>

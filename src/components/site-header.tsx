@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./site-header.module.css";
 
@@ -11,8 +12,8 @@ export function SiteHeader() {
   return (
     <header className={`${styles.header} shell`}>
       <span aria-hidden="true" />
-      <Link className={`${styles.signature} signature`} href="/" aria-label="Zach Yeo home">
-        Zach Yeo
+      <Link className={styles.signature} href="/" aria-label="Zach Yeo home">
+        <Image src="/zach-yeo-wordmark.svg" alt="" width={194} height={79} />
       </Link>
       <nav aria-label="Primary navigation">
         {links.map((link) => (
