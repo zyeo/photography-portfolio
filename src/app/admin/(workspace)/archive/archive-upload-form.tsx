@@ -13,47 +13,87 @@ type Photo = {
   camera: string | null;
 };
 
+type UploadResult = {
+  photos?: Photo[];
+  skippedDuplicates?: string[];
+  error?: string;
+};
+
 export function ArchiveUploadForm() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isUploading) return;
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const fileCount = formData.getAll("files").filter((value) => value instanceof File && value.size > 0).length;
+
+    setIsUploading(true);
     setError(null);
-    const response = await fetch("/api/admin/archive", {
-      method: "POST",
-      body: new FormData(event.currentTarget),
-    });
-    const payload = (await response.json()) as { photos?: Photo[]; error?: string };
-    setPhotos(payload.photos ?? []);
-    setError(payload.error ?? null);
+    setStatus(`Uploading ${fileCount} photograph${fileCount === 1 ? "" : "s"}…`);
+
+    try {
+      const response = await fetch("/api/admin/archive", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json()) as UploadResult;
+
+      if (!response.ok) {
+        setError(payload.error ?? "Upload failed.");
+        setStatus(null);
+        return;
+      }
+
+      setPhotos(payload.photos ?? []);
+      const skipped = payload.skippedDuplicates ?? [];
+      setStatus(
+        skipped.length
+          ? `Uploaded ${payload.photos?.length ?? 0}; skipped ${skipped.length} duplicate${skipped.length === 1 ? "" : "s"}.`
+          : `Uploaded ${payload.photos?.length ?? 0} photograph${payload.photos?.length === 1 ? "" : "s"}.`,
+      );
+      form.reset();
+    } catch {
+      setError("Upload failed. Please try again.");
+      setStatus(null);
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   return (
     <>
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={handleSubmit} aria-busy={isUploading}>
         <label>
           Photographs
-          <input name="files" type="file" accept="image/*" multiple required />
+          <input name="files" type="file" accept="image/*" multiple required disabled={isUploading} />
         </label>
         <div className={styles.grid}>
           <label>
             Shared medium
-            <select name="medium" defaultValue="digital">
+            <select name="medium" defaultValue="digital" disabled={isUploading}>
               <option value="digital">Digital</option>
               <option value="film">Film</option>
             </select>
           </label>
           <label>
             Shared location
-            <input name="locationName" type="text" />
+            <input name="locationName" type="text" disabled={isUploading} />
           </label>
         </div>
         <label className={styles.checkbox}>
-          <input name="selected" type="checkbox" />
+          <input name="selected" type="checkbox" disabled={isUploading} />
           Add uploaded photos to Selected
         </label>
-        <button type="submit">Upload archive batch</button>
+        <button type="submit" disabled={isUploading}>
+          {isUploading ? "Uploading…" : "Upload archive batch"}
+        </button>
+        {status ? <p role="status">{status}</p> : null}
         {error ? <p role="alert">{error}</p> : null}
       </form>
 

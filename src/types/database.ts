@@ -15,6 +15,7 @@ export type Database = {
           image_path: string;
           public_image_path: string | null;
           original_filename: string;
+          content_hash: string | null;
           date_taken: string | null;
           location_name: string | null;
           latitude: number | null;

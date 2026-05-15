@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { extractExif } from "@/lib/photos/exif";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
@@ -19,10 +20,24 @@ export async function POST(request: Request) {
   if (!files.length) return NextResponse.json({ error: "At least one image is required." }, { status: 400 });
 
   const photos = [];
+  const skippedDuplicates: string[] = [];
 
   for (const file of files) {
     assertAcceptedImage(file);
     const buffer = await file.arrayBuffer();
+    const contentHash = createHash("sha256").update(Buffer.from(buffer)).digest("hex");
+
+    const { data: existingPhoto } = await supabase
+      .from("photos")
+      .select("id")
+      .eq("content_hash", contentHash)
+      .maybeSingle();
+
+    if (existingPhoto) {
+      skippedDuplicates.push(file.name);
+      continue;
+    }
+
     const metadata = await extractExif(buffer);
     const imagePath = buildOriginalObjectPath(file);
     const { error: uploadError } = await supabase.storage.from("originals").upload(imagePath, buffer, {
@@ -36,6 +51,7 @@ export async function POST(request: Request) {
       .insert({
         image_path: imagePath,
         original_filename: file.name,
+        content_hash: contentHash,
         date_taken: metadata.dateTaken,
         location_name: locationName,
         latitude: metadata.latitude,
@@ -52,9 +68,16 @@ export async function POST(request: Request) {
       .select("id, original_filename, location_name, medium, selected, date_taken, camera")
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      await supabase.storage.from("originals").remove([imagePath]);
+      if (error.code === "23505") {
+        skippedDuplicates.push(file.name);
+        continue;
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     photos.push(data);
   }
 
-  return NextResponse.json({ photos }, { status: 201 });
+  return NextResponse.json({ photos, skippedDuplicates }, { status: 201 });
 }
