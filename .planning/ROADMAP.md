@@ -37,7 +37,12 @@ Plans:
   1. Admin can authenticate privately.
   2. Uploads create photo records with nullable EXIF-driven metadata.
   3. Originals remain private while public image delivery is supported.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 02-01: Create data and storage spine.
+- [x] 02-02: Add authenticated admin access.
+- [x] 02-03: Build first image ingestion path.
 
 ### Phase 3: Admin workflows
 **Goal**: Make the backstage usable for daily life and archive curation.
@@ -74,7 +79,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Project foundation and design system | 3/3 | Complete | 2026-05-15 |
-| 2. Data, auth, storage, and image ingestion | 0/TBD | Not started | - |
+| 2. Data, auth, storage, and image ingestion | 3/3 | In progress | - |
 | 3. Admin workflows | 0/TBD | Not started | - |
 | 4. Public experience | 0/TBD | Not started | - |
 | 5. Polish, QA, and launch readiness | 0/TBD | Not started | - |

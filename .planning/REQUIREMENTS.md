@@ -64,11 +64,11 @@
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
-| DATA-01 | Phase 2 | Pending |
-| DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
-| DATA-04 | Phase 2 | Pending |
-| ADMIN-01 | Phase 2 | Pending |
+| DATA-01 | Phase 2 | In Progress |
+| DATA-02 | Phase 2 | In Progress |
+| DATA-03 | Phase 2 | In Progress |
+| DATA-04 | Phase 2 | In Progress |
+| ADMIN-01 | Phase 2 | In Progress |
 | ADMIN-02 | Phase 3 | Pending |
 | ADMIN-03 | Phase 3 | Pending |
 | ADMIN-04 | Phase 3 | Pending |
