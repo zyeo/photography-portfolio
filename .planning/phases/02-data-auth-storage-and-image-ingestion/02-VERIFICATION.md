@@ -4,19 +4,16 @@
 Create the system spine that all content features depend on.
 
 ## Result
-Partially verified; external integration remains pending.
+Passed.
 
-## Passed locally
+## Evidence
 - `npm run lint` passes.
 - `npm run build` passes.
-- Schema, storage policy, auth scaffolding, typed clients, and upload code are present.
-- Nullable metadata handling is represented in both schema and ingestion code.
+- Remote Supabase migrations `202605160001` and `202605160002` were applied successfully.
+- Live project contains the expected `originals` private bucket and `public-images` public bucket.
+- Initial admin user authenticated successfully against hosted Supabase Auth.
+- Authenticated upload verification stored an object in `originals` and inserted a photo row with nullable metadata fields accepted; the temporary verification artifact was then removed.
+- Public REST reads return only published content after explicit grants plus RLS policies were applied.
 
-## Pending real-environment checks
-- Apply the migration to a Supabase project.
-- Create the initial admin user.
-- Confirm `/admin` authentication flow end to end.
-- Upload a real photograph and confirm object storage plus photo-row creation.
-
-## Blocker
-A configured Supabase project and admin credentials are required before the acceptance criteria can be verified truthfully.
+## Notes
+- The project was created with automatic table exposure disabled, so explicit Data API grants are managed in migration `202605160002_explicit_api_grants.sql`.

@@ -13,14 +13,14 @@
 
 ### Data & Media
 
-- [ ] **DATA-01**: System stores photos, journal entries, collections, and photo-collection relationships.
-- [ ] **DATA-02**: Original files remain private while public image delivery assets can be served efficiently.
-- [ ] **DATA-03**: Uploads extract EXIF where available without requiring metadata to exist.
-- [ ] **DATA-04**: Hero focal point and mobile crop preferences can be stored.
+- [x] **DATA-01**: System stores photos, journal entries, collections, and photo-collection relationships.
+- [x] **DATA-02**: Original files remain private while public image delivery assets can be served efficiently.
+- [x] **DATA-03**: Uploads extract EXIF where available without requiring metadata to exist.
+- [x] **DATA-04**: Hero focal point and mobile crop preferences can be stored.
 
 ### Admin
 
-- [ ] **ADMIN-01**: Admin user can authenticate into a private admin area.
+- [x] **ADMIN-01**: Admin user can authenticate into a private admin area.
 - [ ] **ADMIN-02**: Admin can publish one daily journal entry end to end.
 - [ ] **ADMIN-03**: Admin can upload archive photos in batches with optional shared metadata and per-photo review.
 - [ ] **ADMIN-04**: Admin can search, filter, and edit library records.
@@ -64,11 +64,11 @@
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
-| DATA-01 | Phase 2 | In Progress |
-| DATA-02 | Phase 2 | In Progress |
-| DATA-03 | Phase 2 | In Progress |
-| DATA-04 | Phase 2 | In Progress |
-| ADMIN-01 | Phase 2 | In Progress |
+| DATA-01 | Phase 2 | Complete |
+| DATA-02 | Phase 2 | Complete |
+| DATA-03 | Phase 2 | Complete |
+| DATA-04 | Phase 2 | Complete |
+| ADMIN-01 | Phase 2 | Complete |
 | ADMIN-02 | Phase 3 | Pending |
 | ADMIN-03 | Phase 3 | Pending |
 | ADMIN-04 | Phase 3 | Pending |

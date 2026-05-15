@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-15)
 
 **Core value:** A visitor can encounter Zach's visual voice immediately, then follow the daily discipline that produces it.
-**Current focus:** Phase 2 — Data, auth, storage, and image ingestion
+**Current focus:** Phase 3 — Admin workflows
 
 ## Current Position
 
-Phase: 2 of 5 (Data, auth, storage, and image ingestion)
-Plan: 3 of 3 in current phase
-Status: Awaiting external verification
-Last activity: 2026-05-16 — Implemented Phase 2 code; Supabase-backed verification is pending.
+Phase: 3 of 5 (Admin workflows)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-05-16 — Completed live Supabase verification for Phase 2.
 
 Progress: [████░░░░░░] 40%
 
@@ -51,7 +51,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 2]: Need a configured Supabase project plus initial admin user to verify auth and upload acceptance end to end.
+None yet.
 
 ## Deferred Items
 
@@ -62,5 +62,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-15 23:45 JST
-Stopped at: Phase 2 implementation complete; awaiting Supabase-backed verification.
+Stopped at: Phase 2 verified live; Phase 3 is ready to plan.
 Resume file: None

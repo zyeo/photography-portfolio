@@ -7,7 +7,7 @@ Build the site from its foundation outward: first establish the visual language 
 ## Phases
 
 - [x] **Phase 1: Project foundation and design system** - Establish the Next.js shell and approved visual language.
-- [ ] **Phase 2: Data, auth, storage, and image ingestion** - Build the content spine and secure upload path.
+- [x] **Phase 2: Data, auth, storage, and image ingestion** - Build the content spine and secure upload path.
 - [ ] **Phase 3: Admin workflows** - Make daily publishing and curation genuinely usable.
 - [ ] **Phase 4: Public experience** - Deliver the visitor-facing routes and browsing flows.
 - [ ] **Phase 5: Polish, QA, and launch readiness** - Harden the product for publication.
@@ -79,7 +79,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Project foundation and design system | 3/3 | Complete | 2026-05-15 |
-| 2. Data, auth, storage, and image ingestion | 3/3 | In progress | - |
+| 2. Data, auth, storage, and image ingestion | 3/3 | Complete | 2026-05-16 |
 | 3. Admin workflows | 0/TBD | Not started | - |
 | 4. Public experience | 0/TBD | Not started | - |
 | 5. Polish, QA, and launch readiness | 0/TBD | Not started | - |

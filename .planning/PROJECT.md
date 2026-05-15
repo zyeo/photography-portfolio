@@ -13,6 +13,7 @@ A visitor can encounter Zach's visual voice immediately, then follow the daily d
 ### Validated
 
 - ✓ Public shell expresses the approved poetic/minimal direction — Phase 1
+- ✓ Data, auth, storage, and nullable ingestion spine works against hosted Supabase — Phase 2
 
 ### Active
 
