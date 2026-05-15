@@ -45,10 +45,6 @@ The site is not just a gallery of finished work. It reveals the practice behind 
   - optional camera / lens later
   - a few lines of reflection: what happened, what was noticed, what was attempted, what to improve
 
-### Places
-- Browse journal entries by location / neighborhood
-- Tokyo can be the first strong organizing thread
-
 ### About / Contact
 - Short personal introduction
 - Simple contact path
@@ -80,6 +76,7 @@ The system should handle image optimization, responsive sizes, and presentation 
 - Character should come from proportion, sequencing, typography, and small rituals—not decoration for its own sake
 
 ## Future expansion
+- Places section for browsing by location / neighborhood when the archive is ready for it
 - Tokyo photography essays / blog posts
 - Service pages for freelance photography
 - Inquiry or booking flow once services become concrete
