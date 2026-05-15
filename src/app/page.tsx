@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getHomepageData, getPhotoVisualStyle } from "@/lib/public/photos";
+import { getHomepageData } from "@/lib/public/photos";
+import { getPhotoVisualStyle } from "@/lib/public/visuals";
 import styles from "./page.module.css";
 
 export default async function Home() {

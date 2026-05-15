@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getPhotoVisualStyle } from "@/lib/public/photos";
+import { getPhotoVisualStyle } from "@/lib/public/visuals";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./page.module.css";
 

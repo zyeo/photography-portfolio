@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getPhotoVisualStyle } from "@/lib/public/photos";
+import { getPhotoVisualStyle } from "@/lib/public/visuals";
 import styles from "./lightbox-gallery.module.css";
 
 type Photo = {
