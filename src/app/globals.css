@@ -142,3 +142,16 @@ a {
     justify-content: space-between;
   }
 }
+
+.signature {
+  font-family: var(--font-signature), cursive;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.page-kicker {
+  color: var(--ink-soft);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}

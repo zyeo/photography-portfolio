@@ -1,26 +1,23 @@
 import Link from "next/link";
+import styles from "./site-header.module.css";
 
 const links = [
   { href: "/selected", label: "Selected" },
   { href: "/journal", label: "Journal" },
-  { href: "/collections", label: "Collections" },
   { href: "/about", label: "About" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ section }: { section?: string }) {
   return (
-    <header className="shell site-header">
-      <Link className="wordmark display" href="/" aria-label="Zach Yeo home">
+    <header className={`${styles.header} shell`}>
+      <span className="page-kicker">{section}</span>
+      <Link className={`${styles.signature} signature`} href="/" aria-label="Zach Yeo home">
         Zach Yeo
       </Link>
       <nav aria-label="Primary navigation">
-        <ul>
-          {links.map((link) => (
-            <li key={link.href}>
-              <Link href={link.href}>{link.label}</Link>
-            </li>
-          ))}
-        </ul>
+        {links.map((link) => (
+          <Link key={link.href} href={link.href}>{link.label}</Link>
+        ))}
       </nav>
     </header>
   );

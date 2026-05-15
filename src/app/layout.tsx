@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Geist, Newsreader } from "next/font/google";
+import { Cormorant_Garamond, Geist, Newsreader, Allura } from "next/font/google";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -12,6 +12,12 @@ const serif = Newsreader({
   variable: "--font-serif",
   subsets: ["latin"],
   display: "swap",
+});
+
+const signature = Allura({
+  variable: "--font-signature",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 const sans = Geist({
@@ -46,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${serif.variable} ${sans.variable}`}>
+      <body className={`${display.variable} ${serif.variable} ${signature.variable} ${sans.variable}`}>
         {children}
       </body>
     </html>
