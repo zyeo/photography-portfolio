@@ -26,6 +26,17 @@ export const metadata: Metadata = {
   },
   description:
     "A daily photography journal and selected portfolio rooted in Tokyo.",
+  metadataBase: new URL("https://photos.zachyeo.com"),
+  openGraph: {
+    title: "Zach Yeo — Photography Journal",
+    description: "A daily photography journal and selected portfolio rooted in Tokyo.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Zach Yeo — Photography Journal",
+    description: "A daily photography journal and selected portfolio rooted in Tokyo.",
+  },
 };
 
 export default function RootLayout({
