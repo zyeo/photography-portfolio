@@ -12,3 +12,24 @@
 .page p {
   margin: 0;
 }
+
+.statusCard {
+  display: grid;
+  gap: 0.45rem;
+  border: 1px solid var(--line);
+  margin-block: 2rem 1.4rem;
+  padding: 1.25rem;
+}
+
+.statusCard span,
+.statusCard p {
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.statusCard strong {
+  font-size: 1.35rem;
+  font-weight: 400;
+}
