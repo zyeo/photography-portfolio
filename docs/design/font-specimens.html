@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Instrument+Sans:wght@400;500&family=Newsreader:opsz,wght@6..72,400,500&family=Manrope:wght@400;500&family=Fraunces:opsz,wght@9..144,400,500&family=Inter:wght@400;500&family=Bodoni+Moda:opsz,wght@6..96,400,500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --paper:#f6f2ea; --ink:#262321; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); padding:48px 28px 80px; }
+.grid { display:grid; gap:28px; max-width:1200px; margin:0 auto; grid-template-columns:repeat(2,minmax(0,1fr)); }
+.card { border:1px solid rgba(38,35,33,.18); min-height:300px; padding:30px; display:flex; flex-direction:column; justify-content:space-between; }
+.kicker { font-size:12px; letter-spacing:.18em; text-transform:uppercase; opacity:.6; }
+.name { font-size:48px; line-height:1; margin-top:24px; }
+.place { margin-top:12px; font-size:14px; letter-spacing:.16em; text-transform:uppercase; }
+.line { margin-top:28px; font-size:18px; line-height:1.5; max-width:360px; }
+.nav { margin-top:34px; display:flex; gap:24px; font-size:13px; letter-spacing:.16em; text-transform:uppercase; }
+.a .name { font-family:'Cormorant Garamond', serif; font-weight:500; }
+.a .place,.a .line,.a .nav,.a .kicker { font-family:'Instrument Sans', sans-serif; }
+.b .name { font-family:'Newsreader', serif; font-weight:500; }
+.b .place,.b .line,.b .nav,.b .kicker { font-family:'Manrope', sans-serif; }
+.c .name { font-family:'Fraunces', serif; font-weight:400; }
+.c .place,.c .line,.c .nav,.c .kicker { font-family:'Inter', sans-serif; }
+.d .name { font-family:'Bodoni Moda', serif; font-weight:400; }
+.d .place,.d .line,.d .nav,.d .kicker { font-family:'DM Sans', sans-serif; }
+@media (max-width:800px){ .grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="grid">
+  <section class="card a"><div><div class="kicker">A · Poetic</div><div class="name">Zach Yeo</div><div class="place">Tokyo, for now</div><div class="line">Photographs and notes from an ongoing practice.</div></div><div class="nav">Selected <span>Journal</span> <span>About</span></div></section>
+  <section class="card b"><div><div class="kicker">B · Quiet literary</div><div class="name">Zach Yeo</div><div class="place">Tokyo, for now</div><div class="line">Photographs and notes from an ongoing practice.</div></div><div class="nav">Selected <span>Journal</span> <span>About</span></div></section>
+  <section class="card c"><div><div class="kicker">C · Editorial warm</div><div class="name">Zach Yeo</div><div class="place">Tokyo, for now</div><div class="line">Photographs and notes from an ongoing practice.</div></div><div class="nav">Selected <span>Journal</span> <span>About</span></div></section>
+  <section class="card d"><div><div class="kicker">D · Fashion editorial</div><div class="name">Zach Yeo</div><div class="place">Tokyo, for now</div><div class="line">Photographs and notes from an ongoing practice.</div></div><div class="nav">Selected <span>Journal</span> <span>About</span></div></section>
+</div>
+</body>
+</html>

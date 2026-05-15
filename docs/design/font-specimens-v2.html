@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:wght@400;500&family=Newsreader:opsz,ital,wght@6..72,0,400;0,500;1,400&family=Manrope:wght@400;500&family=Fraunces:opsz,ital,wght@9..144,0,400;0,500;1,400&family=Inter:wght@400;500&family=Bodoni+Moda:opsz,ital,wght@6..96,0,400;0,500;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --paper:#f6f2ea; --ink:#262321; --muted:#6c655f; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); padding:36px 20px 70px; }
+.wrap { max-width:1200px; margin:0 auto; display:grid; gap:24px; }
+.card { border:1px solid rgba(38,35,33,.18); padding:28px; display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+.label { font:500 12px/1.2 system-ui; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); grid-column:1/-1; }
+.hero-name { font-size:72px; line-height:.9; margin:0 0 14px; }
+.place { font-size:12px; letter-spacing:.22em; text-transform:uppercase; margin-bottom:24px; }
+.hero-line { max-width:340px; font-size:20px; line-height:1.45; }
+.entry-title { font-size:40px; line-height:1.05; margin:0 0 10px; }
+.meta { font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+.body { max-width:470px; font-size:18px; line-height:1.7; }
+.italic { font-style:italic; }
+.a .display,.a .entry-title { font-family:'Cormorant Garamond', serif; }
+.a .body,.a .place,.a .hero-line,.a .meta { font-family:'Instrument Sans', sans-serif; }
+.b .display,.b .entry-title { font-family:'Newsreader', serif; }
+.b .body,.b .place,.b .hero-line,.b .meta { font-family:'Manrope', sans-serif; }
+.c .display,.c .entry-title { font-family:'Fraunces', serif; }
+.c .body,.c .place,.c .hero-line,.c .meta { font-family:'Inter', sans-serif; }
+.d .display,.d .entry-title { font-family:'Bodoni Moda', serif; }
+.d .body,.d .place,.d .hero-line,.d .meta { font-family:'DM Sans', sans-serif; }
+@media (max-width: 800px) {
+ .card { grid-template-columns:1fr; }
+ .hero-name { font-size:54px; }
+ .entry-title { font-size:34px; }
+}
+</style>
+</head>
+<body><main class="wrap">
+<section class="card a"><div class="label">A · Cormorant Garamond + Instrument Sans</div><div><h1 class="hero-name display">Zach Yeo</h1><div class="place">Tokyo, for now</div><div class="hero-line">Photographs and notes from an ongoing practice.</div></div><div><h2 class="entry-title display">Blue hour at the crossing</h2><div class="meta">Shibuya · May 15, 2026 · f/2.8 · 1/250s · ISO 400</div><div class="body">I noticed the light before I noticed the people. The rain had thinned the crowd, and for a few seconds the street felt quieter than it should have. <span class="italic">I want to get better at waiting for the frame to simplify itself.</span></div></div></section>
+<section class="card b"><div class="label">B · Newsreader + Manrope</div><div><h1 class="hero-name display">Zach Yeo</h1><div class="place">Tokyo, for now</div><div class="hero-line">Photographs and notes from an ongoing practice.</div></div><div><h2 class="entry-title display">Blue hour at the crossing</h2><div class="meta">Shibuya · May 15, 2026 · f/2.8 · 1/250s · ISO 400</div><div class="body">I noticed the light before I noticed the people. The rain had thinned the crowd, and for a few seconds the street felt quieter than it should have. <span class="italic">I want to get better at waiting for the frame to simplify itself.</span></div></div></section>
+<section class="card c"><div class="label">C · Fraunces + Inter</div><div><h1 class="hero-name display">Zach Yeo</h1><div class="place">Tokyo, for now</div><div class="hero-line">Photographs and notes from an ongoing practice.</div></div><div><h2 class="entry-title display">Blue hour at the crossing</h2><div class="meta">Shibuya · May 15, 2026 · f/2.8 · 1/250s · ISO 400</div><div class="body">I noticed the light before I noticed the people. The rain had thinned the crowd, and for a few seconds the street felt quieter than it should have. <span class="italic">I want to get better at waiting for the frame to simplify itself.</span></div></div></section>
+<section class="card d"><div class="label">D · Bodoni Moda + DM Sans</div><div><h1 class="hero-name display">Zach Yeo</h1><div class="place">Tokyo, for now</div><div class="hero-line">Photographs and notes from an ongoing practice.</div></div><div><h2 class="entry-title display">Blue hour at the crossing</h2><div class="meta">Shibuya · May 15, 2026 · f/2.8 · 1/250s · ISO 400</div><div class="body">I noticed the light before I noticed the people. The rain had thinned the crowd, and for a few seconds the street felt quieter than it should have. <span class="italic">I want to get better at waiting for the frame to simplify itself.</span></div></div></section>
+</main></body>
+</html>
