@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Local tooling
 .codex/
+
+# Supabase CLI local state
+supabase/.temp/
