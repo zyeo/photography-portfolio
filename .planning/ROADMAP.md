@@ -1,0 +1,100 @@
+# Roadmap: Photography Journal & Portfolio
+
+## Overview
+
+Build the site from its foundation outward: first establish the visual language and application shell, then add the content spine, the humane admin workflows, the public browsing experience, and finally the launch hardening needed to trust the system in daily use.
+
+## Phases
+
+- [x] **Phase 1: Project foundation and design system** - Establish the Next.js shell and approved visual language.
+- [x] **Phase 2: Data, auth, storage, and image ingestion** - Build the content spine and secure upload path.
+- [x] **Phase 3: Admin workflows** - Make daily publishing and curation genuinely usable.
+- [x] **Phase 4: Public experience** - Deliver the visitor-facing routes and browsing flows.
+- [x] **Phase 5: Polish, QA, and launch readiness** - Harden the product for publication.
+
+## Phase Details
+
+### Phase 1: Project foundation and design system
+**Goal**: Establish the application shell and visual language before feature work expands.
+**Depends on**: Nothing (first phase)
+**Requirements**: FOUND-01, FOUND-02, FOUND-03
+**Success Criteria** (what must be TRUE):
+  1. App runs locally with a responsive public shell.
+  2. Palette, typography, spacing, and chrome reflect the poetic/minimal direction.
+  3. Homepage hero shell demonstrates contrast-safe overlay behavior.
+**Plans**: 3 plans
+
+Plans:
+- [x] 01-01: Scaffold the Next.js application and developer tooling.
+- [x] 01-02: Build design tokens, typography, and responsive layout primitives.
+- [x] 01-03: Assemble the public shell and homepage hero placeholder.
+
+### Phase 2: Data, auth, storage, and image ingestion
+**Goal**: Create the system spine that all content features depend on.
+**Depends on**: Phase 1
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, ADMIN-01
+**Success Criteria** (what must be TRUE):
+  1. Admin can authenticate privately.
+  2. Uploads create photo records with nullable EXIF-driven metadata.
+  3. Originals remain private while public image delivery is supported.
+**Plans**: 3 plans
+
+Plans:
+- [x] 02-01: Create data and storage spine.
+- [x] 02-02: Add authenticated admin access.
+- [x] 02-03: Build first image ingestion path.
+
+### Phase 3: Admin workflows
+**Goal**: Make the backstage usable for daily life and archive curation.
+**Depends on**: Phase 2
+**Requirements**: ADMIN-02, ADMIN-03, ADMIN-04, ADMIN-05
+**Success Criteria** (what must be TRUE):
+  1. Daily journal entry can be published in a few steps.
+  2. Mixed archive batches can be uploaded without mandatory cleanup.
+  3. Selected work, collections, and homepage heroes can be curated visually.
+**Plans**: 3 plans
+
+Plans:
+- [x] 03-01: Build dashboard and daily publishing.
+- [x] 03-02: Build archive and library workflows.
+- [x] 03-03: Build curation workspaces.
+
+### Phase 4: Public experience
+**Goal**: Build the visitor-facing site around the content system.
+**Depends on**: Phase 3
+**Requirements**: PUBLIC-01, PUBLIC-02, PUBLIC-03, PUBLIC-04, PUBLIC-05
+**Success Criteria** (what must be TRUE):
+  1. All approved public routes work with real content.
+  2. Gallery experiences remain editorial rather than catalog-like.
+  3. Journal browsing works gracefully across desktop and mobile.
+**Plans**: 3 plans
+
+Plans:
+- [x] 04-01: Connect public shell and homepage.
+- [x] 04-02: Build public galleries.
+- [x] 04-03: Build journal and about routes.
+
+### Phase 5: Polish, QA, and launch readiness
+**Goal**: Make the site trustworthy enough to publish.
+**Depends on**: Phase 4
+**Requirements**: LAUNCH-01, LAUNCH-02, LAUNCH-03
+**Success Criteria** (what must be TRUE):
+  1. Site is fast, stable, accessible, and SEO-ready.
+  2. Admin workflows survive realistic usage.
+  3. Deployment and operator guidance are reproducible.
+**Plans**: 3 plans
+
+Plans:
+- [x] 05-01: Add public polish surfaces.
+- [x] 05-02: Add deployment and operator readiness.
+- [x] 05-03: Run final QA and launch checks.
+
+## Progress
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Project foundation and design system | 3/3 | Complete | 2026-05-15 |
+| 2. Data, auth, storage, and image ingestion | 3/3 | Complete | 2026-05-16 |
+| 3. Admin workflows | 3/3 | Complete | 2026-05-16 |
+| 4. Public experience | 3/3 | Complete | 2026-05-16 |
+| 5. Polish, QA, and launch readiness | 3/3 | Complete | 2026-05-16 |

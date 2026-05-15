@@ -1,0 +1,5 @@
+.page { width:min(100% - 2rem,54rem); margin:0 auto; padding-block:clamp(2rem,1.4rem + 3vw,4rem); }
+.page h1 { margin:.35rem 0 1.5rem; font-size:clamp(2rem,1.6rem + 2vw,3.25rem); }
+.list { display:grid; gap:.8rem; }
+.list article { display:grid; gap:.25rem; border:1px solid var(--line); padding:1rem; }
+.list span { color:var(--ink-soft); font-size:.78rem; }

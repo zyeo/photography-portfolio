@@ -1,0 +1,9 @@
+.page { padding-top:var(--space-4); }
+.page h1 { margin:.45rem 0 var(--space-4); font-size:clamp(2rem,1.5rem + 2.4vw,3.7rem); }
+.featured { display:grid; gap:1.2rem; margin-bottom:var(--space-5); }
+.featured > div { min-height:18rem; }
+.featured span,.page em { color:var(--ink-soft); font-size:.78rem; font-style:normal; letter-spacing:.16em; text-transform:uppercase; }
+.featured h2 { margin:.45rem 0 .75rem; font-size:clamp(1.8rem,1.4rem + 1.5vw,2.8rem); }
+.page ol { margin:0; padding:0; list-style:none; border-top:1px solid var(--line); }
+.page li { display:grid; gap:.35rem; border-bottom:1px solid var(--line); padding-block:1rem; }
+@media (min-width:48rem){ .featured{grid-template-columns:1.1fr .9fr; align-items:end;} .page li{grid-template-columns:7rem 1fr auto; gap:1rem;} }

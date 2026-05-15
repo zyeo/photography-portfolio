@@ -1,0 +1,9 @@
+.page { padding-top:var(--space-4); }
+.image { min-height:min(62vh,38rem); margin-bottom:var(--space-4); }
+.page article { max-width:42rem; margin-inline:auto; }
+.page h1 { margin:0 0 .6rem; font-size:clamp(2rem,1.5rem + 2.4vw,3.7rem); }
+.page article > p:first-of-type { color:var(--ink-soft); font-size:.78rem; letter-spacing:.16em; text-transform:uppercase; }
+.page dl { display:flex; flex-wrap:wrap; gap:1rem; margin-block:1.25rem; }
+.page dt { color:var(--ink-soft); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; }
+.page dd { margin:0; }
+.page nav { display:flex; justify-content:space-between; max-width:42rem; margin:2rem auto 0; }
