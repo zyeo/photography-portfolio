@@ -16,6 +16,7 @@ A visitor can encounter Zach's visual voice immediately, then follow the daily d
 - ✓ Data, auth, storage, and nullable ingestion spine works against hosted Supabase — Phase 2
 - ✓ Admin supports daily publishing, archive intake, library browsing, and v1 curation workflows — Phase 3
 - ✓ Public site exposes the core home, gallery, journal, collections, and about routes — Phase 4
+- ✓ Site has launch-readiness docs, SEO surfaces, and resilient public states — Phase 5
 
 ### Active
 

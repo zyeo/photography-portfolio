@@ -36,9 +36,9 @@
 
 ### Launch Readiness
 
-- [ ] **LAUNCH-01**: Site includes SEO basics, sitemap, robots, and social metadata.
-- [ ] **LAUNCH-02**: Site handles loading, empty, and error states accessibly.
-- [ ] **LAUNCH-03**: Deployment and operator documentation are reproducible.
+- [x] **LAUNCH-01**: Site includes SEO basics, sitemap, robots, and social metadata.
+- [x] **LAUNCH-02**: Site handles loading, empty, and error states accessibly.
+- [x] **LAUNCH-03**: Deployment and operator documentation are reproducible.
 
 ## v2 Requirements
 
@@ -78,9 +78,9 @@
 | PUBLIC-03 | Phase 4 | Complete |
 | PUBLIC-04 | Phase 4 | Complete |
 | PUBLIC-05 | Phase 4 | Complete |
-| LAUNCH-01 | Phase 5 | Pending |
-| LAUNCH-02 | Phase 5 | Pending |
-| LAUNCH-03 | Phase 5 | Pending |
+| LAUNCH-01 | Phase 5 | Complete |
+| LAUNCH-02 | Phase 5 | Complete |
+| LAUNCH-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 20 total

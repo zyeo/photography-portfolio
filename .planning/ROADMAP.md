@@ -10,7 +10,7 @@ Build the site from its foundation outward: first establish the visual language 
 - [x] **Phase 2: Data, auth, storage, and image ingestion** - Build the content spine and secure upload path.
 - [x] **Phase 3: Admin workflows** - Make daily publishing and curation genuinely usable.
 - [x] **Phase 4: Public experience** - Deliver the visitor-facing routes and browsing flows.
-- [ ] **Phase 5: Polish, QA, and launch readiness** - Harden the product for publication.
+- [x] **Phase 5: Polish, QA, and launch readiness** - Harden the product for publication.
 
 ## Phase Details
 
@@ -82,7 +82,12 @@ Plans:
   1. Site is fast, stable, accessible, and SEO-ready.
   2. Admin workflows survive realistic usage.
   3. Deployment and operator guidance are reproducible.
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 05-01: Add public polish surfaces.
+- [x] 05-02: Add deployment and operator readiness.
+- [x] 05-03: Run final QA and launch checks.
 
 ## Progress
 
@@ -92,4 +97,4 @@ Plans:
 | 2. Data, auth, storage, and image ingestion | 3/3 | Complete | 2026-05-16 |
 | 3. Admin workflows | 3/3 | Complete | 2026-05-16 |
 | 4. Public experience | 3/3 | Complete | 2026-05-16 |
-| 5. Polish, QA, and launch readiness | 0/TBD | Not started | - |
+| 5. Polish, QA, and launch readiness | 3/3 | Complete | 2026-05-16 |
