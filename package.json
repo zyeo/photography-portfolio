@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "backfill:public-images": "node scripts/backfill-public-images.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

@@ -12,3 +12,9 @@ Public pages are ready to consume optimized image variants but still fall back g
 
 ## Why this separation matters
 It keeps archival durability separate from delivery optimization, which lets the site stay fast without treating compressed web files as master assets.
+
+## Current first-pass implementation
+- New published daily entries write a public delivery copy into `public-images`.
+- New archive uploads added directly to public `Selected` do the same.
+- Existing published photos can be repaired with `npm run backfill:public-images`.
+- The current copy is the original browser-readable asset; responsive derivatives remain the next optimization step.

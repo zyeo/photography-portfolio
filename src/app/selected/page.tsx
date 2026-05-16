@@ -8,7 +8,7 @@ export default async function SelectedPage() {
   const supabase = await createClient();
   const { data: photos } = await supabase
     .from("photos")
-    .select("id, original_filename, location_name, date_taken, selected_size")
+    .select("id, original_filename, public_image_path, location_name, date_taken, selected_size")
     .eq("published", true)
     .eq("selected", true)
     .order("selected_order", { ascending: true, nullsFirst: false });

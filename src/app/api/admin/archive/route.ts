@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { extractExif } from "@/lib/photos/exif";
+import { uploadPublicImageCopy } from "@/lib/photos/public-images";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,63 +25,80 @@ export async function POST(request: Request) {
   const failedFiles: Array<{ name: string; error: string }> = [];
 
   for (const file of files) {
+    let imagePath: string | null = null;
+    let publicImagePath: string | null = null;
+
     try {
       assertAcceptedImage(file);
       const buffer = await file.arrayBuffer();
-    const contentHash = createHash("sha256").update(Buffer.from(buffer)).digest("hex");
+      const contentHash = createHash("sha256").update(Buffer.from(buffer)).digest("hex");
 
-    const { data: existingPhoto } = await supabase
-      .from("photos")
-      .select("id")
-      .eq("content_hash", contentHash)
-      .maybeSingle();
+      const { data: existingPhoto } = await supabase
+        .from("photos")
+        .select("id")
+        .eq("content_hash", contentHash)
+        .maybeSingle();
 
-    if (existingPhoto) {
-      skippedDuplicates.push(file.name);
-      continue;
-    }
-
-    const metadata = await extractExif(buffer);
-    const imagePath = buildOriginalObjectPath(file);
-    const { error: uploadError } = await supabase.storage.from("originals").upload(imagePath, buffer, {
-      contentType: file.type,
-      upsert: false,
-    });
-      if (uploadError) throw new Error(uploadError.message);
-
-    const { data, error } = await supabase
-      .from("photos")
-      .insert({
-        image_path: imagePath,
-        original_filename: file.name,
-        content_hash: contentHash,
-        date_taken: metadata.dateTaken,
-        location_name: locationName,
-        latitude: metadata.latitude,
-        longitude: metadata.longitude,
-        camera: metadata.camera,
-        lens: metadata.lens,
-        aperture: metadata.aperture,
-        shutter_speed: metadata.shutterSpeed,
-        iso: metadata.iso,
-        medium,
-        selected,
-        selected_size: selected ? "normal" : null,
-        published: selected,
-      })
-      .select("id, original_filename, location_name, medium, selected, date_taken, camera")
-      .single();
-
-    if (error) {
-      await supabase.storage.from("originals").remove([imagePath]);
-      if (error.code === "23505") {
+      if (existingPhoto) {
         skippedDuplicates.push(file.name);
         continue;
       }
-      throw new Error(error.message);
-    }
-    photos.push(data);
+
+      const metadata = await extractExif(buffer);
+      imagePath = buildOriginalObjectPath(file);
+      const { error: uploadError } = await supabase.storage.from("originals").upload(imagePath, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
+      if (uploadError) throw new Error(uploadError.message);
+
+      if (selected) {
+        publicImagePath = await uploadPublicImageCopy(supabase, imagePath, buffer, file.type);
+      }
+
+      const { data, error } = await supabase
+        .from("photos")
+        .insert({
+          image_path: imagePath,
+          public_image_path: publicImagePath,
+          original_filename: file.name,
+          content_hash: contentHash,
+          date_taken: metadata.dateTaken,
+          location_name: locationName,
+          latitude: metadata.latitude,
+          longitude: metadata.longitude,
+          camera: metadata.camera,
+          lens: metadata.lens,
+          aperture: metadata.aperture,
+          shutter_speed: metadata.shutterSpeed,
+          iso: metadata.iso,
+          medium,
+          selected,
+          selected_size: selected ? "normal" : null,
+          published: selected,
+        })
+        .select("id, original_filename, location_name, medium, selected, date_taken, camera")
+        .single();
+
+      if (error) {
+        if (error.code === "23505") {
+          if (publicImagePath) {
+            await supabase.storage.from("public-images").remove([publicImagePath]);
+          }
+          await supabase.storage.from("originals").remove([imagePath]);
+          skippedDuplicates.push(file.name);
+          continue;
+        }
+        throw new Error(error.message);
+      }
+      photos.push(data);
     } catch (error) {
+      if (publicImagePath) {
+        await supabase.storage.from("public-images").remove([publicImagePath]);
+      }
+      if (imagePath) {
+        await supabase.storage.from("originals").remove([imagePath]);
+      }
       failedFiles.push({
         name: file.name,
         error: error instanceof Error ? error.message : "Upload failed.",

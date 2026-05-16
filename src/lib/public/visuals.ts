@@ -14,3 +14,17 @@ export function getPublicImageUrl(path: string | null) {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   return `${base}/storage/v1/object/public/public-images/${path}`;
 }
+
+export function getPhotoBackgroundStyle(seed: string, path: string | null) {
+  const fallback = getPhotoVisualStyle(seed);
+  const imageUrl = getPublicImageUrl(path);
+
+  return imageUrl
+    ? {
+        backgroundImage: `url(${imageUrl}), ${fallback}`,
+        backgroundSize: "cover, cover",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
+      }
+    : { background: fallback };
+}

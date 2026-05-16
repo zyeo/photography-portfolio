@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { extractExif } from "@/lib/photos/exif";
+import { uploadPublicImageCopy } from "@/lib/photos/public-images";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
 import { createClient } from "@/lib/supabase/server";
 
@@ -55,6 +56,17 @@ export async function POST(request: Request) {
 
   if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
 
+  let publicImagePath: string;
+  try {
+    publicImagePath = await uploadPublicImageCopy(supabase, imagePath, buffer, file.type);
+  } catch (error) {
+    await supabase.storage.from("originals").remove([imagePath]);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Public image upload failed." },
+      { status: 500 },
+    );
+  }
+
   if (parseBoolean(formData.get("pinnedHero"))) {
     await supabase.from("photos").update({ pinned_hero: false }).eq("pinned_hero", true);
   }
@@ -63,6 +75,7 @@ export async function POST(request: Request) {
     .from("photos")
     .insert({
       image_path: imagePath,
+      public_image_path: publicImagePath,
       original_filename: file.name,
       date_taken: metadata.dateTaken,
       location_name: locationName,
@@ -83,6 +96,7 @@ export async function POST(request: Request) {
     .single();
 
   if (photoError) {
+    await supabase.storage.from("public-images").remove([publicImagePath]);
     await supabase.storage.from("originals").remove([imagePath]);
     return NextResponse.json({ error: photoError.message }, { status: 500 });
   }
@@ -102,6 +116,7 @@ export async function POST(request: Request) {
 
   if (entryError) {
     await supabase.from("photos").delete().eq("id", photo.id);
+    await supabase.storage.from("public-images").remove([publicImagePath]);
     await supabase.storage.from("originals").remove([imagePath]);
     return NextResponse.json({ error: entryError.message }, { status: 500 });
   }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { getPhotoVisualStyle } from "@/lib/public/visuals";
+import { getPhotoBackgroundStyle } from "@/lib/public/visuals";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./page.module.css";
 
@@ -9,14 +9,14 @@ export default async function JournalPage() {
   const supabase = await createClient();
   const { data: entries } = await supabase
     .from("journal_entries")
-    .select("entry_date, title, reflection, photos(id, location_name)")
+    .select("entry_date, title, reflection, photos(id, public_image_path, location_name)")
     .eq("published", true)
     .order("entry_date", { ascending: false });
   const journalEntries = (entries ?? []) as Array<{
     entry_date: string;
     title: string;
     reflection: string;
-    photos: { id: string; location_name: string | null } | null;
+    photos: { id: string; public_image_path: string | null; location_name: string | null } | null;
   }>;
   const [latest, ...older] = journalEntries;
 
@@ -28,7 +28,7 @@ export default async function JournalPage() {
         <p className="page-kicker">A journal of photographs, places, and the practice of noticing.</p>
         {latest ? (
           <article className={styles.featured}>
-            <div style={{ background: getPhotoVisualStyle(latest.photos?.id ?? latest.entry_date) }} />
+            <div style={getPhotoBackgroundStyle(latest.photos?.id ?? latest.entry_date, latest.photos?.public_image_path ?? null)} />
             <section>
               <span>{latest.entry_date}</span>
               <h2 className="display">{latest.title}</h2>

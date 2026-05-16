@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
+import { getPhotoBackgroundStyle } from "@/lib/public/visuals";
 import styles from "./hero-rotator.module.css";
 
 type HeroPhoto = {
@@ -21,16 +21,10 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
     return () => window.clearInterval(timer);
   }, [photos.length, pinned]);
 
-  const imageUrl = getPublicImageUrl(active?.public_image_path ?? null);
-
   return (
     <div
       className={styles.hero}
-      style={
-        imageUrl
-          ? { backgroundImage: `url(${imageUrl})` }
-          : { background: getPhotoVisualStyle(active?.id ?? "hero") }
-      }
+      style={getPhotoBackgroundStyle(active?.id ?? "hero", active?.public_image_path ?? null)}
     />
   );
 }
