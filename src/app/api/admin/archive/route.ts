@@ -5,6 +5,33 @@ import { uploadPublicImageCopy } from "@/lib/photos/public-images";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
 import { createClient } from "@/lib/supabase/server";
 
+async function parseArchiveRequest(request: Request) {
+  const contentType = request.headers.get("content-type") ?? "";
+
+  if (contentType.startsWith("multipart/form-data")) {
+    const formData = await request.formData();
+    return {
+      files: formData.getAll("files").filter((value): value is File => value instanceof File),
+      medium: String(formData.get("medium") ?? "digital") as "digital" | "film",
+      locationName: String(formData.get("locationName") ?? "").trim() || null,
+      selected: formData.get("selected") === "on",
+    };
+  }
+
+  const encodedName = request.headers.get("x-archive-file-name");
+  if (!encodedName) throw new Error("Missing archive filename.");
+
+  const buffer = await request.arrayBuffer();
+  const file = new File([buffer], decodeURIComponent(encodedName), { type: contentType });
+
+  return {
+    files: [file],
+    medium: (request.headers.get("x-archive-medium") ?? "digital") as "digital" | "film",
+    locationName: decodeURIComponent(request.headers.get("x-archive-location") ?? "").trim() || null,
+    selected: request.headers.get("x-archive-selected") === "true",
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
@@ -13,11 +40,7 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const formData = await request.formData();
-    const files = formData.getAll("files").filter((value): value is File => value instanceof File);
-    const medium = String(formData.get("medium") ?? "digital") as "digital" | "film";
-    const locationName = String(formData.get("locationName") ?? "").trim() || null;
-    const selected = formData.get("selected") === "on";
+    const { files, medium, locationName, selected } = await parseArchiveRequest(request);
 
     if (!files.length) return NextResponse.json({ error: "At least one image is required." }, { status: 400 });
 

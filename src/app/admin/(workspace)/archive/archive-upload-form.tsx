@@ -63,18 +63,17 @@ export function ArchiveUploadForm() {
       for (const [index, file] of files.entries()) {
         setStatus(`Uploading ${index + 1} of ${fileCount}: ${file.name}…`);
 
-        const fileFormData = new FormData();
-        fileFormData.append("files", file);
-        fileFormData.append("medium", String(sourceFormData.get("medium") ?? "digital"));
-        fileFormData.append("locationName", String(sourceFormData.get("locationName") ?? ""));
-        if (sourceFormData.get("selected") === "on") {
-          fileFormData.append("selected", "on");
-        }
-
         try {
           const response = await fetch("/api/admin/archive", {
             method: "POST",
-            body: fileFormData,
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+              "X-Archive-File-Name": encodeURIComponent(file.name),
+              "X-Archive-Medium": String(sourceFormData.get("medium") ?? "digital"),
+              "X-Archive-Location": encodeURIComponent(String(sourceFormData.get("locationName") ?? "")),
+              "X-Archive-Selected": sourceFormData.get("selected") === "on" ? "true" : "false",
+            },
+            body: file,
           });
           const payload = await readUploadPayload(response);
 
