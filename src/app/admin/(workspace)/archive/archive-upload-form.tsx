@@ -31,35 +31,60 @@ export function ArchiveUploadForm() {
     if (isUploading) return;
 
     const form = event.currentTarget;
-    const formData = new FormData(form);
-    const fileCount = formData.getAll("files").filter((value) => value instanceof File && value.size > 0).length;
+    const sourceFormData = new FormData(form);
+    const files = sourceFormData
+      .getAll("files")
+      .filter((value): value is File => value instanceof File && value.size > 0);
+    const fileCount = files.length;
 
     setIsUploading(true);
     setError(null);
     setStatus(`Uploading ${fileCount} photograph${fileCount === 1 ? "" : "s"}…`);
 
     try {
-      const response = await fetch("/api/admin/archive", {
-        method: "POST",
-        body: formData,
-      });
-      const payload = (await response.json()) as UploadResult;
+      const uploadedPhotos: Photo[] = [];
+      const skippedDuplicates: string[] = [];
+      const failedFiles: Array<{ name: string; error: string }> = [];
 
-      if (!response.ok) {
-        setError(payload.error ?? "Upload failed.");
-        setStatus(null);
-        return;
+      for (const [index, file] of files.entries()) {
+        setStatus(`Uploading ${index + 1} of ${fileCount}…`);
+
+        const fileFormData = new FormData();
+        fileFormData.append("files", file);
+        fileFormData.append("medium", String(sourceFormData.get("medium") ?? "digital"));
+        fileFormData.append("locationName", String(sourceFormData.get("locationName") ?? ""));
+        if (sourceFormData.get("selected") === "on") {
+          fileFormData.append("selected", "on");
+        }
+
+        const response = await fetch("/api/admin/archive", {
+          method: "POST",
+          body: fileFormData,
+        });
+        const payload = (await response.json()) as UploadResult;
+
+        if (!response.ok) {
+          failedFiles.push({
+            name: file.name,
+            error: payload.error ?? "Upload failed.",
+          });
+          continue;
+        }
+
+        uploadedPhotos.push(...(payload.photos ?? []));
+        skippedDuplicates.push(...(payload.skippedDuplicates ?? []));
+        failedFiles.push(...(payload.failedFiles ?? []));
       }
 
-      setPhotos(payload.photos ?? []);
-      const skipped = payload.skippedDuplicates ?? [];
-      const failed = payload.failedFiles ?? [];
+      setPhotos(uploadedPhotos);
       setStatus(
-        `Uploaded ${payload.photos?.length ?? 0}${
-          skipped.length ? `; skipped ${skipped.length} duplicate${skipped.length === 1 ? "" : "s"}` : ""
-        }${failed.length ? `; ${failed.length} failed` : ""}.`,
+        `Uploaded ${uploadedPhotos.length}${
+          skippedDuplicates.length
+            ? `; skipped ${skippedDuplicates.length} duplicate${skippedDuplicates.length === 1 ? "" : "s"}`
+            : ""
+        }${failedFiles.length ? `; ${failedFiles.length} failed` : ""}.`,
       );
-      setError(failed.length ? failed.map((file) => `${file.name}: ${file.error}`).join(" ") : null);
+      setError(failedFiles.length ? failedFiles.map((file) => `${file.name}: ${file.error}`).join(" ") : null);
       form.reset();
     } catch {
       setError("Upload failed. Please try again.");
