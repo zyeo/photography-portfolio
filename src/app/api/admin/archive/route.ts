@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { extractExif } from "@/lib/photos/exif";
+import { extractImageDimensions } from "@/lib/photos/dimensions";
 import { uploadPublicImageCopy } from "@/lib/photos/public-images";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
 import { createClient } from "@/lib/supabase/server";
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
         assertAcceptedImage(file);
         const buffer = await file.arrayBuffer();
         const contentHash = createHash("sha256").update(Buffer.from(buffer)).digest("hex");
+        const dimensions = extractImageDimensions(buffer);
 
         const { data: existingPhoto } = await supabase
           .from("photos")
@@ -85,6 +87,8 @@ export async function POST(request: Request) {
           .insert({
             image_path: imagePath,
             public_image_path: publicImagePath,
+            image_width: dimensions.width,
+            image_height: dimensions.height,
             original_filename: file.name,
             content_hash: contentHash,
             date_taken: metadata.dateTaken,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { extractExif } from "@/lib/photos/exif";
+import { extractImageDimensions } from "@/lib/photos/dimensions";
 import { uploadPublicImageCopy } from "@/lib/photos/public-images";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
 import { createClient } from "@/lib/supabase/server";
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
 
   const buffer = await file.arrayBuffer();
   const metadata = await extractExif(buffer);
+  const dimensions = extractImageDimensions(buffer);
   const imagePath = buildOriginalObjectPath(file);
 
   const { error: uploadError } = await supabase.storage.from("originals").upload(imagePath, buffer, {
@@ -76,6 +78,8 @@ export async function POST(request: Request) {
     .insert({
       image_path: imagePath,
       public_image_path: publicImagePath,
+      image_width: dimensions.width,
+      image_height: dimensions.height,
       original_filename: file.name,
       date_taken: metadata.dateTaken,
       location_name: locationName,

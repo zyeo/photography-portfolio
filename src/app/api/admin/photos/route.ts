@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { assertAcceptedImage, buildOriginalObjectPath } from "@/lib/photos/uploads";
+import { extractImageDimensions } from "@/lib/photos/dimensions";
 import { extractExif } from "@/lib/photos/exif";
 
 export async function POST(request: Request) {
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
 
   const buffer = await file.arrayBuffer();
   const metadata = await extractExif(buffer);
+  const dimensions = extractImageDimensions(buffer);
   const imagePath = buildOriginalObjectPath(file);
 
   const { error: uploadError } = await supabase.storage
@@ -48,6 +50,8 @@ export async function POST(request: Request) {
     .from("photos")
     .insert({
       image_path: imagePath,
+      image_width: dimensions.width,
+      image_height: dimensions.height,
       original_filename: file.name,
       date_taken: metadata.dateTaken,
       camera: metadata.camera,

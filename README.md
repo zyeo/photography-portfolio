@@ -25,5 +25,6 @@ Poetic photography journal and portfolio for Zach Yeo, built with Next.js and Su
 
 - Originals remain private in the `originals` bucket.
 - Public delivery assets belong in `public-images`.
+- Run `npm run backfill:photo-dimensions` after applying the dimension migration to fill width/height for older photo rows.
 - The website is not the only archive of master image files; keep independent backups.
 - Rotate Supabase secrets after sharing or suspected exposure.

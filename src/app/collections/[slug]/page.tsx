@@ -19,10 +19,10 @@ export default async function CollectionDetailPage({ params }: PageProps) {
   if (!collection) notFound();
   const { data: links } = await supabase
     .from("photo_collections")
-    .select("display_order, photos(id, original_filename, public_image_path, location_name, date_taken)")
+    .select("display_order, photos(id, original_filename, public_image_path, image_width, image_height, location_name, date_taken)")
     .eq("collection_id", collection.id)
     .order("display_order", { ascending: true, nullsFirst: false });
-  const photos = ((links ?? []) as Array<{ photos: { id: string; original_filename: string; public_image_path: string | null; location_name: string | null; date_taken: string | null } | null }>)
+  const photos = ((links ?? []) as Array<{ photos: { id: string; original_filename: string; public_image_path: string | null; image_width: number | null; image_height: number | null; location_name: string | null; date_taken: string | null } | null }>)
     .flatMap((link) => link.photos ? [link.photos] : []);
 
   return (
