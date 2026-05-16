@@ -20,6 +20,20 @@ type UploadResult = {
   error?: string;
 };
 
+async function readUploadPayload(response: Response): Promise<UploadResult> {
+  const text = await response.text();
+
+  if (!text) return {};
+
+  try {
+    return JSON.parse(text) as UploadResult;
+  } catch {
+    return {
+      error: `Server returned ${response.status} ${response.statusText || "without a JSON response"}.`,
+    };
+  }
+}
+
 export function ArchiveUploadForm() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -41,13 +55,13 @@ export function ArchiveUploadForm() {
     setError(null);
     setStatus(`Uploading ${fileCount} photograph${fileCount === 1 ? "" : "s"}…`);
 
-    try {
-      const uploadedPhotos: Photo[] = [];
-      const skippedDuplicates: string[] = [];
-      const failedFiles: Array<{ name: string; error: string }> = [];
+    const uploadedPhotos: Photo[] = [];
+    const skippedDuplicates: string[] = [];
+    const failedFiles: Array<{ name: string; error: string }> = [];
 
+    try {
       for (const [index, file] of files.entries()) {
-        setStatus(`Uploading ${index + 1} of ${fileCount}…`);
+        setStatus(`Uploading ${index + 1} of ${fileCount}: ${file.name}…`);
 
         const fileFormData = new FormData();
         fileFormData.append("files", file);
@@ -57,23 +71,30 @@ export function ArchiveUploadForm() {
           fileFormData.append("selected", "on");
         }
 
-        const response = await fetch("/api/admin/archive", {
-          method: "POST",
-          body: fileFormData,
-        });
-        const payload = (await response.json()) as UploadResult;
+        try {
+          const response = await fetch("/api/admin/archive", {
+            method: "POST",
+            body: fileFormData,
+          });
+          const payload = await readUploadPayload(response);
 
-        if (!response.ok) {
+          if (!response.ok) {
+            failedFiles.push({
+              name: file.name,
+              error: payload.error ?? `Upload failed with HTTP ${response.status}.`,
+            });
+            continue;
+          }
+
+          uploadedPhotos.push(...(payload.photos ?? []));
+          skippedDuplicates.push(...(payload.skippedDuplicates ?? []));
+          failedFiles.push(...(payload.failedFiles ?? []));
+        } catch (uploadError) {
           failedFiles.push({
             name: file.name,
-            error: payload.error ?? "Upload failed.",
+            error: uploadError instanceof Error ? uploadError.message : "Network upload failed.",
           });
-          continue;
         }
-
-        uploadedPhotos.push(...(payload.photos ?? []));
-        skippedDuplicates.push(...(payload.skippedDuplicates ?? []));
-        failedFiles.push(...(payload.failedFiles ?? []));
       }
 
       setPhotos(uploadedPhotos);
@@ -86,9 +107,16 @@ export function ArchiveUploadForm() {
       );
       setError(failedFiles.length ? failedFiles.map((file) => `${file.name}: ${file.error}`).join(" ") : null);
       form.reset();
-    } catch {
-      setError("Upload failed. Please try again.");
-      setStatus(null);
+    } catch (uploadError) {
+      setPhotos(uploadedPhotos);
+      setError(uploadError instanceof Error ? uploadError.message : "Upload failed. Please try again.");
+      setStatus(
+        `Uploaded ${uploadedPhotos.length}${
+          skippedDuplicates.length
+            ? `; skipped ${skippedDuplicates.length} duplicate${skippedDuplicates.length === 1 ? "" : "s"}`
+            : ""
+        }${failedFiles.length ? `; ${failedFiles.length} failed` : ""}.`,
+      );
     } finally {
       setIsUploading(false);
     }
