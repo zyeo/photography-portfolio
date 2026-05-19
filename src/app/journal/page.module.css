@@ -6,23 +6,19 @@
 .featured figure span { min-height:18rem; }
 .featured span,.page em,.archive span { color:var(--ink-soft); font-size:.78rem; font-style:normal; letter-spacing:.16em; text-transform:uppercase; }
 .featured h2 { margin:.45rem 0 .75rem; font-size:clamp(1.8rem,1.4rem + 1.5vw,2.8rem); }
-.archive { display:grid; gap:1rem; margin:0; padding:0; list-style:none; }
+.archive { display:grid; gap:0; width:min(100%,54rem); margin:0 auto; padding:0; list-style:none; }
 .archive li { border-top:1px solid var(--line); }
-.archive a { display:grid; grid-template-columns:6.5rem minmax(0,1fr); gap:1rem; padding-block:1rem; color:inherit; text-decoration:none; }
-.archive figure { margin:0; background:var(--paper-deep); }
-.archive img,.archive figure span { display:block; width:100%; height:auto; }
-.archive figure span { min-height:5rem; }
-.archive section { display:grid; gap:.3rem; align-content:start; min-width:0; }
+.archive li:last-child { border-bottom:1px solid var(--line); }
+.archive a { display:grid; gap:1rem; padding-block:1.15rem; color:inherit; text-decoration:none; }
+.archive figure { display:grid; place-items:center; aspect-ratio:16 / 10; margin:0; overflow:hidden; background:rgba(103,91,78,.13); }
+.archive img,.archive figure span { display:block; width:100%; height:100%; }
+.archive img { object-fit:contain; }
+.archive figure span { min-height:100%; }
+.archive section { display:grid; gap:.35rem; align-content:center; min-width:0; }
 .archive strong { overflow-wrap:anywhere; font-size:1.1rem; }
 .archive p { display:-webkit-box; margin:.15rem 0 0; overflow:hidden; color:var(--ink-soft); font-size:.9rem; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
-.pagination { display:flex; justify-content:space-between; gap:1rem; margin-top:var(--space-4); }
+.pagination { display:flex; justify-content:space-between; gap:1rem; width:min(100%,54rem); margin:var(--space-4) auto 0; }
 @media (min-width:48rem){
   .featured{grid-template-columns:1.1fr .9fr; align-items:end;}
-  .archive{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .archive li{border-bottom:1px solid var(--line);}
-  .archive a{grid-template-columns:8rem minmax(0,1fr); min-height:10rem;}
-}
-@media (min-width:70rem){
-  .archive{grid-template-columns:repeat(3,minmax(0,1fr));}
-  .archive a{grid-template-columns:1fr; gap:.8rem;}
+  .archive a{grid-template-columns:minmax(12rem,18rem) minmax(0,1fr); gap:1.35rem; min-height:11rem;}
 }
