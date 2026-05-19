@@ -28,15 +28,17 @@ Prioritize:
 
 ## Layout Preference
 
-Prefer a justified gallery layout, similar to Flickr or Google Photos.
+Prefer a non-cropping masonry layout for an organic photography portfolio feel.
 
-Use justified layout when the goal is:
+Use masonry when the goal is:
 - preserved aspect ratios
-- clean rows
-- minimal whitespace
-- professional photography portfolio feel
+- proportional scaling within columns
+- natural visual rhythm
+- an organic photography portfolio feel
 
-Use masonry only if justified layout is too complex for the current codebase or if the existing project is already built around masonry.
+Photos may scale proportionally to fit columns, but must not crop, stretch, or distort.
+
+Use justified layout only as a fallback if masonry cannot solve the layout cleanly or if the user later asks for tighter Google Photos/Flickr-style rows.
 
 Avoid a basic equal-cell CSS grid unless the user explicitly wants cropped uniform thumbnails.
 
@@ -106,7 +108,7 @@ When fixing an existing gallery:
 1. Inspect the current gallery component.
 2. Inspect the current image data structure.
 3. Identify whether image width and height are available.
-4. Choose justified layout unless there is a clear reason not to.
+4. Choose masonry layout unless there is a clear reason not to.
 5. Make the smallest clean change.
 6. Test with portrait, landscape, square, and panorama images.
 7. Explain what changed and why.

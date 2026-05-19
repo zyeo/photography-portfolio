@@ -8,6 +8,7 @@ type Photo = {
   id: string;
   original_filename: string;
   public_image_path: string | null;
+  gallery_image_path: string | null;
   image_width: number | null;
   image_height: number | null;
   location_name: string | null;
@@ -71,7 +72,9 @@ function balancePhotosForMasonry(photos: Photo[]) {
 
 export function LightboxGallery({ photos }: { photos: Photo[] }) {
   const orderedPhotos = balancePhotosForMasonry(photos);
-  const [active, setActive] = useState<Photo | null>(null);
+  const [loadedIds, setLoadedIds] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const active = activeIndex === null ? null : orderedPhotos[activeIndex] ?? null;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const titleId = useId();
@@ -85,9 +88,36 @@ export function LightboxGallery({ photos }: { photos: Photo[] }) {
     }
   }, [active]);
 
-  function openPhoto(photo: Photo, opener: HTMLButtonElement) {
+  useEffect(() => {
+    if (!active) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setActiveIndex((current) =>
+          current === null ? current : (current - 1 + orderedPhotos.length) % orderedPhotos.length,
+        );
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveIndex((current) =>
+          current === null ? current : (current + 1) % orderedPhotos.length,
+        );
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [active, orderedPhotos.length]);
+
+  function markLoaded(photoId: string) {
+    setLoadedIds((current) => (current.includes(photoId) ? current : [...current, photoId]));
+  }
+
+  function openPhoto(index: number, opener: HTMLButtonElement) {
     openerRef.current = opener;
-    setActive(photo);
+    setActiveIndex(index);
   }
 
   function closeLightbox() {
@@ -98,34 +128,46 @@ export function LightboxGallery({ photos }: { photos: Photo[] }) {
       return;
     }
 
-    setActive(null);
+    setActiveIndex(null);
   }
 
   function handleDialogClose() {
-    setActive(null);
+    setActiveIndex(null);
     openerRef.current?.focus();
+  }
+
+  function showPrevious() {
+    setActiveIndex((current) =>
+      current === null ? current : (current - 1 + orderedPhotos.length) % orderedPhotos.length,
+    );
+  }
+
+  function showNext() {
+    setActiveIndex((current) => (current === null ? current : (current + 1) % orderedPhotos.length));
   }
 
   return (
     <>
       <div className={styles.gallery}>
-        {orderedPhotos.map((photo) => (
+        {orderedPhotos.map((photo, index) => (
           <button
             key={photo.id}
             type="button"
             data-size={photo.selected_size ?? "normal"}
             data-category={getPhotoCategory(photo)}
+            data-loaded={loadedIds.includes(photo.id)}
             style={getPhotoBackgroundStyle(photo.id, null)}
-            onClick={(event) => openPhoto(photo, event.currentTarget)}
+            onClick={(event) => openPhoto(index, event.currentTarget)}
             aria-label={`Open ${photo.original_filename}`}
           >
-            {getPublicImageUrl(photo.public_image_path) ? (
+            {getPublicImageUrl(photo.gallery_image_path) ? (
               <img
-                src={getPublicImageUrl(photo.public_image_path) ?? undefined}
+                src={getPublicImageUrl(photo.gallery_image_path) ?? undefined}
                 alt=""
                 width={photo.image_width ?? undefined}
                 height={photo.image_height ?? undefined}
                 loading="lazy"
+                onLoad={() => markLoaded(photo.id)}
               />
             ) : (
               <span
@@ -153,9 +195,12 @@ export function LightboxGallery({ photos }: { photos: Photo[] }) {
             }
           }}
         >
-          <button type="button" onClick={closeLightbox} autoFocus>
-            Close
-          </button>
+          <div className={styles.lightboxToolbar}>
+            <button type="button" onClick={closeLightbox} autoFocus>
+              Close
+            </button>
+            <span>{activeIndex === null ? null : `${activeIndex + 1} / ${orderedPhotos.length}`}</span>
+          </div>
           <div className={styles.lightboxImage}>
             {getPublicImageUrl(active.public_image_path) ? (
               <img
@@ -172,8 +217,22 @@ export function LightboxGallery({ photos }: { photos: Photo[] }) {
               />
             )}
           </div>
-          <p id={titleId}>{active.location_name ?? "Untitled place"}</p>
-          <span id={dateId}>{active.date_taken?.slice(0, 10) ?? "Undated"}</span>
+          <div className={styles.lightboxFooter}>
+            <div>
+              <p id={titleId}>{active.location_name ?? "Untitled place"}</p>
+              <span id={dateId}>{active.date_taken?.slice(0, 10) ?? "Undated"}</span>
+            </div>
+            {orderedPhotos.length > 1 ? (
+              <div className={styles.lightboxNav}>
+                <button type="button" onClick={showPrevious} aria-label="Previous image">
+                  Previous
+                </button>
+                <button type="button" onClick={showNext} aria-label="Next image">
+                  Next
+                </button>
+              </div>
+            ) : null}
+          </div>
         </dialog>
       ) : null}
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { directUploadOriginal } from "@/lib/admin/direct-upload";
 import styles from "./archive-upload-form.module.css";
 
 type Photo = {
@@ -64,16 +65,17 @@ export function ArchiveUploadForm() {
         setStatus(`Uploading ${index + 1} of ${fileCount}: ${file.name}…`);
 
         try {
-          const response = await fetch("/api/admin/archive", {
+          const upload = await directUploadOriginal(file);
+          const response = await fetch("/api/admin/uploads/finalize", {
             method: "POST",
-            headers: {
-              "Content-Type": file.type || "application/octet-stream",
-              "X-Archive-File-Name": encodeURIComponent(file.name),
-              "X-Archive-Medium": String(sourceFormData.get("medium") ?? "digital"),
-              "X-Archive-Location": encodeURIComponent(String(sourceFormData.get("locationName") ?? "")),
-              "X-Archive-Selected": sourceFormData.get("selected") === "on" ? "true" : "false",
-            },
-            body: file,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              kind: "archive-photo",
+              ...upload,
+              medium: String(sourceFormData.get("medium") ?? "digital"),
+              locationName: String(sourceFormData.get("locationName") ?? "").trim() || null,
+              selected: sourceFormData.get("selected") === "on",
+            }),
           });
           const payload = await readUploadPayload(response);
 

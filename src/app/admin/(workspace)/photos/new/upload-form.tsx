@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { directUploadOriginal } from "@/lib/admin/direct-upload";
 import styles from "./upload-form.module.css";
 
 type UploadResult = {
@@ -27,13 +28,28 @@ export function UploadForm() {
     setResult(null);
 
     const formData = new FormData(event.currentTarget);
-    const response = await fetch("/api/admin/photos", {
-      method: "POST",
-      body: formData,
-    });
-    const payload = (await response.json()) as UploadResult;
+    const file = formData.get("file");
+    if (!(file instanceof File)) {
+      setResult({ error: "Image file is required." });
+      setIsUploading(false);
+      return;
+    }
 
-    setResult(payload);
+    try {
+      const upload = await directUploadOriginal(file);
+      const response = await fetch("/api/admin/uploads/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "library-photo",
+          ...upload,
+        }),
+      });
+      const payload = (await response.json()) as UploadResult;
+      setResult(payload);
+    } catch (error) {
+      setResult({ error: error instanceof Error ? error.message : "Upload failed." });
+    }
     setIsUploading(false);
   }
 

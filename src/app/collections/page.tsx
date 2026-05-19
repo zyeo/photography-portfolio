@@ -18,9 +18,9 @@ export default async function CollectionsPage() {
   const { data: coverPhotos } = coverPhotoIds.length
     ? await supabase
         .from("photos")
-        .select("id, public_image_path")
+        .select("id, gallery_image_path")
         .in("id", coverPhotoIds)
-    : { data: [] as Array<{ id: string; public_image_path: string | null }> };
+    : { data: [] as Array<{ id: string; gallery_image_path: string | null }> };
   const coverPhotoMap = new Map((coverPhotos ?? []).map((photo) => [photo.id, photo]));
 
   return (
@@ -29,21 +29,24 @@ export default async function CollectionsPage() {
       <main className={`${styles.page} shell`}>
         <p className="eyebrow">Collections</p>
         <h1 className="display">Ways through the archive.</h1>
-        <div>
+        <div className={styles.list}>
           {collections?.map((collection) => (
             <article key={collection.id}>
               <div
+                data-has-cover={Boolean(collection.cover_photo_id)}
                 aria-hidden="true"
                 style={getPhotoBackgroundStyle(
                   collection.cover_photo_id ?? collection.id,
                   collection.cover_photo_id
-                    ? coverPhotoMap.get(collection.cover_photo_id)?.public_image_path ?? null
+                    ? coverPhotoMap.get(collection.cover_photo_id)?.gallery_image_path ?? null
                     : null,
                 )}
               />
-              <h2 className="display">{collection.title}</h2>
-              <p className="serif">{collection.description}</p>
-              <Link className="utility-link" href={`/collections/${collection.slug}`}>Open collection</Link>
+              <section>
+                <h2 className="display">{collection.title}</h2>
+                {collection.description ? <p className="serif">{collection.description}</p> : null}
+                <Link className="utility-link" href={`/collections/${collection.slug}`}>Open collection</Link>
+              </section>
             </article>
           ))}
         </div>

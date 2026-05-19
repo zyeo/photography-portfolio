@@ -13,7 +13,7 @@ export default async function JournalEntryPage({ params }: PageProps) {
   const supabase = await createClient();
   const { data: entry } = await supabase
     .from("journal_entries")
-    .select("entry_date, title, reflection, weather, photos(id, public_image_path, location_name, aperture, shutter_speed, iso)")
+    .select("entry_date, title, reflection, weather, photos(id, gallery_image_path, location_name, aperture, shutter_speed, iso)")
     .eq("entry_date", date)
     .eq("published", true)
     .maybeSingle();
@@ -23,7 +23,7 @@ export default async function JournalEntryPage({ params }: PageProps) {
     title: string;
     reflection: string;
     weather: string | null;
-    photos: { id: string; public_image_path: string | null; location_name: string | null; aperture: string | null; shutter_speed: string | null; iso: number | null } | null;
+    photos: { id: string; gallery_image_path: string | null; location_name: string | null; aperture: string | null; shutter_speed: string | null; iso: number | null } | null;
   };
   const { data: neighbors } = await supabase
     .from("journal_entries")
@@ -43,7 +43,7 @@ export default async function JournalEntryPage({ params }: PageProps) {
           className={styles.image}
           style={getPhotoBackgroundStyle(
             journalEntry.photos?.id ?? journalEntry.entry_date,
-            journalEntry.photos?.public_image_path ?? null,
+            journalEntry.photos?.gallery_image_path ?? null,
           )}
         />
         <article>

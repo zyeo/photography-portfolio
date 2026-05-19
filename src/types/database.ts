@@ -14,6 +14,7 @@ export type Database = {
           id: string;
           image_path: string;
           public_image_path: string | null;
+          gallery_image_path: string | null;
           image_width: number | null;
           image_height: number | null;
           original_filename: string;

@@ -36,9 +36,18 @@
 }
 
 .toggles label {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 0.5rem;
+}
+
+.toggles small {
+  grid-column: 2;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .form button {

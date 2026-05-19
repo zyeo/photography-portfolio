@@ -6,7 +6,7 @@ import styles from "./hero-rotator.module.css";
 
 type HeroPhoto = {
   id: string;
-  public_image_path: string | null;
+  gallery_image_path: string | null;
   pinned_hero: boolean;
 };
 
@@ -24,7 +24,7 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
   return (
     <div
       className={styles.hero}
-      style={getPhotoBackgroundStyle(active?.id ?? "hero", active?.public_image_path ?? null)}
+      style={getPhotoBackgroundStyle(active?.id ?? "hero", active?.gallery_image_path ?? null)}
     />
   );
 }

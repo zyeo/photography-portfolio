@@ -1,7 +1,9 @@
 # Image delivery guidance
 
 ## Current state
-Public pages are ready to consume optimized image variants but still fall back gracefully when a photo has no public rendition yet.
+Public pages consume proportional web derivatives from `public-images`:
+- gallery tiles: `gallery.jpg` at about 1200px on the long edge
+- lightbox/public display: `lightbox.jpg` at about 2200px on the long edge
 
 ## Recommended next image pipeline step
 1. Preserve every uploaded original in the private `originals` bucket.
@@ -13,8 +15,8 @@ Public pages are ready to consume optimized image variants but still fall back g
 ## Why this separation matters
 It keeps archival durability separate from delivery optimization, which lets the site stay fast without treating compressed web files as master assets.
 
-## Current first-pass implementation
-- New published daily entries write a public delivery copy into `public-images`.
+## Current implementation
+- New published daily entries generate both public derivatives in `public-images`.
 - New archive uploads added directly to public `Selected` do the same.
+- Publishing an older admin photo generates missing derivatives before it becomes public.
 - Existing published photos can be repaired with `npm run backfill:public-images`.
-- The current copy is the original browser-readable asset; responsive derivatives remain the next optimization step.
