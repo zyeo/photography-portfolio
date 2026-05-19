@@ -1,567 +1,376 @@
-# Next Implementation Plan — Admin + Public Site Stabilization
-
-## Purpose of this handoff
-This document is the strict continuation brief for the next implementation pass.
-
-It exists because the project is now past “initial build” territory. The next work is not about adding random polish; it is about making the site and admin reliable enough to use with real photographs.
-
-The next chat should treat this file as the working plan, while still respecting:
-- `CREATIVE_BRIEF.md`
-- `IMPLEMENTATION_PLAN.md`
-- `DESIGN_DRIFT_AUDIT.md`
-- `DESIGN_DRIFT_FOLLOWUP.md`
-
-## Current repository state
-- Branch: `codex/phase-1-foundation`
-- Latest completed commit at handoff: `4fe7820 Render real public photo assets`
-- Untracked folder intentionally present: `audit-shots/`
-
-### Recently completed fixes that must not regress
-1. **Archive duplicate-submit protection**
-   - Upload buttons/fields are disabled during archive submission.
-   - Duplicate archive submissions are blocked with `content_hash`.
-   - Commit: `d0b4a32 Prevent duplicate archive submissions`
-
-2. **Selected/public mismatch clarified**
-   - Admin Selected distinguishes `public` vs `draft`.
-   - “Add uploaded photos to public Selected” now publishes new selected archive uploads.
-   - Per-file archive failures are reported individually.
-   - Commit: `8ff8ba5 Clarify archive failures and selected publishing`
-
-3. **Real public image delivery first pass**
-   - New published daily-entry photos and new public Selected archive uploads create a public delivery copy in `public-images`.
-   - Public pages now prefer real image URLs when `public_image_path` exists.
-   - Existing published photos can be backfilled with `npm run backfill:public-images`.
-   - Supabase migration added for `service_role` grants.
-   - Commit: `4fe7820 Render real public photo assets`
-
-### Known implementation detail
-The current public-image pass is intentionally only a first pass:
-- it copies browser-readable source files into `public-images`
-- it does **not** yet generate optimized responsive derivatives
-- real-image rendering now exists, but layout/interaction bugs remain
-
----
-
-# Product reality check
-
-The public site is visually much closer to the intended design after the drift-correction work, but the system is not yet comfortable to operate daily.
-
-The next work has two goals:
-1. make the public site behave correctly with real mixed photography
-2. make the admin function like a humane archive-management tool rather than a scaffold
-
----
-
-# Full issue inventory
-
-## A. Archive / batch upload issues
-
-### A1. Multi-file archive batch upload fails
-Observed by user:
-- uploading **one** image works
-- uploading a **group** of photos in one archive batch fails
-
-Need to debug:
-- whether the failure is client-side, route-side, storage-side, timeout/size-related, or caused by one file aborting the whole response
-- whether the new public-image-copy step introduced any multi-file issue
-- whether mixed file types / large files / same names / EXIF extraction affect behavior
-
-### A2. Archive upload UX was previously click-racy
-Previously observed by user:
-- noticeable delay on buttons
-- repeated clicks could trigger duplicate uploads
-
-This was fixed, but it needs regression testing during the next pass.
-
-### A3. Filename spaces were suspected
-User suspected files with spaces might fail.
-
-Current finding:
-- spaces are **not** known to be the root cause
-- live rows with names like `_DSF8157 copy.jpg` did upload successfully
-
-Still test filenames containing:
-- spaces
-- underscores
-- duplicate base names
-- mixed extensions
-
----
-
-## B. Selected gallery issues on the public site
-
-### B1. The Selected lightbox behaves incorrectly
-Observed by user:
-- the lightbox appears to remain on the page like permanent inline content
-- it does not feel like a temporary overlay that only appears after selecting a photo
-
-Likely contributing detail:
-- the current component uses native `<dialog open>` without a proper modal show/close interaction model
-- current screenshot shows the “lightbox” occupying document flow instead of acting like a true overlay
-
-### B2. The Selected gallery crops mixed aspect ratios poorly
-Observed by user:
-- the current grid cuts off images regardless of whether they are landscape, portrait, or square
-- the site needs a better way to present a mixed photographic body of work
-
-Design requirement:
-- preserve the intended compact-airy editorial rhythm
-- do **not** flatten every image into a generic crop box
-- support a convincing mix of:
-  - landscape
-  - portrait
-  - square
-  - normal and large selected states
-
-### B3. Selected/public state previously diverged
-Previously observed:
-- admin Selected showed photos that the public Selected gallery did not show
-
-Root cause already found:
-- admin was querying `selected=true`
-- public gallery required both `selected=true` and `published=true`
-
-This was partially fixed, but it still needs product follow-through:
-- draft/public state must remain visible
-- the future Library UI should make publish state manageable without confusion
-- older selected draft rows still exist and should not be silently promoted without user intent
-
-### B4. Selected images previously did not render real photos
-Previously observed:
-- public Selected showed placeholders instead of actual uploaded photographs
-
-This was fixed in the first image-delivery pass, but must be regression-tested after the layout rewrite.
-
-Additional current note:
-- the seeded `rain-window.jpg` Selected record still points at `seed/public/rain-window.jpg`, which is currently not present in storage
-- that means one visible Selected tile can still appear blank even though the new real-image pipeline is working
-- fix by either supplying the seeded asset or replacing/removing the placeholder record during gallery stabilization
-
----
-
-## C. Journal/public image issues
-
-### C1. Uploaded Journal image previously rendered as a blank gradient
-Previously observed:
-- a user-uploaded daily-entry photo appeared as a blank gradient on the public Journal page
-
-Root cause already fixed:
-- no public delivery asset / `public_image_path` existed
-
-Still required:
-- regression test Journal index and single-entry page with real uploaded photos
-- confirm image fallback remains graceful only when truly needed
-
----
-
-## D. Library/admin issues
-
-### D1. Library is currently too passive
-User expectation:
-- Library should be the master list of all photographs
-
-Current problem:
-- it is mostly a read-only filename list
-
-Needed capabilities:
-- visible thumbnail/preview for each photo
-- select / deselect for inclusion in Selected gallery
-- modify `hero_approved`
-- expose/edit useful metadata
-- show publish state clearly
-- eventually support deletion / unpublishing decisions
-
-### D2. Filenames alone are not useful enough
-Observed by user:
-- names like `_DSF9183.jpg` are not enough to identify a photograph
-
-Needed:
-- visual previews
-- likely richer metadata affordances
-- ideally quick recognition without opening a separate page for every item
-
-### D3. No deletion / removal workflow exists
-Observed by user:
-- currently no way to remove images
-- currently no way to remove daily entries
-
-Required product distinction:
-- **remove from Selected** is not the same as **unpublish**
-- **unpublish** is not the same as **hard delete**
-- deleting a Journal entry is not always the same as deleting the underlying photo
-
-The admin must handle these as separate, explicit actions.
-
----
-
-## E. Daily-entry workflow issues
-
-### E1. Daily-entry upload feels slow
-Observed by user:
-- publishing a daily entry is slow enough to feel poor
-
-Need to inspect:
-- image upload time
-- EXIF extraction
-- public-image copy
-- form/UX feedback during submission
-
-### E2. Form remains filled after successful publish
-Observed by user:
-- after successful upload, all fields remain populated until page reload
-
-Expected better behavior:
-- reset to a fresh blank state after success, or
-- redirect to the newly published public entry/admin confirmation view
-
-Do not leave stale “already submitted” state sitting in the form.
-
----
-
-# Strict implementation sequence
-
-## Pass 0 — Orientation and baseline verification
-Before changing code:
-1. Read this document and the four planning/design docs listed above.
-2. Inspect current git state and recent commits.
-3. Run:
-   - `npm run lint`
-   - `npm run build`
-4. Verify the current public/image state manually:
-   - `/selected`
-   - `/journal`
-   - one `/journal/[date]`
-5. Record any already-broken baseline behavior before making new edits.
-
-Acceptance:
-- the next agent can say exactly what is already fixed, what is still broken, and what it is about to touch
-
----
-
-## Pass 1 — Stabilize archive batch uploads
-
-### Primary goal
-Uploading a realistic multi-image batch should succeed predictably, with clear per-file outcomes.
-
-### Debugging checklist
-1. Reproduce with:
-   - 1 file
-   - 2 files
-   - 5+ files
-   - filenames with spaces
-   - duplicate filenames
-   - a mix of landscape / portrait files
-2. Capture:
-   - browser network request/response
-   - server logs
-   - exact failed-file details returned to UI
-   - whether one failure poisons the whole batch or only that file
-3. Inspect:
-   - `src/app/api/admin/archive/route.ts`
-   - storage uploads to `originals`
-   - public image writes to `public-images`
-   - EXIF extraction behavior
-   - payload size / request duration
-
-### Likely implementation work
-- make batch behavior explicitly resilient
-- preserve successful files even if one file fails
-- improve progress/error messaging if needed
-- verify cleanup of partial storage writes
-
-### Required tests
-Automated where practical:
-- route/helper tests for duplicate handling and per-file failure collection if a lightweight test harness is added
-
-Manual:
-- successful multi-file upload
-- one-bad-file-in-batch scenario
-- duplicate attempt after a successful upload
-- filename with spaces
-- verify no accidental duplicates are created through repeated clicking
-
-### Suggested commit boundary
-`Stabilize archive batch uploads`
-
----
-
-## Pass 2 — Repair Selected interaction + layout
-
-### Primary goal
-Selected should feel like a real photographic gallery, not a scaffold.
-
-### Workstream 2A — Lightbox interaction
-Requirements:
-- closed by default
-- only opens after clicking an image
-- acts as an actual overlay/modal
-- closes cleanly
-- does not permanently consume page layout
-- remains keyboard/accessibility conscious
-
-Potential implementation direction:
-- use a controlled modal pattern rather than static `<dialog open>`
-- if retaining `<dialog>`, use proper `showModal()`/`close()` behavior and portal/modal semantics
-
-### Workstream 2B — Mixed-ratio gallery layout
-Requirements:
-- support portrait, landscape, and square photographs gracefully
-- stop indiscriminate image cropping
-- preserve the approved compact-airy feel
-- continue respecting editorial curation states such as `normal` and `large`
-
-Implementation should evaluate, then deliberately choose, one of:
-1. aspect-ratio-aware CSS grid with stored image dimensions
-2. a masonry-like layout
-3. a justified-row gallery
-
-Important:
-- do not choose the fastest visually-generic answer
-- choose the system that best matches the approved design language
-- if new metadata is required (width/height/aspect ratio), add it deliberately and migrate/backfill carefully
-
-### Required tests
-Manual with real photos:
-- mixed landscape/portrait/square selection
-- normal vs large tiles
-- desktop and mobile
-- open/close lightbox repeatedly
-- keyboard close behavior
-- no overlay visible before selection
-
-Regression:
-- real public Selected photos still render after layout changes
-
-### Suggested commit boundaries
-1. `Fix selected lightbox interaction`
-2. `Support mixed-ratio selected gallery layout`
-
----
-
-## Pass 3 — Upgrade Library into the master archive workspace
-
-### Primary goal
-Library should become the practical control center for all uploaded photographs.
-
-### Required capabilities
-1. Thumbnail preview per photo
-2. Clear visible states:
-   - selected / not selected
-   - public / draft
-   - hero-approved / not hero-approved
-3. Inline or obvious quick actions:
-   - add/remove from Selected
-   - toggle hero approval
-   - publish/unpublish where appropriate
-4. Metadata editing path:
-   - location
-   - medium
-   - possibly EXIF corrections / title-like admin fields if supported by schema
-5. Search/filter remain available and should improve rather than regress
-
-### Important product boundary
-- `Library` = master archive management
-- `Selected` admin page = ordering, sizing, and gallery rhythm curation
-
-Do not overload the Selected curator with all archive-management duties.
-
-### Required tests
-- thumbnail appears for photos with public delivery asset
-- sensible fallback exists for photos without one
-- toggling Selected updates the correct records and public behavior
-- toggling hero approval updates homepage eligibility correctly
-- filters/search still work after UI expansion
-
-### Suggested commit boundaries
-1. `Add library thumbnails and state badges`
-2. `Add library quick-edit controls`
-3. `Add library metadata editing flow`
-
----
-
-## Pass 4 — Add safe removal / deletion flows
-
-### Primary goal
-Give the admin enough control to remove content without accidentally destroying the archive.
-
-### Required distinction
-1. Remove from Selected
-2. Unpublish photo
-3. Delete Journal entry
-4. Hard-delete photo and associated storage assets
-
-### Requirements
-- explicit confirmation for destructive actions
-- clear copy that explains what will and will not be deleted
-- Journal entry deletion should not silently delete the underlying photo unless explicitly requested
-- storage cleanup should match database cleanup
-
-### Required tests
-- remove from Selected keeps photo record intact
-- unpublish hides public content without deleting it
-- deleting a Journal entry leaves the photo when expected
-- hard delete removes database record and storage files
-- deleting content does not break collections/homepage references silently
-
-### Suggested commit boundaries
-1. `Add safe unpublish controls`
-2. `Add journal entry removal flow`
-3. `Add confirmed photo deletion flow`
-
----
-
-## Pass 5 — Smooth the Daily Entry workflow
-
-### Primary goal
-Publishing a daily entry should feel calm, clear, and complete.
-
-### Required changes
-1. Better progress/disabled state while submitting
-2. After success:
-   - reset the form cleanly, or
-   - navigate to a confirmation/result view
-3. Avoid stale filled inputs after successful publication
-4. Consider showing the published entry link immediately
-
-### Debugging checklist
-- measure whether the slowdown is mostly upload, processing, or UI ambiguity
-- check whether user-perceived slowness can be reduced with clearer progress even before deeper optimization
-
-### Required tests
-- repeated successful submissions do not leave stale state
-- duplicate submission is prevented while request is in flight
-- form recovers cleanly from a failed submission
-- published public Journal page renders the real image afterward
-
-### Suggested commit boundary
-`Polish daily entry publishing flow`
-
----
-
-## Pass 6 — Full regression and visual QA
-
-### Required regression surfaces
-Public:
-- `/`
-- `/selected`
-- `/journal`
-- one `/journal/[date]`
-- `/collections`
-- one `/collections/[slug]`
-- `/about`
-
-Admin:
-- `/admin/archive`
-- `/admin/library`
-- `/admin/selected`
-- `/admin/daily-entry`
-- `/admin/homepage`
-
-### Required verification commands
-- `npm run lint`
-- `npm run build`
-
-### Required manual scenarios
-1. Upload one archive photo
-2. Upload a multi-photo archive batch
-3. Publish a daily entry
-4. Add/remove a photo from Selected
-5. Verify Selected public page with mixed aspect ratios
-6. Open/close lightbox on desktop and mobile
-7. Verify homepage still uses real hero imagery where available
-8. Verify Journal and Journal entry use real images
-9. Verify no regression in approved design corrections from the drift documents
-
-### Suggested final commit boundary
-`Complete admin and gallery stabilization pass`
-
----
-
-# Agent workflow requirements for the next chat
-
-## Lead-agent role
-The main agent should act as:
-- product manager
-- architect
-- integrator
-- final reviewer
-
-The main agent should:
-1. keep the global plan updated
-2. own the critical path
-3. decide commit boundaries
-4. review all delegated work before integrating
-5. verify the whole system end to end
-
-## Subagent usage
-Use cheaper subagents when work can be cleanly bounded.
-
-Good delegation examples:
-- **Explorer**: inspect why multi-file batch upload fails
-- **Worker**: implement only Selected lightbox changes
-- **Worker**: implement only Library thumbnail card UI
-- **Explorer**: map deletion impact across schema/storage
-
-Rules:
-- delegate sidecar work, not the immediate blocker on the critical path
-- each coding worker must own a disjoint write set
-- explicitly tell workers they are not alone in the codebase
-- ask workers to edit files directly and report changed file paths
-- the lead agent must review worker changes before committing
-
-## Git discipline
-- keep commits small, coherent, and named for the user-visible outcome
-- no giant catch-all commit
-- commit after each verified pass or meaningful sub-pass
-- push after stable checkpoints
-- do not include `audit-shots/` unless the user explicitly asks
-
-## Testing discipline
-For each pass:
-1. inspect current behavior
-2. reproduce the bug
-3. implement the smallest coherent fix
-4. run local verification
-5. use the in-app browser for frontend behavior when appropriate
-6. commit only after verification
-
-If introducing a new architectural mechanism:
-- add targeted automated coverage where practical
-- document any new operator command or migration
-
----
-
-# Recommended next action
-
-Start with:
-
-## `Pass 1 — Stabilize archive batch uploads`
-
-Why:
-- it is a correctness failure in core ingestion
-- the user has now reproduced it clearly
-- until uploads work reliably for groups, every later curation/admin improvement rests on unstable ground
-
-After that, proceed directly to:
-
-## `Pass 2 — Repair Selected interaction + layout`
-
-Why:
-- the public gallery is now showing real photos, which exposes the next real-world UX problems
-- fixing lightbox behavior and mixed-ratio layout together will materially improve the visitor-facing site
-
----
-
-# Definition of done for the entire stabilization sequence
-
-This round is complete only when:
-1. multi-photo archive batches upload reliably
-2. Selected lightbox behaves like a true modal
-3. Selected gallery handles mixed aspect ratios gracefully
-4. Library is genuinely useful for recognizing and managing photographs
-5. safe delete/unpublish paths exist
-6. daily-entry publishing feels complete rather than awkward
-7. public image rendering remains real and correct across Selected + Journal
-8. lint/build pass
-9. changes are split into clean commits and pushed
+# Phase 1 Handoff — Photography Portfolio
+
+This is the authoritative handoff brief for continuing Phase 1 work in a new Codex chat.
+
+The repo is still in active Phase 1 stabilization. Do **not** treat this as launch-ready. The current branch contains a large, coherent tranche of admin, upload, gallery, journal, and collection work that should continue from here.
+
+## Repository state
+
+- Repo path: `/Users/zyeo/Desktop/photography-portfolio`
+- Active branch: `codex/phase-1-foundation`
+- Remote: `origin` → `https://github.com/zyeo/photography-portfolio.git`
+- Latest pushed checkpoint at handoff: `3812cd4 Stabilize photo publishing workflow`
+- Base branch: `main`
+- Compare/PR URL: `https://github.com/zyeo/photography-portfolio/compare/main...codex/phase-1-foundation`
+
+Before continuing, run:
+
+```bash
+cd /Users/zyeo/Desktop/photography-portfolio
+git checkout codex/phase-1-foundation
+git pull origin codex/phase-1-foundation
+npm run build
+```
+
+`npm run build` currently passes. It still reports known non-blocking warnings about raw `<img>` usage.
+
+## Collaboration / implementation practices
+
+These practices were used during the current phase and should continue:
+
+1. Work on `codex/phase-1-foundation` unless the user explicitly asks for a new branch.
+2. Keep changes focused. Do not mix unrelated feature work into a stabilization fix.
+3. Before editing, inspect the relevant files and explain the smallest safe plan when the user asks for planning/checkpoint first.
+4. Do not redesign public gallery/admin flows unless the user explicitly asks.
+5. Preserve existing behavior unless the requested change clearly requires altering it.
+6. Server-side validation is authoritative; client-side validation is only UX/preflight.
+7. Avoid public states that can make the site lie, especially around journal entries, photo publication, Selected, collection covers, and deletes.
+8. Run `npm run build` after meaningful code changes before calling work complete.
+9. Commit regularly at stable checkpoints. Prefer one coherent commit per completed task or small task group.
+10. Push after each checkpoint commit so GitHub stays current:
+
+```bash
+git status --short
+git add -A
+git commit -m "Clear imperative summary"
+git push origin codex/phase-1-foundation
+```
+
+11. Do not commit local QA image artifacts. `audit-shots/` is ignored intentionally.
+12. If build failure appears related to `.next`, verify with a clean rebuild before changing source:
+
+```bash
+rm -rf .next
+npm run build
+```
+
+## Current architecture notes
+
+### Upload pipeline
+
+Large uploads must not pass through Next route request bodies.
+
+Current durable path:
+1. Browser asks `/api/admin/uploads/prepare` for a signed upload path.
+2. Browser uploads the original directly to Supabase Storage bucket `originals`.
+3. Browser calls `/api/admin/uploads/finalize` with metadata/path info only.
+4. Server downloads the stored original, validates it, extracts metadata/dimensions, generates public derivatives, and writes DB rows.
+
+Important files:
+- `/src/lib/admin/direct-upload.ts`
+- `/src/app/api/admin/uploads/prepare/route.ts`
+- `/src/app/api/admin/uploads/finalize/route.ts`
+- `/src/lib/photos/validation.ts`
+- `/src/lib/photos/finalize.ts`
+- `/src/lib/photos/public-images.ts`
+
+Public derivatives:
+- `gallery_image_path`: gallery tile derivative, roughly 1200px long edge
+- `public_image_path`: lightbox/public larger derivative, roughly 2200px long edge
+
+Originals stay private and untouched in `originals`.
+
+### Journal/photo state rules
+
+Daily Entry creation now follows these rules:
+
+- If `Publish immediately` is checked:
+  - `journal_entries.published = true`
+  - linked `photos.published = true`
+- If unchecked:
+  - `journal_entries.published = false`
+  - linked `photos.published = false`
+- `Add photo to Selected` is independent:
+  - checked → `photos.selected = true`, `selected_size = "normal"`, `selected_order = null`
+  - unchecked → selected remains false
+- Draft + Selected is allowed because public `/selected` filters `published = true`.
+- A photo used by a published journal entry cannot be unpublished from Library until the journal entry is unpublished.
+- A journal entry cannot be published unless its linked photo is public and has usable public assets.
+
+Important files:
+- `/src/app/admin/(workspace)/daily-entry/daily-entry-form.tsx`
+- `/src/app/api/admin/uploads/finalize/route.ts`
+- `/src/app/api/admin/photos/[id]/route.ts`
+- `/src/app/api/admin/journal/[id]/route.ts`
+
+### Admin modules now present
+
+- Library: `/admin/library`
+  - thumbnail archive view
+  - metadata editing
+  - single/bulk safe state actions
+  - single/bulk hard delete with journal-linked blockers
+  - bulk add to collection
+- Journal: `/admin/journal`
+  - edit entries
+  - publish/unpublish
+  - delete journal row only
+  - change image to eligible existing Library photo
+- Collections: `/admin/collections`
+  - edit collection metadata
+  - show/remove members
+  - bulk remove members
+  - set/clear cover
+- Daily Entry: `/admin/daily-entry`
+  - direct upload
+  - duplicate date preflight
+  - published/draft choice
+  - optional Add photo to Selected
+
+## Remaining Phase 1 backlog
+
+### P1 — must fix before final upload
+
+#### 1. Collection cover eligibility
+
+Current issue:
+- Admin can choose any collection member as cover, even if the photo is draft or lacks a usable `gallery_image_path`.
+- Public `/collections` can silently show a placeholder even though a cover is set.
+
+Likely files:
+- `/src/app/api/admin/collections/[id]/route.ts`
+- `/src/app/admin/(workspace)/collections/collection-manager.tsx`
+
+Smallest safe fix:
+- Server: when setting `cover_photo_id`, require the photo to:
+  - belong to the collection
+  - be `published = true`
+  - have non-null `gallery_image_path`
+- UI: disable or clearly label ineligible cover candidates.
+
+Risks:
+- Existing test covers may become invalid and need reselection.
+
+Manual test:
+- Set valid published member with gallery derivative as cover → succeeds.
+- Try draft member as cover → clear error.
+- Try member missing gallery derivative → clear error.
+- Public collections page shows real cover when cover is set.
+
+#### 2. Selected curator and Homepage hero admin fragility
+
+Current issue:
+- `/admin/selected` and `/admin/homepage` still feel scaffolded compared with Library.
+- They are filename-first and have little explicit success/error feedback.
+
+Likely files:
+- `/src/app/admin/(workspace)/selected/selected-curator.tsx`
+- `/src/app/admin/(workspace)/selected/selected-curator.module.css`
+- `/src/app/admin/(workspace)/selected/page.tsx`
+- `/src/app/admin/(workspace)/homepage/hero-manager.tsx`
+- `/src/app/admin/(workspace)/homepage/hero-manager.module.css`
+- `/src/app/admin/(workspace)/homepage/page.tsx`
+
+Smallest safe fix:
+- Add thumbnails using `gallery_image_path` where available.
+- Add success/error status for reorder, size toggle, remove, pin/unpin, focal updates.
+- Preserve existing ordering and hero semantics.
+- Do not redesign these pages into Library clones.
+
+Risks:
+- Reordering must remain deterministic and persisted only through intended selected order updates.
+- Hero pinning must still preserve single pinned hero.
+
+Manual test:
+- Reorder Selected and refresh → same order.
+- Toggle selected size and refresh → persists.
+- Remove from Selected → disappears from curator and public selected after refresh.
+- Pin hero → only one pinned hero.
+- Resume rotation → no pinned hero.
+- Simulated failed request shows error instead of silent drift.
+
+### P2 — should fix before launch
+
+#### 3. Public Journal detail layout: preserve aspect ratio
+
+Current issue:
+- Journal detail image is currently a cropped background block.
+- The journal should feel like a minimal daily photo log / photo essay, not a database record.
+
+Likely files:
+- `/src/app/journal/[date]/page.tsx`
+- `/src/app/journal/[date]/page.module.css`
+
+Smallest safe fix:
+- Render the journal image as a real image, not a cropped CSS background.
+- Use stored `image_width` / `image_height` metadata to classify orientation.
+- Mobile: always stack image above text.
+- Desktop:
+  - portrait image can sit side-by-side with text
+  - landscape image can span wider, with text below or in a balanced adjacent column
+  - square image gets balanced treatment
+- Do not crop, stretch, or distort.
+
+Risks:
+- Mixed orientation CSS can sprawl. Keep it minimal and editorial.
+
+Manual test:
+- Portrait, landscape, and square journal entries on mobile and desktop.
+- No crop/stretch/distortion.
+- Missing dimensions still render gracefully.
+
+#### 4. Public Journal list/archive UI
+
+Current issue:
+- Journal index is mostly text and will not scale to hundreds of entries.
+- It needs visual recognition via thumbnails.
+
+Likely files:
+- `/src/app/journal/page.tsx`
+- `/src/app/journal/page.module.css`
+- possibly a small client component for load-more, or a simple paginated server route.
+
+Smallest safe fix:
+- Keep latest entry prominent.
+- Show older entries in compact thumbnail archive items:
+  - thumbnail
+  - date
+  - title
+  - short excerpt if useful
+- Initially show about 6 on desktop and 5 on mobile.
+- Add simple pagination or Load more.
+- Avoid horizontal carousel as the main archive.
+
+Risks:
+- Avoid overfetching hundreds of image entries.
+- Avoid making it app-like; keep minimal/editorial.
+
+Manual test:
+- Latest entry prominent.
+- Archive items recognizable by thumbnail.
+- Load more/pagination exposes older entries.
+- Mobile remains compact.
+
+#### 5. Public contact links
+
+Current issue:
+- Homepage Instagram is placeholder.
+- Email is outdated.
+
+Correct links:
+- Instagram: `https://www.instagram.com/aphoto._aday`
+- Email: `zacharyyeo22@gmail.com`
+
+Likely files:
+- `/src/app/page.tsx`
+- `/src/components/site-footer.tsx`
+- maybe `/src/app/about/page.tsx` if adding explicit contact copy there.
+
+Smallest safe fix:
+- Replace stale URLs only.
+- Keep nav/layout unchanged.
+
+Manual test:
+- Homepage Instagram opens correct profile.
+- Homepage/footer email use correct address.
+- No `hello@zachyeo.com` remains unless intentionally preserved.
+
+#### 6. Public empty states
+
+Current issue:
+- Sparse-content pages can feel blank or unfinished.
+
+Likely files:
+- `/src/app/selected/page.tsx`
+- `/src/app/collections/page.tsx`
+- `/src/app/collections/[slug]/page.tsx`
+- `/src/app/journal/page.tsx`
+
+Smallest safe fix:
+- Add quiet editorial empty-state copy.
+- No mechanics, no large redesign.
+
+Manual test:
+- Empty Selected, Collections, collection detail, and Journal all look intentional.
+- Empty copy disappears when content exists.
+
+#### 7. Journal weather rendering
+
+Current issue:
+- Weather is editable and fetched but not rendered on journal detail.
+
+Likely files:
+- `/src/app/journal/[date]/page.tsx`
+
+Smallest safe fix:
+- Add weather to the detail metadata line when present.
+
+Manual test:
+- Entry with weather shows it.
+- Entry without weather remains clean.
+
+#### 8. Mobile nav pass
+
+Current issue:
+- Navigation is consistent but may feel cramped on small screens.
+
+Likely files:
+- `/src/components/site-header.module.css`
+- `/src/app/page.module.css`
+
+Smallest safe fix:
+- Tune gaps/letter-spacing/wrapping for 320–430px widths.
+- Keep all four links visible.
+
+Manual test:
+- Home and inner pages at 320, 375, 430px.
+- No horizontal overflow.
+
+### P3 — nice to have later
+
+#### 9. Raw `<img>` cleanup
+
+Current issue:
+- `npm run build` passes but warns about raw `<img>` usage.
+
+Likely files:
+- `/src/components/public/lightbox-gallery.tsx`
+- `/src/app/admin/(workspace)/library/library-grid.tsx`
+- `/src/app/admin/(workspace)/collections/collection-manager.tsx`
+- `/src/app/admin/(workspace)/journal/journal-manager.tsx`
+
+Smallest safe fix:
+- Convert selectively to `next/image` only where it helps and remote image config is stable.
+
+#### 10. Larger admin ergonomics
+
+Potential later improvements:
+- Search/filter in Journal image picker.
+- Search/filter/pagination in Collections add-photo list.
+- More visual curation tools after final photos exist.
+
+#### 11. Data model polish
+
+Potential later decisions:
+- `title`
+- `alt_text`
+- separate display date vs capture timestamp
+
+Defer until real content strategy is clearer.
+
+## Suggested next implementation order
+
+1. Collection cover eligibility.
+2. Selected curator + Homepage hero admin stabilization.
+3. Public Journal detail aspect-ratio layout.
+4. Public Journal archive/list thumbnails and pagination/load more.
+5. Contact links.
+6. Empty states.
+7. Weather rendering.
+8. Mobile nav pass.
+
+This order keeps public state truthful first, then improves high-touch admin curation, then polishes the public journal experience.
+
+## Hand-off prompt for next Codex chat
+
+Use the prompt at the bottom of this document or copy the one provided by the previous assistant.

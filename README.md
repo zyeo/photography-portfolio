@@ -2,6 +2,10 @@
 
 Poetic photography journal and portfolio for Zach Yeo, built with Next.js and Supabase.
 
+## Phase 1 handoff
+
+Continue active Phase 1 work from `NEXT_IMPLEMENTATION_PLAN.md`. It includes the current branch, working practices, remaining stabilization backlog, and manual test checklists.
+
 ## Local development
 
 1. Copy `.env.example` to `.env.local`.
