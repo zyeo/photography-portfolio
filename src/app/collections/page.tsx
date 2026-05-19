@@ -29,8 +29,9 @@ export default async function CollectionsPage() {
       <main className={`${styles.page} shell`}>
         <p className="eyebrow">Collections</p>
         <h1 className="display">Ways through the archive.</h1>
-        <div className={styles.list}>
-          {collections?.map((collection) => (
+        {collections?.length ? (
+          <div className={styles.list}>
+            {collections.map((collection) => (
             <article key={collection.id}>
               <div
                 data-has-cover={Boolean(collection.cover_photo_id)}
@@ -48,8 +49,11 @@ export default async function CollectionsPage() {
                 <Link className="utility-link" href={`/collections/${collection.slug}`}>Open collection</Link>
               </section>
             </article>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className={`${styles.empty} serif`}>Collections are being gathered. Check back as the archive takes shape.</p>
+        )}
       </main>
       <SiteFooter />
     </>

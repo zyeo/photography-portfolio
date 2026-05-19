@@ -56,7 +56,11 @@ export default async function CollectionDetailPage({ params }: PageProps) {
         <p className="eyebrow">Collection</p>
         <h1 className="display">{collection.title}</h1>
         <p className="serif">{collection.description}</p>
-        <LightboxGallery photos={photos} />
+        {photos.length ? (
+          <LightboxGallery photos={photos} />
+        ) : (
+          <p className={`${styles.empty} serif`}>This collection is published, but its visible photographs are still being gathered.</p>
+        )}
       </main>
       <SiteFooter />
     </>

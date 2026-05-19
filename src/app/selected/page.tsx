@@ -22,7 +22,11 @@ export default async function SelectedPage() {
       <main className={`${styles.page} shell`}>
         <h1 className="display">Selected</h1>
         <p className="page-kicker">A selection of photographs from recent years.</p>
-        <LightboxGallery photos={photos ?? []} />
+        {photos?.length ? (
+          <LightboxGallery photos={photos} />
+        ) : (
+          <p className={`${styles.empty} serif`}>A smaller edit is taking shape. Selected photographs will appear here soon.</p>
+        )}
       </main>
       <SiteFooter />
     </>

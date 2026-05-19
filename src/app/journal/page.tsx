@@ -102,10 +102,15 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             })}
           </ol>
         ) : null}
-        <nav className={styles.pagination} aria-label="Journal archive pagination">
-          {hasNewer ? <Link href={page === 2 ? "/journal" : `/journal?page=${page - 1}`}>← Newer entries</Link> : <span />}
-          {hasOlder ? <Link href={`/journal?page=${page + 1}`}>Older entries →</Link> : null}
-        </nav>
+        {!latest && !archiveEntries.length ? (
+          <p className={`${styles.empty} serif`}>The journal is quiet for now. Daily entries will appear here once published.</p>
+        ) : null}
+        {hasNewer || hasOlder ? (
+          <nav className={styles.pagination} aria-label="Journal archive pagination">
+            {hasNewer ? <Link href={page === 2 ? "/journal" : `/journal?page=${page - 1}`}>← Newer entries</Link> : <span />}
+            {hasOlder ? <Link href={`/journal?page=${page + 1}`}>Older entries →</Link> : null}
+          </nav>
+        ) : null}
       </main>
       <SiteFooter />
     </>

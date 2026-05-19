@@ -17,6 +17,7 @@
 .archive strong { overflow-wrap:anywhere; font-size:1.1rem; }
 .archive p { display:-webkit-box; margin:.15rem 0 0; overflow:hidden; color:var(--ink-soft); font-size:.9rem; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
 .archive a:hover,.archive a:focus-visible { background:rgba(103,91,78,.045); }
+.empty { width:min(100%,42rem); border-top:1px solid var(--line); margin:var(--space-4) auto 0; padding-top:var(--space-3); color:var(--ink-soft); font-size:1.1rem; }
 .pagination { display:flex; justify-content:space-between; gap:1rem; width:min(100%,64rem); margin:var(--space-4) auto 0; }
 @media (min-width:48rem){
   .featured{grid-template-columns:1.1fr .9fr; align-items:end;}
