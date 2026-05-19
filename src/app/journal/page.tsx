@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import styles from "./page.module.css";
 
 type JournalPageProps = { searchParams: Promise<{ page?: string }> };
-const ARCHIVE_PAGE_SIZE = 6;
+const ARCHIVE_PAGE_SIZE = 24;
 
 function getPageNumber(value: string | undefined) {
   const parsed = Number(value);

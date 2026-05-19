@@ -19,5 +19,6 @@
 .pagination { display:flex; justify-content:space-between; gap:1rem; width:min(100%,54rem); margin:var(--space-4) auto 0; }
 @media (min-width:48rem){
   .featured{grid-template-columns:1.1fr .9fr; align-items:end;}
+  .archive{max-height:min(72vh,42rem); overflow-y:auto; padding-right:.35rem; overscroll-behavior:contain;}
   .archive a{grid-template-columns:minmax(12rem,18rem) minmax(0,1fr); gap:1.35rem; min-height:11rem;}
 }
