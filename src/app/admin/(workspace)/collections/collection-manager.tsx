@@ -19,11 +19,13 @@ type Photo = {
   id: string;
   original_filename: string;
   gallery_image_path: string | null;
+  public_image_path: string | null;
   image_width: number | null;
   image_height: number | null;
   medium: "digital" | "film";
   date_taken: string | null;
   location_name: string | null;
+  published: boolean;
 };
 
 type Membership = {
@@ -52,6 +54,20 @@ export function CollectionManager({
   const [error, setError] = useState<string | null>(null);
   const activeCollection = collections.find((collection) => collection.id === activeId) ?? null;
   const activeMembers = memberships.filter((membership) => membership.collection_id === activeId && membership.photos);
+  const activeCoverMember = activeMembers.find((membership) => membership.photo_id === activeCollection?.cover_photo_id);
+  const activeCoverWarning = activeCollection?.cover_photo_id && !activeCoverMember
+    ? "not an eligible collection member"
+    : activeCoverMember?.photos
+      ? getCoverIneligibilityReason(activeCoverMember.photos)
+      : null;
+
+  function getCoverIneligibilityReason(photo: Photo) {
+    if (!photo.published) return "Draft photo";
+    if (!photo.gallery_image_path && !photo.public_image_path) return "Missing public assets";
+    if (!photo.gallery_image_path) return "Missing gallery derivative";
+    if (!photo.public_image_path) return "Missing public derivative";
+    return null;
+  }
 
   async function createCollection(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -268,10 +284,16 @@ export function CollectionManager({
             </button>
           </div>
         ) : null}
+        {activeCoverWarning ? (
+          <p className={styles.warning} role="status">
+            Current cover is ineligible: {activeCoverWarning}. Clear it or choose another eligible member.
+          </p>
+        ) : null}
         {activeMembers.length ? activeMembers.map((membership) => {
           const photo = membership.photos!;
           const thumbnailUrl = getPublicImageUrl(photo.gallery_image_path);
           const isCover = activeCollection?.cover_photo_id === photo.id;
+          const coverIneligibilityReason = getCoverIneligibilityReason(photo);
 
           return (
             <article key={`${membership.collection_id}-${photo.id}`}>
@@ -294,8 +316,11 @@ export function CollectionManager({
                 <strong>{photo.original_filename}</strong>
                 <span>{photo.medium} · {photo.date_taken?.slice(0, 10) ?? "Undated"} · {photo.location_name ?? "No location"}</span>
                 {isCover ? <em>Current cover</em> : null}
+                {coverIneligibilityReason ? (
+                  <p className={styles.coverNote}>Cannot be cover: {coverIneligibilityReason}.</p>
+                ) : null}
                 <div>
-                  <button type="button" onClick={() => updateCollection({ cover_photo_id: photo.id })} disabled={pending || isCover}>
+                  <button type="button" onClick={() => updateCollection({ cover_photo_id: photo.id })} disabled={pending || isCover || Boolean(coverIneligibilityReason)}>
                     {isCover ? "Cover selected" : "Set as cover"}
                   </button>
                   <button type="button" onClick={() => removePhoto(photo.id)} disabled={pending}>Remove</button>

@@ -11,12 +11,12 @@ export default async function CollectionsPage() {
       .order("display_order", { ascending: true, nullsFirst: false }),
     supabase
       .from("photos")
-      .select("id, original_filename, gallery_image_path, image_width, image_height, medium, date_taken, location_name")
+      .select("id, original_filename, gallery_image_path, public_image_path, image_width, image_height, medium, date_taken, location_name, published")
       .order("created_at", { ascending: false })
       .limit(40),
     supabase
       .from("photo_collections")
-      .select("collection_id, photo_id, display_order, photos(id, original_filename, gallery_image_path, image_width, image_height, medium, date_taken, location_name)")
+      .select("collection_id, photo_id, display_order, photos(id, original_filename, gallery_image_path, public_image_path, image_width, image_height, medium, date_taken, location_name, published)")
       .order("display_order", { ascending: true, nullsFirst: false }),
   ]);
 

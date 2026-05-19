@@ -31,13 +31,25 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const { id } = await context.params;
   if (parsed.data.cover_photo_id) {
+    const coverPhotoId = parsed.data.cover_photo_id;
     const { data: membership } = await supabase
       .from("photo_collections")
       .select("photo_id")
       .eq("collection_id", id)
-      .eq("photo_id", parsed.data.cover_photo_id)
+      .eq("photo_id", coverPhotoId)
       .maybeSingle();
     if (!membership) return NextResponse.json({ error: "Cover photo must belong to this collection." }, { status: 400 });
+
+    const { data: photo } = await supabase
+      .from("photos")
+      .select("published, gallery_image_path, public_image_path")
+      .eq("id", coverPhotoId)
+      .maybeSingle();
+    if (!photo) return NextResponse.json({ error: "Cover photo could not be found." }, { status: 400 });
+    if (!photo.published) return NextResponse.json({ error: "Cover photo must be published." }, { status: 400 });
+    if (!photo.gallery_image_path || !photo.public_image_path) {
+      return NextResponse.json({ error: "Cover photo must have gallery and public derivatives." }, { status: 400 });
+    }
   }
 
   const update: CollectionUpdate = {
