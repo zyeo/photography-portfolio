@@ -142,222 +142,24 @@ Important files:
   - Cover photos must have both `gallery_image_path` and `public_image_path`.
   - Admin disables ineligible cover choices and shows short reasons.
   - Existing invalid covers are **not** silently cleared; the UI warns and allows clearing or replacement.
+- P1 #4 Selected curator + Homepage hero admin stabilization.
+- P2 #5 Library layout density.
+- P2 #6 Daily Entry form readability.
+- P2 #7 Public Journal detail aspect-ratio layout.
+- P2 #8 Public Journal archive/list thumbnails, pagination, contained scroll, and visual polish.
+- P2 #9 Contact links.
+- P2 #10 Public empty states.
+- P2 #11 Journal weather rendering:
+  - Verified public journal detail already renders `weather` in the date/location metadata line when present.
+  - Entries without weather remain clean with no extra separator.
 
 ## Remaining Phase 1 backlog
 
 ### P1 — must fix before final upload
 
-#### 4. Selected curator and Homepage hero admin stabilization
-
-Current issue:
-- `/admin/selected` and `/admin/homepage` still feel scaffolded compared with Library.
-- They are filename-first and have little explicit success/error feedback.
-- Hero photo resolution currently looks bad.
-- Hero transitions feel choppy.
-- Need to investigate whether the hero uses the wrong image path, too-small derivative, bad CSS sizing, or compression issue.
-
-Likely files:
-- `/src/app/admin/(workspace)/selected/selected-curator.tsx`
-- `/src/app/admin/(workspace)/selected/selected-curator.module.css`
-- `/src/app/admin/(workspace)/selected/page.tsx`
-- `/src/app/admin/(workspace)/homepage/hero-manager.tsx`
-- `/src/app/admin/(workspace)/homepage/hero-manager.module.css`
-- `/src/app/admin/(workspace)/homepage/page.tsx`
-- `/src/app/page.tsx`
-- `/src/app/page.module.css`
-
-Smallest safe fix:
-- Add thumbnails using `gallery_image_path` where available.
-- Add success/error status for reorder, size toggle, remove, pin/unpin, focal updates.
-- Preserve existing ordering and hero semantics.
-- Investigate homepage hero image source and rendering quality:
-  - confirm whether the hero should use `public_image_path` instead of `gallery_image_path`
-  - check CSS sizing/object-fit/focal-position behavior
-  - check whether derivative compression or dimensions are the cause
-- Smooth homepage hero transitions slightly while keeping them quick and minimal.
-- Do not redesign these pages into Library clones.
-
-Risks:
-- Reordering must remain deterministic and persisted only through intended selected order updates.
-- Hero pinning must still preserve single pinned hero.
-- Hero polish should not turn into a broad homepage redesign.
-
-Manual test:
-- Reorder Selected and refresh → same order.
-- Toggle selected size and refresh → persists.
-- Remove from Selected → disappears from curator and public selected after refresh.
-- Pin hero → only one pinned hero.
-- Resume rotation → no pinned hero.
-- Simulated failed request shows error instead of silent drift.
-- Homepage hero uses the highest appropriate public derivative and looks sharp.
-- Hero transitions feel smooth enough without becoming slow or showy.
+No open P1 items remain before final upload.
 
 ### P2 — should fix before launch
-
-#### 5. Library layout density
-
-Current issue:
-- Library page currently feels too single-column.
-- Admin should be able to browse many photos more efficiently.
-
-Likely files:
-- `/src/app/admin/(workspace)/library/library-grid.tsx`
-- `/src/app/admin/(workspace)/library/library-grid.module.css`
-- `/src/app/admin/(workspace)/library/page.tsx`
-
-Smallest safe fix:
-- Make Library cards responsive with best-practice CSS grid, not fixed awkward columns.
-- Preferred direction:
-  - desktop: 3–4 columns depending on screen size
-  - tablet: 2 columns
-  - mobile: 1 column
-- Keep metadata/action controls usable and not cramped.
-
-Manual test:
-- Library shows 3–4 comfortable columns on desktop.
-- Library shows 2 columns on tablet.
-- Library shows 1 column on mobile.
-- Cards remain readable and actions remain usable.
-
-#### 6. Daily Entry form readability
-
-Current issue:
-- Daily Entry creation form text and spacing feel too small/tight.
-
-Likely files:
-- `/src/app/admin/(workspace)/daily-entry/daily-entry-form.tsx`
-- `/src/app/admin/(workspace)/daily-entry/daily-entry-form.module.css`
-- `/src/app/admin/(workspace)/daily-entry/page.tsx`
-
-Smallest safe fix:
-- Increase text size and spacing in the creation form.
-- Keep visual style consistent with the rest of the admin UI.
-- Do not change upload/publish/Selected semantics.
-
-Manual test:
-- Daily Entry form is easier to scan on desktop and mobile.
-- Upload, publish/draft, duplicate-date preflight, and Add photo to Selected still behave as before.
-
-#### 7. Public Journal detail layout: preserve aspect ratio
-
-Current issue:
-- Journal detail images are currently cropped into a landscape shape.
-- The journal should feel like a minimal daily photo log / photo essay, not a database record.
-
-Likely files:
-- `/src/app/journal/[date]/page.tsx`
-- `/src/app/journal/[date]/page.module.css`
-
-Smallest safe fix:
-- Render the journal image as a real image, not a cropped CSS background.
-- Use stored `image_width` / `image_height` metadata to classify orientation.
-- Mobile: always stack image above text.
-- Desktop:
-  - portrait image can sit side-by-side with text
-  - landscape image can span wider, with text below or in a balanced adjacent column
-  - square image gets balanced treatment
-- Do not crop, stretch, or distort.
-
-Risks:
-- Mixed orientation CSS can sprawl. Keep it minimal and editorial.
-
-Manual test:
-- Portrait, landscape, and square journal entries on mobile and desktop.
-- No crop/stretch/distortion.
-- Missing dimensions still render gracefully.
-
-#### 8. Public Journal list/archive UI
-
-Current issue:
-- Journal index is mostly text and will not scale to hundreds of entries.
-- This is a daily photo log and may eventually have hundreds of entries.
-- It needs visual recognition via thumbnails without showing hundreds of full-size entries.
-
-Likely files:
-- `/src/app/journal/page.tsx`
-- `/src/app/journal/page.module.css`
-- possibly a small client component for load-more, or a simple paginated server route.
-
-Smallest safe fix:
-- Keep latest entry prominent.
-- Show older entries in compact thumbnail archive items:
-  - thumbnail
-  - date
-  - title
-  - short excerpt if useful
-- Initially show about 6 on desktop and 5 on mobile.
-- Add simple pagination or Load more.
-- Avoid horizontal carousel as the main archive.
-
-Risks:
-- Avoid overfetching hundreds of image entries.
-- Avoid making it app-like; keep minimal/editorial.
-
-Manual test:
-- Latest entry prominent.
-- Archive items recognizable by thumbnail.
-- Load more/pagination exposes older entries.
-- Mobile remains compact.
-
-#### 9. Public contact links
-
-Current issue:
-- Homepage Instagram is placeholder.
-- Email is outdated.
-
-Correct links:
-- Instagram: `https://www.instagram.com/aphoto._aday`
-- Email: `zacharyyeo22@gmail.com`
-
-Likely files:
-- `/src/app/page.tsx`
-- `/src/components/site-footer.tsx`
-- `/src/components/site-header.tsx`
-- maybe `/src/app/about/page.tsx` if adding explicit contact copy there.
-
-Smallest safe fix:
-- Inspect homepage, About page, footer, and header if applicable.
-- Replace stale URLs only.
-- Keep nav/layout unchanged.
-
-Manual test:
-- Homepage Instagram opens correct profile.
-- Homepage/footer email use correct address.
-- No `hello@zachyeo.com` remains unless intentionally preserved.
-
-#### 10. Public empty states
-
-Current issue:
-- Sparse-content pages can feel blank or unfinished.
-
-Likely files:
-- `/src/app/selected/page.tsx`
-- `/src/app/collections/page.tsx`
-- `/src/app/collections/[slug]/page.tsx`
-- `/src/app/journal/page.tsx`
-
-Smallest safe fix:
-- Add quiet editorial empty-state copy.
-- No mechanics, no large redesign.
-
-Manual test:
-- Empty Selected, Collections, collection detail, and Journal all look intentional.
-- Empty copy disappears when content exists.
-
-#### 11. Journal weather rendering
-
-Current issue:
-- Weather is editable and fetched but not rendered on journal detail.
-
-Likely files:
-- `/src/app/journal/[date]/page.tsx`
-
-Smallest safe fix:
-- Add weather to the detail metadata line when present.
-
-Manual test:
-- Entry with weather shows it.
-- Entry without weather remains clean.
 
 #### 12. Mobile nav pass
 
@@ -416,21 +218,13 @@ Potential later decision:
 
 ## Suggested next implementation order
 
-1. P1 #4 Selected curator + Homepage hero admin stabilization, including hero quality/transition investigation.
-2. P2 #5 Library layout density.
-3. P2 #6 Daily Entry form readability.
-4. P2 #7 Public Journal detail aspect-ratio layout.
-5. P2 #8 Public Journal archive/list thumbnails and pagination/load more.
-6. P2 #9 Contact links.
-7. P2 #10 Public empty states.
-8. P2 #11 Journal weather rendering.
-9. P2 #12 Mobile nav pass.
-10. P3 #13 Raw `<img>` cleanup.
-11. P3 #14 Larger admin ergonomics.
-12. P3 #15 Data model polish.
-13. P3 #16 Cloudflare object storage evaluation.
+1. P2 #12 Mobile nav pass.
+2. P3 #13 Raw `<img>` cleanup.
+3. P3 #14 Larger admin ergonomics.
+4. P3 #15 Data model polish.
+5. P3 #16 Cloudflare object storage evaluation.
 
-This order keeps public state truthful first, then improves high-touch admin curation and browsing density, then polishes the public journal experience.
+This order finishes the remaining launch-facing navigation polish before moving into lower-priority cleanup and future architecture work.
 
 ## Hand-off prompt for next Codex chat
 
@@ -464,17 +258,25 @@ Already completed:
 - P1 #1 Journal/photo publication consistency
 - P1 #2 Daily Entry “Add photo to Selected”
 - P1 #3 Collection cover eligibility
+- P1 #4 Selected curator + Homepage hero admin stabilization
+- P2 #5 Library layout density
+- P2 #6 Daily Entry form readability
+- P2 #7 Public Journal detail aspect-ratio layout
+- P2 #8 Public Journal archive/list thumbnails, pagination, contained scroll, and visual polish
+- P2 #9 Contact links
+- P2 #10 Public empty states
+- P2 #11 Journal weather rendering
 
 We are still working on Phase 1, not starting a new phase.
 
 Next recommended implementation item:
-P1 #4 Selected curator + Homepage hero admin stabilization.
+P2 #12 Mobile nav pass.
 
 Goal:
-Make `/admin/selected` and `/admin/homepage` clearer and more reliable by adding thumbnails and explicit success/error feedback for curator actions, while preserving existing Selected ordering and single-pinned-hero semantics. Also investigate homepage hero image quality and choppy transitions: check whether the hero uses the wrong image path, too-small derivative, CSS sizing/focal behavior, or compression issue, then smooth transitions slightly while keeping them quick and minimal.
+Tune the public navigation for small screens so it remains calm, readable, and free of horizontal overflow while preserving the existing site structure.
 
 Before editing:
-- inspect relevant Selected, Homepage admin, and public homepage files
+- inspect relevant header/navigation CSS and public page layout CSS
 - explain the smallest safe implementation plan
 - then implement only this item
 ```
