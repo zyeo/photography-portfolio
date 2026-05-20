@@ -155,6 +155,11 @@ Important files:
 - P2 #12 Mobile nav pass:
   - Inner page nav and homepage footer nav now avoid horizontal overflow at 320px, 375px, and 430px.
   - Homepage footer nav can still be refined further for preferred one-line behavior and updated nav order.
+- P2 #13 Homepage/public visual polish:
+  - Hero image rotation works again with preload/decode and no blank frame.
+  - Public nav order is now `Selected`, `Journal`, `Collections`, `About`.
+  - Homepage text/composition and bottom nav spacing have been tuned.
+  - A more obvious hero fade/resolve effect was explored but still did not read visually; defer further transition experiments.
 
 ## Remaining Phase 1 backlog
 
@@ -163,39 +168,6 @@ Important files:
 No open P1 items remain before final upload.
 
 ### P2 — should fix before launch
-
-#### 13. Homepage/public visual polish
-
-Current issue:
-- Homepage hero transition sometimes has a blank/pause between image changes, likely because the next image is not ready before the switch.
-- Hero text/signature/tagline feel too small compared with the visual reference.
-- Homepage footer nav can still wrap awkwardly, with `About` dropping below earlier than desired.
-- Public nav order should become `Selected`, `Journal`, `Collections`, `About` because the daily photo log is central to the site.
-
-Likely files:
-- `/src/components/public/hero-rotator.tsx`
-- `/src/components/public/hero-rotator.module.css`
-- `/src/components/site-header.tsx`
-- `/src/components/site-header.module.css`
-- `/src/app/page.tsx`
-- `/src/app/page.module.css`
-
-Smallest safe fix:
-- Preload/decode the next hero image before switching.
-- Keep the current hero image visible until the next image is ready, then crossfade.
-- Keep the fade quick and minimal, not slow or flashy.
-- Explore slightly larger, more editorial central hero typography/signature/tagline.
-- Keep homepage footer nav on one line when there is enough width by reducing gap/letter-spacing responsively.
-- Only wrap the homepage nav on truly narrow screens.
-- Change public nav order everywhere to `Selected`, `Journal`, `Collections`, `About`.
-- Keep markup/layout changes minimal and avoid redesigning the homepage.
-
-Manual test:
-- Hero changes fade cleanly without blank pauses.
-- Hero typography feels more balanced against the photo.
-- Homepage footer nav stays one line at widths where it reasonably fits.
-- Public nav order is consistent on homepage and inner pages.
-- Home and inner pages at 320px, 375px, and 430px have no horizontal overflow.
 
 #### 14. Selected gallery desktop density
 
@@ -241,7 +213,24 @@ Likely files:
 Smallest safe fix:
 - Convert selectively to `next/image` only where it helps and remote image config is stable.
 
-#### 16. Larger admin ergonomics
+#### 16. Homepage hero transition perceptibility
+
+Current issue:
+- The hero rotation no longer blanks, but the fade/crossfade effect is not visually noticeable enough.
+- Attempts with longer opacity timing and blur/scale resolve did not produce an obvious effect in practice.
+
+Likely files:
+- `/src/components/public/hero-rotator.tsx`
+- `/src/components/public/hero-rotator.module.css`
+- `/src/app/page.module.css`
+
+Future options:
+- Revisit after final hero photos are chosen; image similarity may make crossfades hard to perceive.
+- Consider a more explicit two-layer state machine or keyframed incoming layer rather than toggling one active layer.
+- Consider a subtle dark/bright overlay pulse only if it still feels editorial.
+- Keep no-blank-frame behavior and pinned hero semantics.
+
+#### 17. Larger admin ergonomics
 
 Potential later improvements:
 - Search/filter in Journal image picker.
@@ -253,7 +242,7 @@ Potential later improvements:
   - aspect ratio/orientation: portrait, landscape, square, panorama
   - selected/published/journal-linked/missing assets if not already easy
 
-#### 17. Data model polish
+#### 18. Data model polish
 
 Potential later decisions:
 - `title`
@@ -262,7 +251,7 @@ Potential later decisions:
 
 Defer until real content strategy is clearer.
 
-#### 18. Cloudflare object storage
+#### 19. Cloudflare object storage
 
 Potential later decision:
 - Evaluate Cloudflare object storage or another object-storage layer if the archive grows beyond what Supabase Free file storage comfortably supports.
@@ -270,18 +259,14 @@ Potential later decision:
 
 ## Suggested next implementation order
 
-1. P2 #13 Homepage/public visual polish:
-   - hero transition preload/decode and clean crossfade
-   - hero text/signature/tagline sizing
-   - homepage bottom nav one-line behavior
-   - public nav order: `Selected`, `Journal`, `Collections`, `About`
-2. P2 #14 Selected gallery desktop density.
-3. P3 #15 Raw `<img>` cleanup.
-4. P3 #16 Larger admin ergonomics, including Library filters.
-5. P3 #17 Data model polish.
-6. P3 #18 Cloudflare object storage evaluation.
+1. P2 #14 Selected gallery desktop density.
+2. P3 #15 Raw `<img>` cleanup.
+3. P3 #16 Homepage hero transition perceptibility.
+4. P3 #17 Larger admin ergonomics, including Library filters.
+5. P3 #18 Data model polish.
+6. P3 #19 Cloudflare object storage evaluation.
 
-This order finishes the remaining launch-facing public visual polish first, then improves Selected browsing density, then moves into lower-priority cleanup, admin ergonomics, and future architecture work.
+This order moves on from the hero transition rabbit hole, improves Selected browsing density next, then returns to lower-priority cleanup, visual polish, admin ergonomics, and future architecture work.
 
 ## Hand-off prompt for next Codex chat
 
@@ -324,17 +309,18 @@ Already completed:
 - P2 #10 Public empty states
 - P2 #11 Journal weather rendering
 - P2 #12 Mobile nav pass
+- P2 #13 Homepage/public visual polish
 
 We are still working on Phase 1, not starting a new phase.
 
 Next recommended implementation item:
-P2 #13 Homepage/public visual polish.
+P2 #14 Selected gallery desktop density.
 
 Goal:
-Polish the public homepage and navigation without redesigning the site: make hero transitions seamless by preloading/decoding the next image before switching, slightly enlarge the central hero signature/tagline if it improves the editorial composition, keep the homepage bottom nav on one line when there is enough width, and update public nav order to `Selected`, `Journal`, `Collections`, `About`.
+Make the public Selected page feel wider and fuller on desktop while preserving non-cropping editorial masonry behavior.
 
 Before editing:
-- inspect homepage hero rotator, homepage layout CSS, header/nav components, and related public CSS
+- inspect the public Selected page, lightbox gallery component, and related CSS
 - explain the smallest safe implementation plan
 - then implement only this item
 ```
