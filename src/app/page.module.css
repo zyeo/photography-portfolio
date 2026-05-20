@@ -6,11 +6,20 @@
 .identity span { font-family:var(--font-serif); font-size:clamp(1.12rem,1.04rem + .32vw,1.34rem); }
 .ritual { position:absolute; z-index:1; left:50%; bottom:clamp(2rem, 4vh, 2.9rem); display:grid; justify-items:center; gap:1rem; transform:translateX(-50%); }
 .ritual nav,.ritual div { display:flex; justify-content:center; gap:1.55rem; }
+.ritual nav { flex-wrap:wrap; row-gap:.55rem; width:max-content; max-width:min(100vw - 2rem, 28rem); }
 .ritual nav { font-size:clamp(.76rem,.7rem + .16vw,.86rem); letter-spacing:.28em; text-transform:uppercase; }
 .ritual div { font-size:clamp(.98rem,.9rem + .2vw,1.12rem); opacity:.94; }
 @media (max-width:36rem){
   .identity { transform:translateY(-1.5rem); padding-inline:1.25rem; }
   .wordmark { width:min(90vw, 28rem); }
   .identity span { max-width:18rem; }
-  .ritual nav { gap:1.1rem; }
+  .ritual nav { column-gap:1.1rem; letter-spacing:.22em; }
+}
+@media (max-width:26rem){
+  .ritual { width:min(100% - 2rem, 24rem); }
+  .ritual nav {
+    column-gap:.9rem;
+    font-size:.72rem;
+    letter-spacing:.17em;
+  }
 }
