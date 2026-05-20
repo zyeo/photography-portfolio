@@ -26,8 +26,8 @@ export default async function Home() {
       <footer className={styles.ritual}>
         <nav aria-label="Primary navigation">
           <Link href="/selected">Selected</Link>
-          <Link href="/collections">Collections</Link>
           <Link href="/journal">Journal</Link>
+          <Link href="/collections">Collections</Link>
           <Link href="/about">About</Link>
         </nav>
         <div>
