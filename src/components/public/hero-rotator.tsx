@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { getPhotoBackgroundStyle } from "@/lib/public/visuals";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getPhotoBackgroundStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import styles from "./hero-rotator.module.css";
 
 type HeroPhoto = {
@@ -14,15 +14,20 @@ type HeroPhoto = {
 function preloadHeroImage(src: string) {
   return new Promise<void>((resolve, reject) => {
     const image = new window.Image();
+    const timeout = window.setTimeout(() => reject(new Error("Hero image preload timed out.")), 7000);
     image.decoding = "async";
     image.onload = () => {
       if (image.decode) {
-        image.decode().then(resolve).catch(resolve);
+        image.decode().then(resolve).catch(resolve).finally(() => window.clearTimeout(timeout));
         return;
       }
+      window.clearTimeout(timeout);
       resolve();
     };
-    image.onerror = () => reject(new Error("Hero image failed to load."));
+    image.onerror = () => {
+      window.clearTimeout(timeout);
+      reject(new Error("Hero image failed to load."));
+    };
     image.src = src;
   });
 }
@@ -36,6 +41,7 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
   const [isVisible, setIsVisible] = useState(true);
   const displayedPhotoRef = useRef<HeroPhoto | null>(displayedPhoto);
   const transitionRef = useRef(0);
+  const failedPreloadIdsRef = useRef<Set<string>>(new Set());
 
   function getHeroImagePath(photo: HeroPhoto | null) {
     return photo?.public_image_path ?? photo?.gallery_image_path ?? null;
@@ -51,6 +57,20 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
     displayedPhotoRef.current = displayedPhoto;
   }, [displayedPhoto]);
 
+  const advancePastFailedPhoto = useCallback((failedId: string) => {
+    if (pinned || photos.length < 2) return;
+    setIndex((current) => {
+      for (let offset = 1; offset < photos.length; offset += 1) {
+        const nextIndex = (current + offset) % photos.length;
+        const candidate = photos[nextIndex];
+        if (candidate.id !== failedId && !failedPreloadIdsRef.current.has(candidate.id)) {
+          return nextIndex;
+        }
+      }
+      return current;
+    });
+  }, [photos, pinned]);
+
   useEffect(() => {
     const nextPhoto = active ?? null;
     if ((displayedPhotoRef.current?.id ?? null) === (nextPhoto?.id ?? null)) return;
@@ -63,10 +83,17 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
 
     async function switchWhenReady() {
       const nextPath = getHeroImagePath(nextPhoto);
+      const nextUrl = getPublicImageUrl(nextPath);
       if (nextPath) {
         try {
-          await preloadHeroImage(nextPath);
+          if (!nextUrl) return;
+          await preloadHeroImage(nextUrl);
+          if (nextPhoto) failedPreloadIdsRef.current.delete(nextPhoto.id);
         } catch {
+          if (nextPhoto) {
+            failedPreloadIdsRef.current.add(nextPhoto.id);
+            advancePastFailedPhoto(nextPhoto.id);
+          }
           return;
         }
       }
@@ -86,7 +113,7 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
       if (frame) window.cancelAnimationFrame(frame);
       if (cleanup) window.clearTimeout(cleanup);
     };
-  }, [active]);
+  }, [active, advancePastFailedPhoto]);
 
   return (
     <div className={styles.hero}>

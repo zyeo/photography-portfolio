@@ -20,8 +20,8 @@ export default async function Home() {
           height={650}
           priority
         />
-        <p>Tokyo, for now</p>
-        <span>Photographs and notes from an ongoing practice.</span>
+        <p>TOKYO FOR NOW</p>
+        <span>Photographs and notes from an ongoing practice</span>
       </section>
       <footer className={styles.ritual}>
         <nav aria-label="Primary navigation">
