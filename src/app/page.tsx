@@ -20,7 +20,7 @@ export default async function Home() {
           height={650}
           priority
         />
-        <p>TOKYO FOR NOW</p>
+        <p>TOKYO, FOR NOW</p>
         <span>Photographs and notes from an ongoing practice</span>
       </section>
       <footer className={styles.ritual}>

@@ -104,7 +104,7 @@ export function HeroRotator({ photos }: { photos: HeroPhoto[] }) {
       setIsVisible(false);
 
       frame = window.requestAnimationFrame(() => setIsVisible(true));
-      cleanup = window.setTimeout(() => setPreviousPhoto(null), 700);
+      cleanup = window.setTimeout(() => setPreviousPhoto(null), 900);
     }
 
     switchWhenReady();

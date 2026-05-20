@@ -1,26 +1,26 @@
 .home { position:relative; min-height:100svh; overflow:hidden; color:#f6f1e7; background:#171513; }
 .overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,9,8,.16), rgba(10,9,8,.5)); }
-.identity { position:relative; z-index:1; display:grid; place-content:center; justify-items:center; min-height:100svh; text-align:center; transform:translateY(-2.2rem); }
-.wordmark { width:min(82vw, 39rem); height:auto; }
-.identity p { margin:1.65rem 0 .72rem; font-size:clamp(1.05rem,.9rem + .56vw,1.38rem); letter-spacing:.34em; text-transform:uppercase; }
-.identity span { font-family:var(--font-serif); font-size:clamp(.98rem,.92rem + .22vw,1.14rem); opacity:.92; }
+.identity { position:relative; z-index:1; display:grid; place-content:center; justify-items:center; min-height:100svh; text-align:center; transform:translateY(-2.35rem); }
+.wordmark { width:min(86vw, 42rem); height:auto; }
+.identity p { margin:1.95rem 0 .74rem; font-size:clamp(1.18rem,.96rem + .74vw,1.62rem); letter-spacing:.32em; text-transform:uppercase; }
+.identity span { font-family:var(--font-serif); font-size:clamp(.9rem,.86rem + .16vw,1.02rem); opacity:.9; }
 .ritual { position:absolute; z-index:1; left:50%; bottom:clamp(2rem, 4vh, 2.9rem); display:grid; justify-items:center; gap:1rem; transform:translateX(-50%); }
 .ritual nav,.ritual div { display:flex; justify-content:center; gap:1.55rem; }
-.ritual nav { flex-wrap:wrap; row-gap:.55rem; width:max-content; max-width:min(100vw - 2rem, 28rem); }
-.ritual nav { font-size:clamp(.76rem,.7rem + .16vw,.86rem); letter-spacing:.28em; text-transform:uppercase; }
+.ritual nav { flex-wrap:wrap; row-gap:.55rem; width:max-content; max-width:min(100vw - 2rem, 34rem); }
+.ritual nav { column-gap:1.35rem; font-size:clamp(.82rem,.76rem + .18vw,.94rem); letter-spacing:.22em; text-transform:uppercase; }
 .ritual div { font-size:clamp(.98rem,.9rem + .2vw,1.12rem); opacity:.94; }
 @media (max-width:36rem){
-  .identity { transform:translateY(-1.7rem); padding-inline:1.25rem; }
-  .wordmark { width:min(94vw, 33rem); }
-  .identity p { margin-top:1.35rem; letter-spacing:.26em; }
+  .identity { transform:translateY(-1.8rem); padding-inline:1.25rem; }
+  .wordmark { width:min(95vw, 34rem); }
+  .identity p { margin-top:1.5rem; letter-spacing:.22em; }
   .identity span { max-width:18rem; }
-  .ritual nav { column-gap:.95rem; letter-spacing:.18em; }
+  .ritual nav { column-gap:.75rem; letter-spacing:.1em; }
 }
 @media (max-width:26rem){
   .ritual { width:min(100% - 2rem, 24rem); }
   .ritual nav {
-    column-gap:.8rem;
-    font-size:.72rem;
-    letter-spacing:.14em;
+    column-gap:.65rem;
+    font-size:.75rem;
+    letter-spacing:.06em;
   }
 }
