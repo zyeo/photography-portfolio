@@ -31,8 +31,8 @@ export default async function Home() {
           <Link href="/about">About</Link>
         </nav>
         <div>
-          <a href="https://www.instagram.com/aphoto._aday" aria-label="Instagram">◎</a>
-          <a href="mailto:zacharyyeo22@gmail.com" aria-label="Email">✉</a>
+          <a href="https://www.instagram.com/aphoto._aday">Instagram</a>
+          <a href="mailto:zacharyyeo22@gmail.com">Email</a>
         </div>
       </footer>
     </main>

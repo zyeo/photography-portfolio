@@ -8,7 +8,8 @@
 .ritual nav,.ritual div { display:flex; justify-content:center; gap:1.55rem; }
 .ritual nav { flex-wrap:wrap; row-gap:.55rem; width:max-content; max-width:min(100vw - 2rem, 34rem); }
 .ritual nav { column-gap:1.35rem; font-size:clamp(.82rem,.76rem + .18vw,.94rem); letter-spacing:.22em; text-transform:uppercase; }
-.ritual div { font-size:clamp(.98rem,.9rem + .2vw,1.12rem); opacity:.94; }
+.ritual div { column-gap:1rem; font-size:clamp(.72rem,.68rem + .12vw,.8rem); letter-spacing:.18em; opacity:.94; text-transform:uppercase; }
+.ritual div a { border-bottom:1px solid rgba(246, 241, 231, .62); padding-bottom:.12rem; }
 @media (max-width:36rem){
   .identity { transform:translateY(-1.8rem); padding-inline:1.25rem; }
   .wordmark { width:min(95vw, 34rem); }
