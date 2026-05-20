@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ContactIconLinks } from "@/components/contact-icon-links";
 import { HeroRotator } from "@/components/public/hero-rotator";
 import { getHomepageData } from "@/lib/public/photos";
 import styles from "./page.module.css";
@@ -30,10 +31,7 @@ export default async function Home() {
           <Link href="/collections">Collections</Link>
           <Link href="/about">About</Link>
         </nav>
-        <div>
-          <a href="https://www.instagram.com/aphoto._aday">Instagram</a>
-          <a href="mailto:zacharyyeo22@gmail.com">Email</a>
-        </div>
+        <ContactIconLinks className={styles.contactLinks} />
       </footer>
     </main>
   );

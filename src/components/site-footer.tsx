@@ -1,8 +1,10 @@
+import { ContactIconLinks } from "./contact-icon-links";
+
 export function SiteFooter() {
   return (
     <footer className="shell site-footer">
       <p>Made with ❤️ in Tokyo, Japan.</p>
-      <a href="mailto:zacharyyeo22@gmail.com">zacharyyeo22@gmail.com</a>
+      <ContactIconLinks className="site-footer-links" />
     </footer>
   );
 }

@@ -135,6 +135,40 @@ a {
   letter-spacing: 0.08em;
 }
 
+.site-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.site-footer-links a {
+  display: inline-grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border: 1px solid rgba(94, 88, 79, 0.42);
+  border-radius: var(--radius-pill);
+  color: inherit;
+  transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.site-footer-links a:hover,
+.site-footer-links a:focus-visible {
+  border-color: rgba(33, 31, 27, 0.55);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.site-footer-links svg {
+  width: 0.92rem;
+  height: 0.92rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 @media (min-width: 42rem) {
   .site-footer {
     flex-direction: row;
