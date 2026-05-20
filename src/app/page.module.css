@@ -1,10 +1,10 @@
 .home { position:relative; min-height:100svh; overflow:hidden; color:#f6f1e7; background:#171513; }
 .overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,9,8,.16), rgba(10,9,8,.5)); }
 .identity { position:relative; z-index:1; display:grid; place-content:center; justify-items:center; min-height:100svh; text-align:center; transform:translateY(-2.35rem); }
-.wordmark { width:min(86vw, 42rem); height:auto; }
-.identity p { margin:1.95rem 0 .74rem; font-size:clamp(1.18rem,.96rem + .74vw,1.62rem); letter-spacing:.32em; text-transform:uppercase; }
-.identity span { font-family:var(--font-serif); font-size:clamp(.9rem,.86rem + .16vw,1.02rem); opacity:.9; }
-.ritual { position:absolute; z-index:1; left:50%; bottom:clamp(2rem, 4vh, 2.9rem); display:grid; justify-items:center; gap:1rem; transform:translateX(-50%); }
+.wordmark { width:min(86vw, 38rem); height:auto; }
+.identity p { margin:1.95rem 0 .74rem; font-size:clamp(1.18rem,.96rem + .74vw,1.38rem); letter-spacing:.32em; text-transform:uppercase; }
+.identity span { font-family:var(--font-serif); font-size:clamp(0.9rem,.90rem + .20vw,1.20rem); opacity:.9; }
+.ritual { position:absolute; z-index:1; left:50%; bottom:clamp(3rem, 7vh, 5rem); display:grid; justify-items:center; gap:1rem; transform:translateX(-50%); }
 .ritual nav,.ritual div { display:flex; justify-content:center; gap:1.55rem; }
 .ritual nav { flex-wrap:wrap; row-gap:.55rem; width:max-content; max-width:min(100vw - 2rem, 34rem); }
 .ritual nav { column-gap:1.35rem; font-size:clamp(.82rem,.76rem + .18vw,.94rem); letter-spacing:.22em; text-transform:uppercase; }
