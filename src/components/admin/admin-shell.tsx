@@ -4,6 +4,7 @@ import styles from "./admin-shell.module.css";
 const links = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/daily-entry", label: "Daily Entry" },
+  { href: "/admin/journal", label: "Journal" },
   { href: "/admin/archive", label: "Archive Upload" },
   { href: "/admin/library", label: "Library" },
   { href: "/admin/selected", label: "Selected" },

@@ -1,1 +1,3 @@
-.hero { position:absolute; inset:0; background-size:cover; background-position:center; transition:background-image 1.8s ease, background 1.8s ease; }
+.hero { position:absolute; inset:0; overflow:hidden; background:#171513; }
+.layer { position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat; opacity:1; transition:opacity .82s cubic-bezier(.33, 0, .2, 1); }
+.layer[data-visible="false"] { opacity:0; }

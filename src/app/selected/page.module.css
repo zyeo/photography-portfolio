@@ -1,3 +1,7 @@
-.page { padding-top:1rem; }
+.page { width:min(100% - 2rem,96rem); padding-top:1rem; }
 .page h1 { margin:.6rem 0 .35rem; font-size:clamp(2rem,1.5rem + 2vw,3rem); line-height:.95; }
 .page p { margin-bottom:1.2rem; }
+.empty { border-top:1px solid var(--line); margin-top:var(--space-4); padding-top:var(--space-3); color:var(--ink-soft); font-size:1.1rem; }
+@media (min-width:48rem){
+  .page { width:min(100% - 4rem,96rem); }
+}

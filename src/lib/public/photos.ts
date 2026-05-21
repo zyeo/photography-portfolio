@@ -5,9 +5,10 @@ export async function getHomepageData() {
   const [{ data: heroPhotos }, { data: entries }] = await Promise.all([
     supabase
       .from("photos")
-      .select("id, original_filename, public_image_path, location_name, pinned_hero")
+      .select("id, original_filename, public_image_path, gallery_image_path, location_name, pinned_hero")
       .eq("published", true)
       .eq("hero_approved", true)
+      .not("gallery_image_path", "is", null)
       .order("pinned_hero", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(6),
@@ -24,6 +25,7 @@ export async function getHomepageData() {
       id: string;
       original_filename: string;
       public_image_path: string | null;
+      gallery_image_path: string | null;
       location_name: string | null;
       pinned_hero: boolean;
     }>,

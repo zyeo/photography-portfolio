@@ -6,7 +6,7 @@ export default async function HomepageAdminPage() {
   const supabase = await createClient();
   const { data: photos } = await supabase
     .from("photos")
-    .select("id, original_filename, pinned_hero, focal_point_x, focal_point_y")
+    .select("id, original_filename, gallery_image_path, public_image_path, image_width, image_height, location_name, pinned_hero, focal_point_x, focal_point_y")
     .eq("hero_approved", true)
     .order("created_at", { ascending: false });
 

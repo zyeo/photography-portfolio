@@ -5,6 +5,7 @@ import styles from "./site-header.module.css";
 const links = [
   { href: "/selected", label: "Selected" },
   { href: "/journal", label: "Journal" },
+  { href: "/collections", label: "Collections" },
   { href: "/about", label: "About" },
 ];
 

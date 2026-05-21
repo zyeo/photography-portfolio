@@ -1,0 +1,4 @@
+interface:
+  display_name: "Photo Gallery Layout"
+  short_description: "Mixed-ratio photo gallery guidance"
+  default_prompt: "Use $photo-gallery-layout to improve this photography gallery while preserving original aspect ratios."

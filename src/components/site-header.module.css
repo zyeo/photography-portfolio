@@ -15,7 +15,9 @@
 }
 .header nav {
   display:flex;
+  flex-wrap:wrap;
   justify-self:end;
+  justify-content:flex-end;
   gap:1.25rem;
   color:var(--ink-soft);
   font-size:.62rem;
@@ -24,6 +26,13 @@
 }
 @media (max-width:42rem){
   .header { grid-template-columns:1fr; justify-items:center; gap:.8rem; padding-block:1rem; }
-  .header nav { justify-self:center; }
+  .header nav { justify-self:center; justify-content:center; row-gap:.5rem; max-width:100%; }
   .header .page-kicker { justify-self:center; }
+}
+@media (max-width:26rem){
+  .header nav {
+    column-gap:.9rem;
+    font-size:.6rem;
+    letter-spacing:.16em;
+  }
 }

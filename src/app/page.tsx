@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ContactIconLinks } from "@/components/contact-icon-links";
 import { HeroRotator } from "@/components/public/hero-rotator";
 import { getHomepageData } from "@/lib/public/photos";
 import styles from "./page.module.css";
@@ -20,19 +21,17 @@ export default async function Home() {
           height={650}
           priority
         />
-        <p>Tokyo, for now</p>
-        <span>Photographs and notes from an ongoing practice.</span>
+        <p>TOKYO, FOR NOW</p>
+        <span>Photographs and notes from an ongoing practice</span>
       </section>
       <footer className={styles.ritual}>
         <nav aria-label="Primary navigation">
           <Link href="/selected">Selected</Link>
           <Link href="/journal">Journal</Link>
+          <Link href="/collections">Collections</Link>
           <Link href="/about">About</Link>
         </nav>
-        <div>
-          <a href="https://instagram.com" aria-label="Instagram">◎</a>
-          <a href="mailto:hello@zachyeo.com" aria-label="Email">✉</a>
-        </div>
+        <ContactIconLinks className={styles.contactLinks} />
       </footer>
     </main>
   );
