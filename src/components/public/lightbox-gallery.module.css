@@ -50,6 +50,10 @@
   .lightboxFooter{display:grid; gap:.75rem; align-items:start;}
   .lightboxNav button{flex:1;}
 }
+@media (min-width:72rem){
+  .gallery{column-count:4; column-gap:.62rem;}
+  .gallery button{margin-bottom:.62rem;}
+}
 @media (prefers-reduced-motion:reduce){
   .gallery button,
   .gallery img{transition:none;}

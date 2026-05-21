@@ -160,6 +160,10 @@ Important files:
   - Public nav order is now `Selected`, `Journal`, `Collections`, `About`.
   - Homepage text/composition and bottom nav spacing have been tuned.
   - A more obvious hero fade/resolve effect was explored but still did not read visually; defer further transition experiments.
+- P2 #14 Selected gallery desktop density:
+  - Public Selected now uses a wider page measure on desktop.
+  - Gallery shifts to 4 masonry columns on wide screens while preserving natural, non-cropping image rendering.
+  - Mobile/tablet remain responsive with no horizontal overflow.
 
 ## Remaining Phase 1 backlog
 
@@ -169,33 +173,7 @@ No open P1 items remain before final upload.
 
 ### P2 — should fix before launch
 
-#### 14. Selected gallery desktop density
-
-Current issue:
-- Public Selected may feel too narrow or not full enough on desktop.
-- It should feel closer to a wider editorial masonry reference while preserving non-cropping behavior.
-
-Likely files:
-- `/src/app/selected/page.tsx`
-- `/src/app/selected/page.module.css`
-- `/src/components/public/lightbox-gallery.tsx`
-- `/src/components/public/lightbox-gallery.module.css`
-
-Smallest safe fix:
-- Explore a wider editorial masonry layout for Selected.
-- Keep natural/non-cropping masonry behavior.
-- Suggested responsive scaling:
-  - mobile: 1–2 columns depending on width
-  - tablet: 2–3 columns
-  - desktop: 3–4 columns
-  - wide desktop: 4 columns
-- Do not switch to cropped uniform thumbnails.
-
-Manual test:
-- Selected feels fuller on desktop and wide desktop.
-- Mixed portrait/landscape/square images remain uncropped.
-- Mobile remains clean and readable.
-- No horizontal overflow.
+No open P2 items remain before launch.
 
 ### P3 — nice to have later
 
@@ -259,14 +237,13 @@ Potential later decision:
 
 ## Suggested next implementation order
 
-1. P2 #14 Selected gallery desktop density.
-2. P3 #15 Raw `<img>` cleanup.
-3. P3 #16 Homepage hero transition perceptibility.
-4. P3 #17 Larger admin ergonomics, including Library filters.
-5. P3 #18 Data model polish.
-6. P3 #19 Cloudflare object storage evaluation.
+1. P3 #15 Raw `<img>` cleanup.
+2. P3 #16 Homepage hero transition perceptibility.
+3. P3 #17 Larger admin ergonomics, including Library filters.
+4. P3 #18 Data model polish.
+5. P3 #19 Cloudflare object storage evaluation.
 
-This order moves on from the hero transition rabbit hole, improves Selected browsing density next, then returns to lower-priority cleanup, visual polish, admin ergonomics, and future architecture work.
+The base launch surface is ready; remaining items are lower-priority cleanup, visual polish, admin ergonomics, and future architecture work.
 
 ## Hand-off prompt for next Codex chat
 
@@ -310,17 +287,19 @@ Already completed:
 - P2 #11 Journal weather rendering
 - P2 #12 Mobile nav pass
 - P2 #13 Homepage/public visual polish
+- P2 #14 Selected gallery desktop density
 
 We are still working on Phase 1, not starting a new phase.
 
 Next recommended implementation item:
-P2 #14 Selected gallery desktop density.
+Base launch QA and deployment prep.
 
 Goal:
-Make the public Selected page feel wider and fuller on desktop while preserving non-cropping editorial masonry behavior.
+Run final production-readiness checks, confirm public content state, then merge/deploy when explicitly approved.
 
 Before editing:
-- inspect the public Selected page, lightbox gallery component, and related CSS
-- explain the smallest safe implementation plan
-- then implement only this item
+- inspect git status and recent commits
+- run a clean production build
+- smoke test public pages and contact links
+- do not merge to main until explicitly approved
 ```
