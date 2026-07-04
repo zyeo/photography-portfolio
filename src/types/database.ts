@@ -102,6 +102,25 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["photo_collections"]["Row"]>;
         Relationships: [];
       };
+      selected_layout_items: {
+        Row: {
+          id: string;
+          photo_id: string;
+          desktop_x: number;
+          desktop_y: number;
+          desktop_width: number;
+          desktop_z_index: number;
+          mobile_order: number | null;
+          caption: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["selected_layout_items"]["Row"], "photo_id">> & {
+          photo_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["selected_layout_items"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

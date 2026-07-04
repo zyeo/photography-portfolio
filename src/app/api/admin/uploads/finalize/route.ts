@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildPhotoFields, buildPublicDerivatives, loadStoredOriginal } from "@/lib/photos/finalize";
 import { assertAcceptedImage } from "@/lib/photos/uploads";
+import { buildDefaultSelectedLayoutItems } from "@/lib/selected-layout/layout.mjs";
 import { createClient } from "@/lib/supabase/server";
 
 type CommonFinalize = {
@@ -44,6 +45,28 @@ function isFinalizeKind(value: unknown): value is FinalizeRequest["kind"] {
 
 async function cleanupOriginal(supabase: Awaited<ReturnType<typeof createClient>>, path: string) {
   await supabase.storage.from("originals").remove([path]);
+}
+
+async function createInitialSelectedLayoutItem(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  photo: { id: string; image_width: number | null; image_height: number | null; selected_order?: number | null },
+) {
+  const [layoutItem] = buildDefaultSelectedLayoutItems([photo]);
+  const { error } = await supabase.from("selected_layout_items").upsert(
+    {
+      photo_id: layoutItem.photo_id,
+      desktop_x: layoutItem.desktop_x,
+      desktop_y: layoutItem.desktop_y,
+      desktop_width: layoutItem.desktop_width,
+      desktop_z_index: layoutItem.desktop_z_index,
+      mobile_order: layoutItem.mobile_order,
+      caption: layoutItem.caption,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "photo_id", ignoreDuplicates: true },
+  );
+
+  if (error) throw new Error(error.message);
 }
 
 export async function POST(request: Request) {
@@ -174,9 +197,14 @@ export async function POST(request: Request) {
           selected_size: body.selected ? "normal" : null,
           published: body.selected,
         })
-        .select("id, original_filename, location_name, medium, selected, date_taken, camera")
+        .select("id, image_width, image_height, original_filename, location_name, medium, selected, date_taken, camera")
         .single();
       if (error) throw new Error(error.message);
+
+      if (body.selected) {
+        await createInitialSelectedLayoutItem(supabase, data);
+      }
+
       return NextResponse.json({ photos: [data], skippedDuplicates: [], failedFiles: [] }, { status: 201 });
     }
 
@@ -218,6 +246,15 @@ export async function POST(request: Request) {
       .select("id")
       .single();
     if (photoError) throw new Error(photoError.message);
+
+    if (body.addToSelected) {
+      await createInitialSelectedLayoutItem(supabase, {
+        id: photo.id,
+        image_width: fields.imageWidth,
+        image_height: fields.imageHeight,
+        selected_order: null,
+      });
+    }
 
     const { data: entry, error: entryError } = await supabase
       .from("journal_entries")

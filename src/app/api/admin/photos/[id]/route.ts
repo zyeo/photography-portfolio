@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { uploadPublicImageDerivatives } from "@/lib/photos/public-images";
+import { buildDefaultSelectedLayoutItems } from "@/lib/selected-layout/layout.mjs";
 import { createClient } from "@/lib/supabase/server";
 import { assertValidOriginalImage } from "@/lib/photos/validation";
 import type { Database } from "@/types/database";
@@ -83,6 +84,36 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const { data, error } = await supabase.from("photos").update(update).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  if (body.selected === false) {
+    await supabase.from("selected_layout_items").delete().eq("photo_id", id);
+  }
+
+  if (body.selected === true) {
+    const [layoutItem] = buildDefaultSelectedLayoutItems([
+      {
+        id: data.id,
+        image_width: data.image_width,
+        image_height: data.image_height,
+        selected_order: data.selected_order,
+      },
+    ]);
+
+    await supabase.from("selected_layout_items").upsert(
+      {
+        photo_id: layoutItem.photo_id,
+        desktop_x: layoutItem.desktop_x,
+        desktop_y: layoutItem.desktop_y,
+        desktop_width: layoutItem.desktop_width,
+        desktop_z_index: layoutItem.desktop_z_index,
+        mobile_order: layoutItem.mobile_order,
+        caption: layoutItem.caption,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "photo_id", ignoreDuplicates: true },
+    );
+  }
+
   return NextResponse.json({ photo: data });
 }
 
