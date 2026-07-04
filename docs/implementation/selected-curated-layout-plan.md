@@ -1,7 +1,7 @@
 # Selected Curated Layout Implementation Plan
 
-Status: ready for implementation request
-Stage: 1 planning only
+Status: implemented on `codex/selected-curated-layout`
+Stage: implementation checkpoint
 
 ## Safety Baseline
 
@@ -27,12 +27,11 @@ When implementation begins:
 
 Suggested commits:
 
-1. `Add selected layout persistence`
-2. `Add selected layout API`
+1. `Add selected layout foundation tests`
+2. `Add selected layout persistence API`
 3. `Add public selected layout renderer`
-4. `Add selected snap-grid admin editor`
-5. `Add selected captions`
-6. `Verify selected curated layout`
+4. `Add selected snap grid editor`
+5. `Document selected layout QA`
 
 ## Phase 1: Persistence
 
@@ -148,3 +147,20 @@ Pause and ask before implementation if:
 - The admin editor requires a third-party drag library not already installed.
 - The desired caption design needs art direction beyond plain text under images.
 - Current production data differs materially from the local schema.
+
+## Implementation Notes
+
+The first implementation keeps the old `photos.selected_order` and `photos.selected_size` fields for compatibility, but the authored layout now lives in `selected_layout_items`.
+
+Public `/selected` uses a Selected-specific renderer so collection pages keep the existing masonry gallery.
+
+Admin `/admin/selected` now supports:
+
+- Snap-grid drag placement.
+- Button nudging for position.
+- Button resizing.
+- Caption editing.
+- Mobile order controls.
+- Whole-layout save through `/api/admin/selected-layout`.
+
+The next natural enhancement is an optional freeform desktop mode that saves into the same `desktop_x`, `desktop_y`, and `desktop_width` contract.
