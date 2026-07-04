@@ -1,6 +1,7 @@
 import { SelectedLayoutGallery } from "@/components/public/selected-layout-gallery";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { isMissingSelectedLayoutTableError } from "@/lib/selected-layout/errors";
 import { mergeSelectedLayoutItems } from "@/lib/selected-layout/layout.mjs";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./page.module.css";
@@ -17,12 +18,15 @@ export default async function SelectedPage() {
     .order("created_at", { ascending: true })
     .order("id", { ascending: true });
   const photoIds = photos?.map((photo) => photo.id) ?? [];
-  const { data: layoutItems } = photoIds.length
+  const { data: layoutItems, error: layoutError } = photoIds.length
     ? await supabase
         .from("selected_layout_items")
         .select("photo_id, desktop_x, desktop_y, desktop_width, desktop_z_index, mobile_order, caption")
         .in("photo_id", photoIds)
     : { data: [] };
+  if (layoutError && !isMissingSelectedLayoutTableError(layoutError)) {
+    throw new Error(layoutError.message);
+  }
 
   const mergedLayoutItems = mergeSelectedLayoutItems(photos ?? [], layoutItems ?? []);
   const layoutByPhotoId = new Map(mergedLayoutItems.map((item) => [item.photo_id, item]));

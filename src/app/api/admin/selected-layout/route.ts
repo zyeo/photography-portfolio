@@ -4,6 +4,7 @@ import {
   normalizeSelectedLayoutItem,
   validateSelectedLayoutItems,
 } from "@/lib/selected-layout/layout.mjs";
+import { isMissingSelectedLayoutTableError } from "@/lib/selected-layout/errors";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -25,7 +26,10 @@ async function loadSelectedPhotos(supabase: Awaited<ReturnType<typeof createClie
     .order("created_at", { ascending: true })
     .order("id", { ascending: true });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (isMissingSelectedLayoutTableError(error)) return [];
+    throw new Error(error.message);
+  }
   return data ?? [];
 }
 
@@ -108,7 +112,16 @@ export async function PUT(request: Request) {
         .from("selected_layout_items")
         .upsert(fullLayout.map(toLayoutInsert), { onConflict: "photo_id" });
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (isMissingSelectedLayoutTableError(error)) {
+          return NextResponse.json(
+            { error: "Run the selected_layout_items Supabase migration before saving this layout." },
+            { status: 409 },
+          );
+        }
+
+        throw new Error(error.message);
+      }
     }
 
     const savedItems = await loadLayoutItems(supabase, photos.map((photo) => photo.id));
