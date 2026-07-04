@@ -16,6 +16,13 @@
   margin-bottom: 1rem;
 }
 
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 .toolbar p,
 .toolbar strong {
   margin: 0;
@@ -232,6 +239,10 @@
   }
 
   .toolbar button {
+    width: 100%;
+  }
+
+  .toolbarActions {
     width: 100%;
   }
 

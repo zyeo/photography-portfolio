@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import type { PointerEvent } from "react";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
+import { buildDefaultSelectedLayoutItems } from "@/lib/selected-layout/layout.mjs";
 import styles from "./selected-curator.module.css";
 
 type Photo = {
@@ -115,6 +116,32 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     setPhotos(next.map((photo, order) => ({ ...photo, mobile_order: order + 1 })));
     setDirty(true);
     setStatus(null);
+  }
+
+  function resetAutoLayout() {
+    const captionsByPhotoId = new Map(photos.map((photo) => [photo.id, photo.caption]));
+    const defaultsByPhotoId = new Map(
+      buildDefaultSelectedLayoutItems(photos).map((item) => [item.photo_id, item]),
+    );
+
+    setPhotos((current) =>
+      current.map((photo) => {
+        const layout = defaultsByPhotoId.get(photo.id);
+
+        return {
+          ...photo,
+          desktop_x: layout?.desktop_x ?? photo.desktop_x,
+          desktop_y: layout?.desktop_y ?? photo.desktop_y,
+          desktop_width: layout?.desktop_width ?? photo.desktop_width,
+          desktop_z_index: layout?.desktop_z_index ?? 0,
+          mobile_order: layout?.mobile_order ?? photo.mobile_order,
+          caption: captionsByPhotoId.get(photo.id) ?? null,
+        };
+      }),
+    );
+    setDirty(true);
+    setStatus("Auto layout restored. Save to publish these positions.");
+    setError(null);
   }
 
   function onPointerDown(event: PointerEvent<HTMLButtonElement>, photo: Photo) {
@@ -238,9 +265,14 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
             <p className="eyebrow">Desktop artboard</p>
             <strong className="serif">Snap grid layout</strong>
           </div>
-          <button type="button" onClick={saveLayout} disabled={pending || !dirty}>
-            {pending ? "Saving..." : dirty ? "Save layout" : "Saved"}
-          </button>
+          <div className={styles.toolbarActions}>
+            <button type="button" onClick={resetAutoLayout} disabled={pending}>
+              Reset auto layout
+            </button>
+            <button type="button" onClick={saveLayout} disabled={pending || !dirty}>
+              {pending ? "Saving..." : dirty ? "Save layout" : "Saved"}
+            </button>
+          </div>
         </div>
         {error ? <p className={styles.error} role="alert">{error}</p> : null}
         {status ? <p className={styles.status} role="status">{status}</p> : null}

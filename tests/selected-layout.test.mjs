@@ -21,9 +21,11 @@ test("buildDefaultSelectedLayoutItems creates a desktop spread and mobile order"
     items.map((item) => item.photo_id),
     ["lead", "portrait", "wide"],
   );
-  assert.equal(items[0].desktop_width, 56);
+  assert.equal(items[0].desktop_width, 70);
+  assert.equal(items[0].desktop_y, 0);
   assert.equal(items[0].desktop_x, 0);
-  assert.equal(items[1].desktop_x > items[0].desktop_x, true);
+  assert.equal(items[1].desktop_y > items[0].desktop_y, true);
+  assert.equal(items[2].desktop_y > items[1].desktop_y, true);
   assert.deepEqual(
     items.map((item) => item.mobile_order),
     [1, 2, 3],

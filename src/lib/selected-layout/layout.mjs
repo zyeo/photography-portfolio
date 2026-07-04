@@ -51,36 +51,45 @@ function aspectRatio(photo) {
   return photo.image_width && photo.image_height ? photo.image_width / photo.image_height : 1.3;
 }
 
-function desktopPreset(index, photo) {
+function desktopWidth(index, photo) {
   const ratio = aspectRatio(photo);
-  const row = Math.floor(index / 3);
-  const slot = index % 3;
-  const baseY = row * 42;
-  const width = index === 0 ? 56 : ratio < 0.85 ? 24 : ratio > 1.8 ? 40 : 30;
-  const xBySlot = [0, 62, 18];
-  const yBySlot = [0, 8, 26];
 
-  if (index === 0) {
-    return { desktop_x: 0, desktop_y: 0, desktop_width: width };
-  }
+  if (index === 0) return ratio > 1.45 ? 70 : 54;
+  if (ratio < 0.85) return 28;
+  if (ratio > 1.8) return 56;
+  if (ratio > 1.1) return 46;
+  return 34;
+}
 
-  return {
-    desktop_x: clamp(xBySlot[slot] ?? 0, 0, 100 - width),
-    desktop_y: baseY + (yBySlot[slot] ?? 0),
-    desktop_width: width,
-  };
+function desktopX(index, width) {
+  if (index === 0) return 0;
+
+  const positions = [58, 8, 38, 0, 52, 18];
+  return clamp(positions[(index - 1) % positions.length] ?? 0, 0, 100 - width);
+}
+
+function estimatedHeight(width, photo) {
+  return (width * 0.92) / aspectRatio(photo);
 }
 
 export function buildDefaultSelectedLayoutItems(photos) {
-  return sortedPhotos(photos).map((photo, index) =>
-    normalizeSelectedLayoutItem({
+  let nextY = 0;
+
+  return sortedPhotos(photos).map((photo, index) => {
+    const desktop_width = desktopWidth(index, photo);
+    const item = normalizeSelectedLayoutItem({
       photo_id: photo.id,
-      ...desktopPreset(index, photo),
+      desktop_x: desktopX(index, desktop_width),
+      desktop_y: nextY,
+      desktop_width,
       desktop_z_index: 0,
       mobile_order: index + 1,
       caption: null,
-    }),
-  );
+    });
+
+    nextY = item.desktop_y + estimatedHeight(item.desktop_width, photo) + 7;
+    return item;
+  });
 }
 
 export function validateSelectedLayoutItems(items, selectedPhotoIds) {
