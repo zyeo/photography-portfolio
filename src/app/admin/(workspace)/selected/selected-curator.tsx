@@ -47,6 +47,20 @@ type SelectionBox = {
   currentY: number;
 };
 
+type ResizeCorner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+
+type ResizeState = {
+  photoId: string;
+  corner: ResizeCorner;
+  startX: number;
+  startY: number;
+  originX: number;
+  originY: number;
+  originWidth: number;
+  originHeight: number;
+  ratio: number;
+};
+
 const SNAP_X = 2;
 const SNAP_Y = 1;
 const SNAP_WIDTH = 2;
@@ -75,6 +89,11 @@ function estimateHeight(photo: Photo) {
   return photo.desktop_width / aspectRatio(photo) + captionHeight;
 }
 
+function estimateHeightForWidth(photo: Photo, width: number) {
+  const captionHeight = photo.caption ? 4 : 0;
+  return width / aspectRatio(photo) + captionHeight;
+}
+
 function normalizeMobileOrder(photos: Photo[]) {
   return [...photos]
     .sort((a, b) => (a.mobile_order ?? 999) - (b.mobile_order ?? 999) || (a.selected_order ?? 999) - (b.selected_order ?? 999))
@@ -87,6 +106,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => (initialPhotos[0]?.id ? [initialPhotos[0].id] : []));
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
+  const [resizeState, setResizeState] = useState<ResizeState | null>(null);
   const [pending, setPending] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -98,6 +118,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   const autoScrollActiveRef = useRef(false);
   const dragStateRef = useRef<DragState | null>(null);
   const selectionBoxRef = useRef<SelectionBox | null>(null);
+  const resizeStateRef = useRef<ResizeState | null>(null);
 
   const activePhoto = photos.find((photo) => photo.id === activeId) ?? photos[0] ?? null;
   const mobilePhotos = useMemo(() => normalizeMobileOrder(photos), [photos]);
@@ -129,6 +150,11 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     setSelectionBox(nextSelectionBox);
   }
 
+  function setCurrentResizeState(nextResizeState: ResizeState | null) {
+    resizeStateRef.current = nextResizeState;
+    setResizeState(nextResizeState);
+  }
+
   function startAutoScroll() {
     autoScrollActiveRef.current = true;
     if (autoScrollFrameRef.current !== null) return;
@@ -156,6 +182,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
       if (speed) {
         editor.scrollBy({ top: speed, behavior: "auto" });
         updateDragFromClientPoint(pointer.clientX, pointer.clientY);
+        updateResizeFromClientPoint(pointer.clientX, pointer.clientY);
         updateSelectionFromClientPoint(pointer.clientX, pointer.clientY);
       }
 
@@ -228,6 +255,53 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     if (!point) return;
 
     setCurrentSelectionBox({ ...currentSelectionBox, currentX: point.x, currentY: point.y });
+  }
+
+  function updateResizeFromClientPoint(clientX: number, clientY: number) {
+    const currentResizeState = resizeStateRef.current;
+    if (!currentResizeState || pending) return;
+    const point = artboardPointFromClient(clientX, clientY);
+    if (!point) return;
+
+    const photo = photos.find((current) => current.id === currentResizeState.photoId);
+    if (!photo) return;
+
+    const movesLeft = currentResizeState.corner.endsWith("left");
+    const movesTop = currentResizeState.corner.startsWith("top");
+    const rawDeltaX = point.x - currentResizeState.startX;
+    const rawDeltaY = point.y - currentResizeState.startY;
+    const widthFromX = currentResizeState.originWidth + (movesLeft ? -rawDeltaX : rawDeltaX);
+    const widthFromY = currentResizeState.originWidth + (movesTop ? -rawDeltaY : rawDeltaY) * currentResizeState.ratio;
+    const preferredWidth =
+      Math.abs(widthFromX - currentResizeState.originWidth) >= Math.abs(widthFromY - currentResizeState.originWidth)
+        ? widthFromX
+        : widthFromY;
+    const maxWidth = movesLeft
+      ? currentResizeState.originX + currentResizeState.originWidth
+      : 100 - currentResizeState.originX;
+    const desktop_width = clamp(snap(preferredWidth, SNAP_WIDTH), MIN_WIDTH, Math.min(MAX_WIDTH, maxWidth));
+    const height = estimateHeightForWidth(photo, desktop_width);
+    const desktop_x = movesLeft
+      ? clamp(currentResizeState.originX + currentResizeState.originWidth - desktop_width, 0, 100 - desktop_width)
+      : currentResizeState.originX;
+    const desktop_y = movesTop
+      ? Math.max(0, snap(currentResizeState.originY + currentResizeState.originHeight - height, SNAP_Y))
+      : currentResizeState.originY;
+
+    setPhotos((current) =>
+      current.map((currentPhoto) =>
+        currentPhoto.id === currentResizeState.photoId
+          ? {
+              ...currentPhoto,
+              desktop_x,
+              desktop_y,
+              desktop_width,
+            }
+          : currentPhoto,
+      ),
+    );
+    setDirty(true);
+    setStatus(null);
   }
 
   function updatePhoto(photoId: string, update: (photo: Photo) => Photo) {
@@ -355,6 +429,50 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
     setCurrentDragState(null);
+    stopAutoScroll();
+  }
+
+  function onResizePointerDown(event: PointerEvent<HTMLSpanElement>, photo: Photo, corner: ResizeCorner) {
+    if (pending) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const point = artboardPoint(event);
+    if (!point) return;
+
+    setActiveId(photo.id);
+    setSelectedIds([photo.id]);
+    setCurrentResizeState({
+      photoId: photo.id,
+      corner,
+      startX: point.x,
+      startY: point.y,
+      originX: photo.desktop_x,
+      originY: photo.desktop_y,
+      originWidth: photo.desktop_width,
+      originHeight: estimateHeight(photo),
+      ratio: aspectRatio(photo),
+    });
+    lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    startAutoScroll();
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function onResizePointerMove(event: PointerEvent<HTMLSpanElement>) {
+    if (!resizeStateRef.current || pending) return;
+    event.preventDefault();
+    event.stopPropagation();
+    lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    startAutoScroll();
+    updateResizeFromClientPoint(event.clientX, event.clientY);
+  }
+
+  function onResizePointerUp(event: PointerEvent<HTMLSpanElement>) {
+    if (resizeState) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setCurrentResizeState(null);
     stopAutoScroll();
   }
 
@@ -548,6 +666,18 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
                   <span aria-hidden="true" style={{ background: getPhotoVisualStyle(photo.id) }} />
                 )}
                 {photo.caption ? <em>{photo.caption}</em> : null}
+                {(["top-left", "top-right", "bottom-left", "bottom-right"] as ResizeCorner[]).map((corner) => (
+                  <span
+                    key={corner}
+                    className={styles.resizeHandle}
+                    data-corner={corner}
+                    aria-hidden="true"
+                    onPointerDown={(event) => onResizePointerDown(event, photo, corner)}
+                    onPointerMove={onResizePointerMove}
+                    onPointerUp={onResizePointerUp}
+                    onPointerCancel={onResizePointerUp}
+                  />
+                ))}
               </button>
             );
           })}
