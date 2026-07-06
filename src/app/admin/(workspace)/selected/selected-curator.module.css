@@ -9,11 +9,17 @@
 }
 
 .toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  padding: 0 0 0.85rem;
 }
 
 .toolbarActions {
@@ -61,6 +67,17 @@
   min-height: max(34rem, calc(var(--selected-editor-height, 34) * 1cqw));
 }
 
+.selectionBox {
+  position: absolute;
+  top: calc(var(--selected-box-top, 0) * 1cqw);
+  left: 0;
+  z-index: 30;
+  height: calc(var(--selected-box-height, 0) * 1cqw);
+  border: 1px solid rgba(33, 31, 27, 0.55);
+  background: rgba(33, 31, 27, 0.08);
+  pointer-events: none;
+}
+
 .artboardItem {
   position: absolute;
   top: calc(var(--selected-editor-top, 0) * 1cqw);
@@ -76,13 +93,18 @@
 
 .artboardItem:hover,
 .artboardItem:focus-visible,
-.artboardItem[data-active="true"] {
+.artboardItem[data-active="true"],
+.artboardItem[data-selected="true"] {
   border-color: rgba(33, 31, 27, 0.5);
   box-shadow: 0 0 0 3px rgba(246, 242, 234, 0.85);
 }
 
 .artboardItem[data-active="true"] {
   transform: translateY(-1px);
+}
+
+.artboardItem[data-selected="true"] {
+  box-shadow: 0 0 0 3px rgba(72, 102, 64, 0.28);
 }
 
 .artboardItem img,

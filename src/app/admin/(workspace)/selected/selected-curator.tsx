@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import { buildDefaultSelectedLayoutItems } from "@/lib/selected-layout/layout.mjs";
@@ -28,9 +28,23 @@ type Photo = {
 };
 
 type DragState = {
-  photoId: string;
-  grabXPercent: number;
-  grabYCanvas: number;
+  photoIds: string[];
+  startX: number;
+  startY: number;
+  origins: {
+    id: string;
+    desktop_x: number;
+    desktop_y: number;
+    desktop_width: number;
+  }[];
+};
+
+type SelectionBox = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  currentX: number;
+  currentY: number;
 };
 
 const SNAP_X = 2;
@@ -56,6 +70,11 @@ function estimateBottom(photo: Photo) {
   return photo.desktop_y + photo.desktop_width / aspectRatio(photo) + captionHeight;
 }
 
+function estimateHeight(photo: Photo) {
+  const captionHeight = photo.caption ? 4 : 0;
+  return photo.desktop_width / aspectRatio(photo) + captionHeight;
+}
+
 function normalizeMobileOrder(photos: Photo[]) {
   return [...photos]
     .sort((a, b) => (a.mobile_order ?? 999) - (b.mobile_order ?? 999) || (a.selected_order ?? 999) - (b.selected_order ?? 999))
@@ -64,17 +83,152 @@ function normalizeMobileOrder(photos: Photo[]) {
 
 export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   const [photos, setPhotos] = useState<Photo[]>(() => normalizeMobileOrder(initialPhotos));
-  const [activeId, setActiveId] = useState(initialPhotos[0]?.id ?? null);
+  const [activeId, setActiveId] = useState<string | null>(initialPhotos[0]?.id ?? null);
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => (initialPhotos[0]?.id ? [initialPhotos[0].id] : []));
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const [pending, setPending] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const editorRef = useRef<HTMLElement>(null);
   const artboardRef = useRef<HTMLDivElement>(null);
+  const autoScrollFrameRef = useRef<number | null>(null);
+  const lastPointerRef = useRef<{ clientX: number; clientY: number } | null>(null);
+  const autoScrollActiveRef = useRef(false);
+  const dragStateRef = useRef<DragState | null>(null);
+  const selectionBoxRef = useRef<SelectionBox | null>(null);
 
   const activePhoto = photos.find((photo) => photo.id === activeId) ?? photos[0] ?? null;
   const mobilePhotos = useMemo(() => normalizeMobileOrder(photos), [photos]);
   const artboardHeight = Math.max(34, ...photos.map(estimateBottom)) + 2;
+  const selectionStyle = selectionBox
+    ? ({
+        left: `${Math.min(selectionBox.startX, selectionBox.currentX)}%`,
+        width: `${Math.abs(selectionBox.currentX - selectionBox.startX)}%`,
+        "--selected-box-top": Math.min(selectionBox.startY, selectionBox.currentY),
+        "--selected-box-height": Math.abs(selectionBox.currentY - selectionBox.startY),
+      } as CSSProperties)
+    : undefined;
+
+  useEffect(() => {
+    return () => {
+      if (autoScrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(autoScrollFrameRef.current);
+      }
+    };
+  }, []);
+
+  function setCurrentDragState(nextDragState: DragState | null) {
+    dragStateRef.current = nextDragState;
+    setDragState(nextDragState);
+  }
+
+  function setCurrentSelectionBox(nextSelectionBox: SelectionBox | null) {
+    selectionBoxRef.current = nextSelectionBox;
+    setSelectionBox(nextSelectionBox);
+  }
+
+  function startAutoScroll() {
+    autoScrollActiveRef.current = true;
+    if (autoScrollFrameRef.current !== null) return;
+
+    const tick = () => {
+      const editor = editorRef.current;
+      const pointer = lastPointerRef.current;
+
+      if (!editor || !pointer || !autoScrollActiveRef.current) {
+        autoScrollFrameRef.current = null;
+        return;
+      }
+
+      const rect = editor.getBoundingClientRect();
+      const threshold = 72;
+      const maxSpeed = 18;
+      let speed = 0;
+
+      if (pointer.clientY < rect.top + threshold) {
+        speed = -maxSpeed * (1 - Math.max(pointer.clientY - rect.top, 0) / threshold);
+      } else if (pointer.clientY > rect.bottom - threshold) {
+        speed = maxSpeed * (1 - Math.max(rect.bottom - pointer.clientY, 0) / threshold);
+      }
+
+      if (speed) {
+        editor.scrollBy({ top: speed, behavior: "auto" });
+        updateDragFromClientPoint(pointer.clientX, pointer.clientY);
+        updateSelectionFromClientPoint(pointer.clientX, pointer.clientY);
+      }
+
+      autoScrollFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    autoScrollFrameRef.current = window.requestAnimationFrame(tick);
+  }
+
+  function stopAutoScroll() {
+    autoScrollActiveRef.current = false;
+    lastPointerRef.current = null;
+    if (autoScrollFrameRef.current !== null) {
+      window.cancelAnimationFrame(autoScrollFrameRef.current);
+      autoScrollFrameRef.current = null;
+    }
+  }
+
+  function artboardPoint(event: PointerEvent<HTMLElement>) {
+    return artboardPointFromClient(event.clientX, event.clientY);
+  }
+
+  function artboardPointFromClient(clientX: number, clientY: number) {
+    const artboard = artboardRef.current;
+    if (!artboard) return null;
+
+    const rect = artboard.getBoundingClientRect();
+    return {
+      x: ((clientX - rect.left + artboard.scrollLeft) / rect.width) * 100,
+      y: ((clientY - rect.top + artboard.scrollTop) / rect.width) * 100,
+    };
+  }
+
+  function updateDragFromClientPoint(clientX: number, clientY: number) {
+    const currentDragState = dragStateRef.current;
+    if (!currentDragState || pending) return;
+    const point = artboardPointFromClient(clientX, clientY);
+    if (!point) return;
+
+    const rawDeltaX = point.x - currentDragState.startX;
+    const rawDeltaY = point.y - currentDragState.startY;
+    const minDeltaX = Math.max(...currentDragState.origins.map((origin) => -origin.desktop_x));
+    const maxDeltaX = Math.min(...currentDragState.origins.map((origin) => 100 - origin.desktop_width - origin.desktop_x));
+    const minDeltaY = Math.max(...currentDragState.origins.map((origin) => -origin.desktop_y));
+    const deltaX = snap(clamp(rawDeltaX, minDeltaX, maxDeltaX), SNAP_X);
+    const deltaY = snap(Math.max(rawDeltaY, minDeltaY), SNAP_Y);
+    const originsById = new Map(currentDragState.origins.map((origin) => [origin.id, origin]));
+
+    setPhotos((current) =>
+      current.map((currentPhoto) => {
+        const origin = originsById.get(currentPhoto.id);
+
+        return origin
+          ? {
+              ...currentPhoto,
+              desktop_x: clamp(origin.desktop_x + deltaX, 0, 100 - currentPhoto.desktop_width),
+              desktop_y: Math.max(0, origin.desktop_y + deltaY),
+            }
+          : currentPhoto;
+      }),
+    );
+    setDirty(true);
+    setStatus(null);
+  }
+
+  function updateSelectionFromClientPoint(clientX: number, clientY: number) {
+    const currentSelectionBox = selectionBoxRef.current;
+    if (!currentSelectionBox || pending) return;
+    const point = artboardPointFromClient(clientX, clientY);
+    if (!point) return;
+
+    setCurrentSelectionBox({ ...currentSelectionBox, currentX: point.x, currentY: point.y });
+  }
 
   function updatePhoto(photoId: string, update: (photo: Photo) => Photo) {
     setPhotos((current) => current.map((photo) => (photo.id === photoId ? update(photo) : photo)));
@@ -83,11 +237,20 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   }
 
   function movePhoto(photoId: string, deltaX: number, deltaY: number) {
-    updatePhoto(photoId, (photo) => ({
-      ...photo,
-      desktop_x: clamp(snap(photo.desktop_x + deltaX, SNAP_X), 0, 100 - photo.desktop_width),
-      desktop_y: Math.max(0, snap(photo.desktop_y + deltaY, SNAP_Y)),
-    }));
+    const ids = selectedIds.includes(photoId) ? selectedIds : [photoId];
+    setPhotos((current) =>
+      current.map((photo) =>
+        ids.includes(photo.id)
+          ? {
+              ...photo,
+              desktop_x: clamp(snap(photo.desktop_x + deltaX, SNAP_X), 0, 100 - photo.desktop_width),
+              desktop_y: Math.max(0, snap(photo.desktop_y + deltaY, SNAP_Y)),
+            }
+          : photo,
+      ),
+    );
+    setDirty(true);
+    setStatus(null);
   }
 
   function resizePhoto(photoId: string, deltaWidth: number) {
@@ -114,6 +277,10 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   }
 
   function resetAutoLayout() {
+    if (!window.confirm("Reset the Selected desktop layout to the automatic arrangement? This will replace your current unsaved positions.")) {
+      return;
+    }
+
     const captionsByPhotoId = new Map(photos.map((photo) => [photo.id, photo.caption]));
     const defaultsByPhotoId = new Map(
       buildDefaultSelectedLayoutItems(photos).map((item) => [item.photo_id, item]),
@@ -137,55 +304,116 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     setDirty(true);
     setStatus("Auto layout restored. Save to publish these positions.");
     setError(null);
+    setSelectedIds((current) => current.filter((id) => photos.some((photo) => photo.id === id)));
   }
 
   function onPointerDown(event: PointerEvent<HTMLButtonElement>, photo: Photo) {
-    const artboard = artboardRef.current;
-    if (!artboard || pending) return;
+    if (pending) return;
+    const point = artboardPoint(event);
+    if (!point) return;
 
-    const rect = artboard.getBoundingClientRect();
-    const artboardXPercent = ((event.clientX - rect.left + artboard.scrollLeft) / rect.width) * 100;
-    const artboardYCanvas = ((event.clientY - rect.top + artboard.scrollTop) / rect.width) * 100;
+    let nextSelectedIds = selectedIds;
+    if (event.shiftKey || event.metaKey || event.ctrlKey) {
+      nextSelectedIds = selectedIds.includes(photo.id)
+        ? selectedIds.filter((id) => id !== photo.id)
+        : [...selectedIds, photo.id];
+      if (!nextSelectedIds.length) nextSelectedIds = [photo.id];
+      setSelectedIds(nextSelectedIds);
+    } else if (!selectedIds.includes(photo.id)) {
+      nextSelectedIds = [photo.id];
+      setSelectedIds(nextSelectedIds);
+    }
 
     setActiveId(photo.id);
-    setDragState({
-      photoId: photo.id,
-      grabXPercent: artboardXPercent - photo.desktop_x,
-      grabYCanvas: artboardYCanvas - photo.desktop_y,
+    setCurrentDragState({
+      photoIds: nextSelectedIds,
+      startX: point.x,
+      startY: point.y,
+      origins: photos
+        .filter((current) => nextSelectedIds.includes(current.id))
+        .map((current) => ({
+          id: current.id,
+          desktop_x: current.desktop_x,
+          desktop_y: current.desktop_y,
+          desktop_width: current.desktop_width,
+        })),
     });
+    lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    startAutoScroll();
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function onPointerMove(event: PointerEvent<HTMLButtonElement>) {
-    const artboard = artboardRef.current;
-    if (!artboard || !dragState || pending) return;
-
-    const rect = artboard.getBoundingClientRect();
-    const photo = photos.find((current) => current.id === dragState.photoId);
-    if (!photo) return;
-
-    const nextX = ((event.clientX - rect.left + artboard.scrollLeft) / rect.width) * 100 - dragState.grabXPercent;
-    const nextY = ((event.clientY - rect.top + artboard.scrollTop) / rect.width) * 100 - dragState.grabYCanvas;
-    setPhotos((current) =>
-      current.map((currentPhoto) =>
-        currentPhoto.id === dragState.photoId
-          ? {
-              ...currentPhoto,
-              desktop_x: clamp(snap(nextX, SNAP_X), 0, 100 - photo.desktop_width),
-              desktop_y: Math.max(0, snap(nextY, SNAP_Y)),
-            }
-          : currentPhoto,
-      ),
-    );
-    setDirty(true);
-    setStatus(null);
+    if (!dragStateRef.current || pending) return;
+    lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    startAutoScroll();
+    updateDragFromClientPoint(event.clientX, event.clientY);
   }
 
   function onPointerUp(event: PointerEvent<HTMLButtonElement>) {
     if (dragState) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    setDragState(null);
+    setCurrentDragState(null);
+    stopAutoScroll();
+  }
+
+  function onArtboardPointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget || pending) return;
+    const point = artboardPoint(event);
+    if (!point) return;
+
+    setCurrentSelectionBox({
+      pointerId: event.pointerId,
+      startX: point.x,
+      startY: point.y,
+      currentX: point.x,
+      currentY: point.y,
+    });
+    setActiveId(null);
+    if (!event.shiftKey && !event.metaKey && !event.ctrlKey) {
+      setSelectedIds([]);
+    }
+    lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    startAutoScroll();
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function onArtboardPointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!selectionBoxRef.current || pending) return;
+    lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    startAutoScroll();
+    updateSelectionFromClientPoint(event.clientX, event.clientY);
+  }
+
+  function finishSelection(event: PointerEvent<HTMLDivElement>) {
+    if (!selectionBox) return;
+
+    const left = Math.min(selectionBox.startX, selectionBox.currentX);
+    const right = Math.max(selectionBox.startX, selectionBox.currentX);
+    const top = Math.min(selectionBox.startY, selectionBox.currentY);
+    const bottom = Math.max(selectionBox.startY, selectionBox.currentY);
+    const boxedIds = photos
+      .filter((photo) => {
+        const photoLeft = photo.desktop_x;
+        const photoRight = photo.desktop_x + photo.desktop_width;
+        const photoTop = photo.desktop_y;
+        const photoBottom = photo.desktop_y + estimateHeight(photo);
+        return photoLeft <= right && photoRight >= left && photoTop <= bottom && photoBottom >= top;
+      })
+      .map((photo) => photo.id);
+
+    setSelectedIds((current) => {
+      if (event.shiftKey || event.metaKey || event.ctrlKey) {
+        return Array.from(new Set([...current, ...boxedIds]));
+      }
+
+      return boxedIds;
+    });
+    setActiveId(boxedIds[0] ?? null);
+    setCurrentSelectionBox(null);
+    stopAutoScroll();
+    event.currentTarget.releasePointerCapture(selectionBox.pointerId);
   }
 
   async function patchPhoto(photoId: string, body: Record<string, unknown>) {
@@ -255,7 +483,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
 
   return (
     <div className={styles.layout}>
-      <section className={styles.editor} aria-label="Selected desktop layout editor">
+      <section ref={editorRef} className={styles.editor} aria-label="Selected desktop layout editor">
         <div className={styles.toolbar}>
           <div>
             <p className="eyebrow">Desktop artboard</p>
@@ -276,10 +504,16 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
           ref={artboardRef}
           className={styles.artboard}
           style={{ "--selected-editor-height": artboardHeight } as CSSProperties}
+          onPointerDown={onArtboardPointerDown}
+          onPointerMove={onArtboardPointerMove}
+          onPointerUp={finishSelection}
+          onPointerCancel={finishSelection}
         >
+          {selectionBox ? <div className={styles.selectionBox} style={selectionStyle} aria-hidden="true" /> : null}
           {photos.map((photo) => {
             const thumbnailUrl = getPublicImageUrl(photo.gallery_image_path);
             const selected = photo.id === activePhoto?.id;
+            const inSelection = selectedIds.includes(photo.id);
 
             return (
               <button
@@ -287,6 +521,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
                 type="button"
                 className={styles.artboardItem}
                 data-active={selected}
+                data-selected={inSelection}
                 style={{
                   left: `${photo.desktop_x}%`,
                   width: `${photo.desktop_width}%`,
