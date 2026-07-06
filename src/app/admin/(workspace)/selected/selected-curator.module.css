@@ -127,16 +127,23 @@
   position: absolute;
   z-index: 40;
   display: block;
-  width: 0.9rem;
+  width: 1rem;
   min-height: 0;
   aspect-ratio: 1;
-  border: 1px solid rgba(33, 31, 27, 0.72);
-  border-radius: 999px;
-  background: var(--paper);
-  box-shadow: 0 1px 4px rgba(33, 31, 27, 0.18);
+  border: 0;
+  background: transparent;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 140ms ease, transform 140ms ease;
+  transition: opacity 140ms ease;
+}
+
+.artboardItem .resizeHandle::before {
+  position: absolute;
+  inset: 0.25rem;
+  content: "";
+  border-color: rgba(33, 31, 27, 0.62);
+  border-style: solid;
+  border-width: 0;
 }
 
 .artboardItem:hover .resizeHandle,
@@ -148,31 +155,51 @@
 }
 
 .resizeHandle[data-corner="top-left"] {
-  top: -0.45rem;
-  left: -0.45rem;
+  top: -0.5rem;
+  left: -0.5rem;
   cursor: nwse-resize;
+}
+
+.resizeHandle[data-corner="top-left"]::before {
+  border-top-width: 1px;
+  border-left-width: 1px;
 }
 
 .resizeHandle[data-corner="top-right"] {
-  top: -0.45rem;
-  right: -0.45rem;
+  top: -0.5rem;
+  right: -0.5rem;
   cursor: nesw-resize;
+}
+
+.resizeHandle[data-corner="top-right"]::before {
+  border-top-width: 1px;
+  border-right-width: 1px;
 }
 
 .resizeHandle[data-corner="bottom-left"] {
-  bottom: -0.45rem;
-  left: -0.45rem;
+  bottom: -0.5rem;
+  left: -0.5rem;
   cursor: nesw-resize;
 }
 
+.resizeHandle[data-corner="bottom-left"]::before {
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
 .resizeHandle[data-corner="bottom-right"] {
-  right: -0.45rem;
-  bottom: -0.45rem;
+  right: -0.5rem;
+  bottom: -0.5rem;
   cursor: nwse-resize;
 }
 
-.artboardItem .resizeHandle:hover {
-  transform: scale(1.15);
+.resizeHandle[data-corner="bottom-right"]::before {
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.artboardItem .resizeHandle:hover::before {
+  border-color: rgba(33, 31, 27, 0.9);
 }
 
 .artboardItem em {
