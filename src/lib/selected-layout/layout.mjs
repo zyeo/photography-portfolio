@@ -3,7 +3,8 @@ export const SELECTED_LAYOUT_MIN_WIDTH = 8;
 export const SELECTED_LAYOUT_DEFAULT_WIDTH = 28;
 
 function finiteNumber(value, fallback) {
-  return Number.isFinite(value) ? Number(value) : fallback;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
 }
 
 function clamp(value, min, max) {
@@ -51,6 +52,11 @@ function aspectRatio(photo) {
   return photo.image_width && photo.image_height ? photo.image_width / photo.image_height : 1.3;
 }
 
+function itemHeight(item, photo) {
+  const captionHeight = item.caption ? 3.75 : 0;
+  return (item.desktop_width * 0.92) / aspectRatio(photo) + captionHeight;
+}
+
 function desktopWidth(index, photo) {
   const ratio = aspectRatio(photo);
 
@@ -92,6 +98,26 @@ export function buildDefaultSelectedLayoutItems(photos) {
   });
 }
 
+export function resolveSelectedLayoutCollisions(photos, items, gap = 7) {
+  const photoById = new Map(photos.map((photo) => [String(photo.id), photo]));
+  let nextY = 0;
+
+  return [...items]
+    .map((item) => normalizeSelectedLayoutItem(item))
+    .sort((a, b) => (a.mobile_order ?? 999) - (b.mobile_order ?? 999) || a.desktop_y - b.desktop_y)
+    .map((item) => {
+      const photo = photoById.get(item.photo_id);
+      if (!photo) return item;
+
+      const resolved = {
+        ...item,
+        desktop_y: Math.max(item.desktop_y, nextY),
+      };
+      nextY = resolved.desktop_y + itemHeight(resolved, photo) + gap;
+      return resolved;
+    });
+}
+
 export function validateSelectedLayoutItems(items, selectedPhotoIds) {
   const errors = [];
   const seen = new Set();
@@ -120,10 +146,12 @@ export function validateSelectedLayoutItems(items, selectedPhotoIds) {
 
 export function mergeSelectedLayoutItems(photos, existingItems) {
   const existingByPhotoId = new Map(existingItems.map((item) => [item.photo_id, item]));
-  return buildDefaultSelectedLayoutItems(photos).map((defaultItem) =>
+  const items = buildDefaultSelectedLayoutItems(photos).map((defaultItem) =>
     normalizeSelectedLayoutItem({
       ...defaultItem,
       ...(existingByPhotoId.get(defaultItem.photo_id) ?? {}),
     }),
   );
+
+  return resolveSelectedLayoutCollisions(photos, items);
 }

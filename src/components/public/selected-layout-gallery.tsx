@@ -66,7 +66,6 @@ function getEstimatedDesktopHeight(item: SelectedLayoutGalleryItem) {
 }
 
 export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGalleryItem[] }) {
-  const [loadedIds, setLoadedIds] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const active = activeIndex === null ? null : photos[activeIndex] ?? null;
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -105,10 +104,6 @@ export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGaller
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [active, photos.length]);
-
-  function markLoaded(photoId: string) {
-    setLoadedIds((current) => (current.includes(photoId) ? current : [...current, photoId]));
-  }
 
   function openPhoto(index: number, opener: HTMLButtonElement) {
     openerRef.current = opener;
@@ -163,7 +158,6 @@ export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGaller
               key={photo.id}
               type="button"
               className={styles.item}
-              data-loaded={loadedIds.includes(photo.id)}
               data-has-caption={caption ? "true" : "false"}
               style={itemStyle}
               onClick={(event) => openPhoto(index, event.currentTarget)}
@@ -176,8 +170,7 @@ export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGaller
                     alt=""
                     width={photo.image_width ?? undefined}
                     height={photo.image_height ?? undefined}
-                    loading="lazy"
-                    onLoad={() => markLoaded(photo.id)}
+                    loading={index < 4 ? "eager" : "lazy"}
                   />
                 ) : (
                   <span

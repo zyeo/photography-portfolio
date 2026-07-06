@@ -1,17 +1,17 @@
 export type SelectedLayoutPhoto = {
   id: string;
-  image_width: number | null;
-  image_height: number | null;
-  selected_order?: number | null;
+  image_width: number | string | null;
+  image_height: number | string | null;
+  selected_order?: number | string | null;
 };
 
 export type SelectedLayoutItemInput = {
   photo_id: string;
-  desktop_x?: number | null;
-  desktop_y?: number | null;
-  desktop_width?: number | null;
-  desktop_z_index?: number | null;
-  mobile_order?: number | null;
+  desktop_x?: number | string | null;
+  desktop_y?: number | string | null;
+  desktop_width?: number | string | null;
+  desktop_z_index?: number | string | null;
+  mobile_order?: number | string | null;
   caption?: string | null;
 };
 
@@ -35,6 +35,11 @@ export function validateSelectedLayoutItems(
   items: SelectedLayoutItemInput[],
   selectedPhotoIds: Set<string>,
 ): { ok: true; errors: [] } | { ok: false; errors: string[] };
+export function resolveSelectedLayoutCollisions(
+  photos: SelectedLayoutPhoto[],
+  items: SelectedLayoutItemInput[],
+  gap?: number,
+): SelectedLayoutItem[];
 export function mergeSelectedLayoutItems(
   photos: SelectedLayoutPhoto[],
   existingItems: SelectedLayoutItemInput[],

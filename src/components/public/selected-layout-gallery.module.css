@@ -30,10 +30,6 @@
 }
 .item img {
   height: auto;
-  opacity: 0;
-  transition: opacity 520ms ease;
-}
-.item[data-loaded="true"] img {
   opacity: 1;
 }
 .fallback {
