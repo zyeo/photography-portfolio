@@ -36,6 +36,7 @@ type DragState = {
     desktop_x: number;
     desktop_y: number;
     desktop_width: number;
+    desktop_height: number;
   }[];
 };
 
@@ -61,6 +62,22 @@ type ResizeState = {
   ratio: number;
 };
 
+type LayoutBox = {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  centerX: number;
+  centerY: number;
+  width: number;
+  height: number;
+};
+
+type AlignmentGuide = {
+  axis: "x" | "y";
+  position: number;
+};
+
 const SNAP_X = 2;
 const SNAP_Y = 1;
 const SNAP_WIDTH = 2;
@@ -68,6 +85,7 @@ const MIN_WIDTH = 12;
 const MAX_WIDTH = 92;
 const ARTBOARD_MIN_HEIGHT = 24;
 const ARTBOARD_BOTTOM_BUFFER = 6;
+const ALIGNMENT_THRESHOLD = 1.1;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -96,6 +114,63 @@ function estimateHeightForWidth(photo: Photo, width: number) {
   return width / aspectRatio(photo) + captionHeight;
 }
 
+function boxFromPosition(left: number, top: number, width: number, height: number): LayoutBox {
+  return {
+    left,
+    right: left + width,
+    top,
+    bottom: top + height,
+    centerX: left + width / 2,
+    centerY: top + height / 2,
+    width,
+    height,
+  };
+}
+
+function boxFromPhoto(photo: Photo) {
+  return boxFromPosition(photo.desktop_x, photo.desktop_y, photo.desktop_width, estimateHeight(photo));
+}
+
+function guidesFromBoxes(boxes: LayoutBox[]) {
+  return boxes.flatMap((box) => [
+    { axis: "x" as const, position: box.left },
+    { axis: "x" as const, position: box.centerX },
+    { axis: "x" as const, position: box.right },
+    { axis: "y" as const, position: box.top },
+    { axis: "y" as const, position: box.centerY },
+    { axis: "y" as const, position: box.bottom },
+  ]);
+}
+
+function nearestGuide(value: number, guides: AlignmentGuide[], axis: AlignmentGuide["axis"]) {
+  return guides
+    .filter((guide) => guide.axis === axis)
+    .map((guide) => ({ guide, distance: Math.abs(guide.position - value) }))
+    .filter(({ distance }) => distance <= ALIGNMENT_THRESHOLD)
+    .sort((a, b) => a.distance - b.distance)[0]?.guide ?? null;
+}
+
+function snapBoxToGuides(box: LayoutBox, guides: AlignmentGuide[]) {
+  const xMatches = [
+    { value: box.left, guide: nearestGuide(box.left, guides, "x") },
+    { value: box.centerX, guide: nearestGuide(box.centerX, guides, "x") },
+    { value: box.right, guide: nearestGuide(box.right, guides, "x") },
+  ].filter((match): match is { value: number; guide: AlignmentGuide } => Boolean(match.guide));
+  const yMatches = [
+    { value: box.top, guide: nearestGuide(box.top, guides, "y") },
+    { value: box.centerY, guide: nearestGuide(box.centerY, guides, "y") },
+    { value: box.bottom, guide: nearestGuide(box.bottom, guides, "y") },
+  ].filter((match): match is { value: number; guide: AlignmentGuide } => Boolean(match.guide));
+  const xMatch = xMatches.sort((a, b) => Math.abs(a.guide.position - a.value) - Math.abs(b.guide.position - b.value))[0];
+  const yMatch = yMatches.sort((a, b) => Math.abs(a.guide.position - a.value) - Math.abs(b.guide.position - b.value))[0];
+
+  return {
+    deltaX: xMatch ? xMatch.guide.position - xMatch.value : 0,
+    deltaY: yMatch ? yMatch.guide.position - yMatch.value : 0,
+    guides: [xMatch?.guide, yMatch?.guide].filter((guide): guide is AlignmentGuide => Boolean(guide)),
+  };
+}
+
 function normalizeMobileOrder(photos: Photo[]) {
   return [...photos]
     .sort((a, b) => (a.mobile_order ?? 999) - (b.mobile_order ?? 999) || (a.selected_order ?? 999) - (b.selected_order ?? 999))
@@ -109,6 +184,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const [resizeState, setResizeState] = useState<ResizeState | null>(null);
+  const [activeGuides, setActiveGuides] = useState<AlignmentGuide[]>([]);
   const [pending, setPending] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -125,6 +201,11 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   const activePhoto = photos.find((photo) => photo.id === activeId) ?? photos[0] ?? null;
   const mobilePhotos = useMemo(() => normalizeMobileOrder(photos), [photos]);
   const artboardHeight = Math.max(ARTBOARD_MIN_HEIGHT, ...photos.map(estimateBottom)) + ARTBOARD_BOTTOM_BUFFER;
+  const guideStyles = activeGuides.map((guide) =>
+    guide.axis === "x"
+      ? ({ left: `${guide.position}%` } as CSSProperties)
+      : ({ "--selected-guide-top": guide.position } as CSSProperties),
+  );
   const selectionStyle = selectionBox
     ? ({
         left: `${Math.min(selectionBox.startX, selectionBox.currentX)}%`,
@@ -197,6 +278,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   function stopAutoScroll() {
     autoScrollActiveRef.current = false;
     lastPointerRef.current = null;
+    setActiveGuides([]);
     if (autoScrollFrameRef.current !== null) {
       window.cancelAnimationFrame(autoScrollFrameRef.current);
       autoScrollFrameRef.current = null;
@@ -229,10 +311,32 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     const minDeltaX = Math.max(...currentDragState.origins.map((origin) => -origin.desktop_x));
     const maxDeltaX = Math.min(...currentDragState.origins.map((origin) => 100 - origin.desktop_width - origin.desktop_x));
     const minDeltaY = Math.max(...currentDragState.origins.map((origin) => -origin.desktop_y));
-    const deltaX = snap(clamp(rawDeltaX, minDeltaX, maxDeltaX), SNAP_X);
-    const deltaY = snap(Math.max(rawDeltaY, minDeltaY), SNAP_Y);
+    const baseDeltaX = clamp(rawDeltaX, minDeltaX, maxDeltaX);
+    const baseDeltaY = Math.max(rawDeltaY, minDeltaY);
+    const groupBox = currentDragState.origins.reduce(
+      (box, origin) => ({
+        left: Math.min(box.left, origin.desktop_x),
+        right: Math.max(box.right, origin.desktop_x + origin.desktop_width),
+        top: Math.min(box.top, origin.desktop_y),
+        bottom: Math.max(box.bottom, origin.desktop_y + origin.desktop_height),
+      }),
+      { left: Number.POSITIVE_INFINITY, right: Number.NEGATIVE_INFINITY, top: Number.POSITIVE_INFINITY, bottom: Number.NEGATIVE_INFINITY },
+    );
+    const proposedBox = boxFromPosition(
+      groupBox.left + baseDeltaX,
+      groupBox.top + baseDeltaY,
+      groupBox.right - groupBox.left,
+      groupBox.bottom - groupBox.top,
+    );
+    const guideResult = snapBoxToGuides(
+      proposedBox,
+      guidesFromBoxes(photos.filter((photo) => !currentDragState.photoIds.includes(photo.id)).map(boxFromPhoto)),
+    );
+    const deltaX = clamp(baseDeltaX + guideResult.deltaX, minDeltaX, maxDeltaX);
+    const deltaY = Math.max(baseDeltaY + guideResult.deltaY, minDeltaY);
     const originsById = new Map(currentDragState.origins.map((origin) => [origin.id, origin]));
 
+    setActiveGuides(guideResult.guides);
     setPhotos((current) =>
       current.map((currentPhoto) => {
         const origin = originsById.get(currentPhoto.id);
@@ -281,15 +385,64 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     const maxWidth = movesLeft
       ? currentResizeState.originX + currentResizeState.originWidth
       : 100 - currentResizeState.originX;
-    const desktop_width = clamp(snap(preferredWidth, SNAP_WIDTH), MIN_WIDTH, Math.min(MAX_WIDTH, maxWidth));
-    const height = estimateHeightForWidth(photo, desktop_width);
-    const desktop_x = movesLeft
-      ? clamp(currentResizeState.originX + currentResizeState.originWidth - desktop_width, 0, 100 - desktop_width)
-      : currentResizeState.originX;
-    const desktop_y = movesTop
-      ? Math.max(0, snap(currentResizeState.originY + currentResizeState.originHeight - height, SNAP_Y))
-      : currentResizeState.originY;
+    const maxClampedWidth = Math.min(MAX_WIDTH, maxWidth);
+    const baseWidth = clamp(preferredWidth, MIN_WIDTH, maxClampedWidth);
+    const buildResizedBox = (width: number) => {
+      const height = estimateHeightForWidth(photo, width);
+      return boxFromPosition(
+        movesLeft
+          ? clamp(currentResizeState.originX + currentResizeState.originWidth - width, 0, 100 - width)
+          : currentResizeState.originX,
+        movesTop ? Math.max(0, currentResizeState.originY + currentResizeState.originHeight - height) : currentResizeState.originY,
+        width,
+        height,
+      );
+    };
+    const resizeGuides = guidesFromBoxes(photos.filter((current) => current.id !== currentResizeState.photoId).map(boxFromPhoto));
+    const baseBox = buildResizedBox(baseWidth);
+    const candidates: { width: number; guide: AlignmentGuide; distance: number }[] = [];
+    const rightAnchor = currentResizeState.originX + currentResizeState.originWidth;
+    const bottomAnchor = currentResizeState.originY + currentResizeState.originHeight;
+    const captionHeight = photo.caption ? 4 : 0;
 
+    for (const guide of resizeGuides) {
+      if (guide.axis === "x") {
+        const widthFromEdge = movesLeft ? rightAnchor - guide.position : guide.position - currentResizeState.originX;
+        const widthFromCenter = movesLeft ? 2 * (rightAnchor - guide.position) : 2 * (guide.position - currentResizeState.originX);
+
+        for (const [width, value] of [
+          [widthFromEdge, movesLeft ? baseBox.left : baseBox.right],
+          [widthFromCenter, baseBox.centerX],
+        ] as const) {
+          if (width >= MIN_WIDTH && width <= maxClampedWidth) {
+            const distance = Math.abs(guide.position - value);
+            if (distance <= ALIGNMENT_THRESHOLD) candidates.push({ width, guide, distance });
+          }
+        }
+      } else {
+        const heightFromEdge = movesTop ? bottomAnchor - guide.position : guide.position - currentResizeState.originY;
+        const heightFromCenter = movesTop ? 2 * (bottomAnchor - guide.position) : 2 * (guide.position - currentResizeState.originY);
+
+        for (const [height, value] of [
+          [heightFromEdge, movesTop ? baseBox.top : baseBox.bottom],
+          [heightFromCenter, baseBox.centerY],
+        ] as const) {
+          const width = (height - captionHeight) * currentResizeState.ratio;
+          if (width >= MIN_WIDTH && width <= maxClampedWidth) {
+            const distance = Math.abs(guide.position - value);
+            if (distance <= ALIGNMENT_THRESHOLD) candidates.push({ width, guide, distance });
+          }
+        }
+      }
+    }
+
+    const snapCandidate = candidates.sort((a, b) => a.distance - b.distance)[0] ?? null;
+    const desktop_width = snapCandidate ? clamp(snapCandidate.width, MIN_WIDTH, maxClampedWidth) : baseWidth;
+    const resizedBox = buildResizedBox(desktop_width);
+    const desktop_x = resizedBox.left;
+    const desktop_y = resizedBox.top;
+
+    setActiveGuides(snapCandidate ? [snapCandidate.guide] : []);
     setPhotos((current) =>
       current.map((currentPhoto) =>
         currentPhoto.id === currentResizeState.photoId
@@ -412,6 +565,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
           desktop_x: current.desktop_x,
           desktop_y: current.desktop_y,
           desktop_width: current.desktop_width,
+          desktop_height: estimateHeight(current),
         })),
     });
     lastPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
@@ -607,7 +761,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
         <div className={styles.toolbar}>
           <div>
             <p className="eyebrow">Desktop artboard</p>
-            <strong className="serif">Snap grid layout</strong>
+            <strong className="serif">Freeform layout</strong>
           </div>
           <div className={styles.toolbarActions}>
             <button type="button" onClick={resetAutoLayout} disabled={pending}>
@@ -630,6 +784,15 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
           onPointerCancel={finishSelection}
         >
           {selectionBox ? <div className={styles.selectionBox} style={selectionStyle} aria-hidden="true" /> : null}
+          {activeGuides.map((guide, index) => (
+            <div
+              key={`${guide.axis}-${guide.position}-${index}`}
+              className={styles.guideLine}
+              data-axis={guide.axis}
+              style={guideStyles[index]}
+              aria-hidden="true"
+            />
+          ))}
           {photos.map((photo) => {
             const thumbnailUrl = getPublicImageUrl(photo.gallery_image_path);
             const selected = photo.id === activePhoto?.id;

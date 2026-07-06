@@ -78,6 +78,27 @@
   pointer-events: none;
 }
 
+.guideLine {
+  position: absolute;
+  z-index: 35;
+  pointer-events: none;
+}
+
+.guideLine[data-axis="x"] {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(125, 46, 32, 0.72);
+}
+
+.guideLine[data-axis="y"] {
+  top: calc(var(--selected-guide-top, 0) * 1cqw);
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(125, 46, 32, 0.72);
+}
+
 .artboardItem {
   position: absolute;
   top: calc(var(--selected-editor-top, 0) * 1cqw);
