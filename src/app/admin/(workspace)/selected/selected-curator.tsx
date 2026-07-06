@@ -66,6 +66,8 @@ const SNAP_Y = 1;
 const SNAP_WIDTH = 2;
 const MIN_WIDTH = 12;
 const MAX_WIDTH = 92;
+const ARTBOARD_MIN_HEIGHT = 24;
+const ARTBOARD_BOTTOM_BUFFER = 6;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -122,7 +124,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
 
   const activePhoto = photos.find((photo) => photo.id === activeId) ?? photos[0] ?? null;
   const mobilePhotos = useMemo(() => normalizeMobileOrder(photos), [photos]);
-  const artboardHeight = Math.max(34, ...photos.map(estimateBottom)) + 2;
+  const artboardHeight = Math.max(ARTBOARD_MIN_HEIGHT, ...photos.map(estimateBottom)) + ARTBOARD_BOTTOM_BUFFER;
   const selectionStyle = selectionBox
     ? ({
         left: `${Math.min(selectionBox.startX, selectionBox.currentX)}%`,

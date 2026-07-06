@@ -64,7 +64,7 @@
     var(--paper-deep);
   background-size: 4% 1rem;
   container-type: inline-size;
-  min-height: max(34rem, calc(var(--selected-editor-height, 34) * 1cqw));
+  min-height: calc(var(--selected-editor-height, 24) * 1cqw);
 }
 
 .selectionBox {
