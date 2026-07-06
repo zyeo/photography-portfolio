@@ -150,11 +150,14 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
 
     const rect = artboard.getBoundingClientRect();
     const rem = remSize();
+    const artboardXPercent = ((event.clientX - rect.left + artboard.scrollLeft) / rect.width) * 100;
+    const artboardYRem = (event.clientY - rect.top + artboard.scrollTop) / rem;
+
     setActiveId(photo.id);
     setDragState({
       photoId: photo.id,
-      grabXPercent: ((event.clientX - rect.left) / rect.width) * 100 - photo.desktop_x,
-      grabYRem: (event.clientY - rect.top) / rem - photo.desktop_y,
+      grabXPercent: artboardXPercent - photo.desktop_x,
+      grabYRem: artboardYRem - photo.desktop_y,
     });
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -168,8 +171,8 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     const photo = photos.find((current) => current.id === dragState.photoId);
     if (!photo) return;
 
-    const nextX = ((event.clientX - rect.left) / rect.width) * 100 - dragState.grabXPercent;
-    const nextY = (event.clientY - rect.top) / rem - dragState.grabYRem;
+    const nextX = ((event.clientX - rect.left + artboard.scrollLeft) / rect.width) * 100 - dragState.grabXPercent;
+    const nextY = (event.clientY - rect.top + artboard.scrollTop) / rem - dragState.grabYRem;
     setPhotos((current) =>
       current.map((currentPhoto) =>
         currentPhoto.id === dragState.photoId
