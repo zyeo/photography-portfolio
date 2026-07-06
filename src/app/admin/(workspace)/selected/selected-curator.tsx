@@ -78,6 +78,13 @@ type AlignmentGuide = {
   position: number;
 };
 
+type SpacingGuide = {
+  axis: "x" | "y";
+  start: number;
+  end: number;
+  cross: number;
+};
+
 const SNAP_X = 2;
 const SNAP_Y = 1;
 const SNAP_WIDTH = 2;
@@ -86,6 +93,8 @@ const MAX_WIDTH = 92;
 const ARTBOARD_MIN_HEIGHT = 24;
 const ARTBOARD_BOTTOM_BUFFER = 6;
 const ALIGNMENT_THRESHOLD = 1.1;
+const SPACING_THRESHOLD = 1.2;
+const MAX_SPACING_GUIDE_GAP = 28;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -171,6 +180,170 @@ function snapBoxToGuides(box: LayoutBox, guides: AlignmentGuide[]) {
   };
 }
 
+function overlap(startA: number, endA: number, startB: number, endB: number) {
+  return Math.max(0, Math.min(endA, endB) - Math.max(startA, startB));
+}
+
+function boxesShareRow(a: LayoutBox, b: LayoutBox) {
+  const shared = overlap(a.top, a.bottom, b.top, b.bottom);
+  const minHeight = Math.min(a.height, b.height);
+  return shared >= minHeight * 0.35 || Math.abs(a.centerY - b.centerY) <= Math.max(4, minHeight * 0.45);
+}
+
+function boxesShareColumn(a: LayoutBox, b: LayoutBox) {
+  const shared = overlap(a.left, a.right, b.left, b.right);
+  const minWidth = Math.min(a.width, b.width);
+  return shared >= minWidth * 0.35 || Math.abs(a.centerX - b.centerX) <= Math.max(4, minWidth * 0.45);
+}
+
+function horizontalSpacingGuide(leftBox: LayoutBox, rightBox: LayoutBox): SpacingGuide {
+  const sharedStart = Math.max(leftBox.top, rightBox.top);
+  const sharedEnd = Math.min(leftBox.bottom, rightBox.bottom);
+  const cross = sharedEnd > sharedStart ? (sharedStart + sharedEnd) / 2 : (leftBox.centerY + rightBox.centerY) / 2;
+
+  return {
+    axis: "x",
+    start: leftBox.right,
+    end: rightBox.left,
+    cross,
+  };
+}
+
+function verticalSpacingGuide(topBox: LayoutBox, bottomBox: LayoutBox): SpacingGuide {
+  const sharedStart = Math.max(topBox.left, bottomBox.left);
+  const sharedEnd = Math.min(topBox.right, bottomBox.right);
+  const cross = sharedEnd > sharedStart ? (sharedStart + sharedEnd) / 2 : (topBox.centerX + bottomBox.centerX) / 2;
+
+  return {
+    axis: "y",
+    start: topBox.bottom,
+    end: bottomBox.top,
+    cross,
+  };
+}
+
+function snapBoxToSpacing(box: LayoutBox, stationaryBoxes: LayoutBox[]) {
+  const xCandidates: { delta: number; distance: number; guides: SpacingGuide[] }[] = [];
+  const yCandidates: { delta: number; distance: number; guides: SpacingGuide[] }[] = [];
+
+  for (const first of stationaryBoxes) {
+    for (const second of stationaryBoxes) {
+      if (first === second) continue;
+
+      if (first.right < second.left && boxesShareRow(first, second)) {
+        const targetGap = second.left - first.right;
+
+        if (targetGap > 0 && targetGap <= MAX_SPACING_GUIDE_GAP) {
+          if (second.right <= box.left && boxesShareRow(second, box)) {
+            const currentGap = box.left - second.right;
+            const distance = Math.abs(currentGap - targetGap);
+
+            if (distance <= SPACING_THRESHOLD) {
+              const delta = second.right + targetGap - box.left;
+              const snappedBox = boxFromPosition(box.left + delta, box.top, box.width, box.height);
+              xCandidates.push({
+                delta,
+                distance,
+                guides: [horizontalSpacingGuide(first, second), horizontalSpacingGuide(second, snappedBox)],
+              });
+            }
+          }
+
+          if (box.right <= first.left && boxesShareRow(box, first)) {
+            const currentGap = first.left - box.right;
+            const distance = Math.abs(currentGap - targetGap);
+
+            if (distance <= SPACING_THRESHOLD) {
+              const delta = first.left - targetGap - box.right;
+              const snappedBox = boxFromPosition(box.left + delta, box.top, box.width, box.height);
+              xCandidates.push({
+                delta,
+                distance,
+                guides: [horizontalSpacingGuide(snappedBox, first), horizontalSpacingGuide(first, second)],
+              });
+            }
+          }
+
+          if (first.right <= box.left && box.right <= second.left && boxesShareRow(first, box) && boxesShareRow(box, second)) {
+            const desiredLeft = (first.right + second.left - box.width) / 2;
+            const delta = desiredLeft - box.left;
+            const distance = Math.abs(delta);
+
+            if (distance <= SPACING_THRESHOLD) {
+              const snappedBox = boxFromPosition(desiredLeft, box.top, box.width, box.height);
+              xCandidates.push({
+                delta,
+                distance,
+                guides: [horizontalSpacingGuide(first, snappedBox), horizontalSpacingGuide(snappedBox, second)],
+              });
+            }
+          }
+        }
+      }
+
+      if (first.bottom < second.top && boxesShareColumn(first, second)) {
+        const targetGap = second.top - first.bottom;
+
+        if (targetGap > 0 && targetGap <= MAX_SPACING_GUIDE_GAP) {
+          if (second.bottom <= box.top && boxesShareColumn(second, box)) {
+            const currentGap = box.top - second.bottom;
+            const distance = Math.abs(currentGap - targetGap);
+
+            if (distance <= SPACING_THRESHOLD) {
+              const delta = second.bottom + targetGap - box.top;
+              const snappedBox = boxFromPosition(box.left, box.top + delta, box.width, box.height);
+              yCandidates.push({
+                delta,
+                distance,
+                guides: [verticalSpacingGuide(first, second), verticalSpacingGuide(second, snappedBox)],
+              });
+            }
+          }
+
+          if (box.bottom <= first.top && boxesShareColumn(box, first)) {
+            const currentGap = first.top - box.bottom;
+            const distance = Math.abs(currentGap - targetGap);
+
+            if (distance <= SPACING_THRESHOLD) {
+              const delta = first.top - targetGap - box.bottom;
+              const snappedBox = boxFromPosition(box.left, box.top + delta, box.width, box.height);
+              yCandidates.push({
+                delta,
+                distance,
+                guides: [verticalSpacingGuide(snappedBox, first), verticalSpacingGuide(first, second)],
+              });
+            }
+          }
+
+          if (first.bottom <= box.top && box.bottom <= second.top && boxesShareColumn(first, box) && boxesShareColumn(box, second)) {
+            const desiredTop = (first.bottom + second.top - box.height) / 2;
+            const delta = desiredTop - box.top;
+            const distance = Math.abs(delta);
+
+            if (distance <= SPACING_THRESHOLD) {
+              const snappedBox = boxFromPosition(box.left, desiredTop, box.width, box.height);
+              yCandidates.push({
+                delta,
+                distance,
+                guides: [verticalSpacingGuide(first, snappedBox), verticalSpacingGuide(snappedBox, second)],
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const xMatch = xCandidates.sort((a, b) => a.distance - b.distance)[0];
+  const yMatch = yCandidates.sort((a, b) => a.distance - b.distance)[0];
+
+  return {
+    deltaX: xMatch?.delta ?? 0,
+    deltaY: yMatch?.delta ?? 0,
+    guides: [...(xMatch?.guides ?? []), ...(yMatch?.guides ?? [])],
+  };
+}
+
 function normalizeMobileOrder(photos: Photo[]) {
   return [...photos]
     .sort((a, b) => (a.mobile_order ?? 999) - (b.mobile_order ?? 999) || (a.selected_order ?? 999) - (b.selected_order ?? 999))
@@ -185,6 +358,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const [resizeState, setResizeState] = useState<ResizeState | null>(null);
   const [activeGuides, setActiveGuides] = useState<AlignmentGuide[]>([]);
+  const [activeSpacingGuides, setActiveSpacingGuides] = useState<SpacingGuide[]>([]);
   const [pending, setPending] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -205,6 +379,19 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     guide.axis === "x"
       ? ({ left: `${guide.position}%` } as CSSProperties)
       : ({ "--selected-guide-top": guide.position } as CSSProperties),
+  );
+  const spacingGuideStyles = activeSpacingGuides.map((guide) =>
+    guide.axis === "x"
+      ? ({
+          left: `${guide.start}%`,
+          width: `${Math.max(guide.end - guide.start, 0)}%`,
+          "--selected-spacing-cross": guide.cross,
+        } as CSSProperties)
+      : ({
+          left: `${guide.cross}%`,
+          "--selected-spacing-start": guide.start,
+          "--selected-spacing-length": Math.max(guide.end - guide.start, 0),
+        } as CSSProperties),
   );
   const selectionStyle = selectionBox
     ? ({
@@ -279,6 +466,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     autoScrollActiveRef.current = false;
     lastPointerRef.current = null;
     setActiveGuides([]);
+    setActiveSpacingGuides([]);
     if (autoScrollFrameRef.current !== null) {
       window.cancelAnimationFrame(autoScrollFrameRef.current);
       autoScrollFrameRef.current = null;
@@ -328,15 +516,26 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
       groupBox.right - groupBox.left,
       groupBox.bottom - groupBox.top,
     );
+    const stationaryBoxes = photos.filter((photo) => !currentDragState.photoIds.includes(photo.id)).map(boxFromPhoto);
     const guideResult = snapBoxToGuides(
       proposedBox,
-      guidesFromBoxes(photos.filter((photo) => !currentDragState.photoIds.includes(photo.id)).map(boxFromPhoto)),
+      guidesFromBoxes(stationaryBoxes),
     );
-    const deltaX = clamp(baseDeltaX + guideResult.deltaX, minDeltaX, maxDeltaX);
-    const deltaY = Math.max(baseDeltaY + guideResult.deltaY, minDeltaY);
+    const alignedDeltaX = clamp(baseDeltaX + guideResult.deltaX, minDeltaX, maxDeltaX);
+    const alignedDeltaY = Math.max(baseDeltaY + guideResult.deltaY, minDeltaY);
+    const alignedBox = boxFromPosition(
+      groupBox.left + alignedDeltaX,
+      groupBox.top + alignedDeltaY,
+      groupBox.right - groupBox.left,
+      groupBox.bottom - groupBox.top,
+    );
+    const spacingResult = snapBoxToSpacing(alignedBox, stationaryBoxes);
+    const deltaX = clamp(alignedDeltaX + spacingResult.deltaX, minDeltaX, maxDeltaX);
+    const deltaY = Math.max(alignedDeltaY + spacingResult.deltaY, minDeltaY);
     const originsById = new Map(currentDragState.origins.map((origin) => [origin.id, origin]));
 
     setActiveGuides(guideResult.guides);
+    setActiveSpacingGuides(spacingResult.guides);
     setPhotos((current) =>
       current.map((currentPhoto) => {
         const origin = originsById.get(currentPhoto.id);
@@ -443,6 +642,7 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     const desktop_y = resizedBox.top;
 
     setActiveGuides(snapCandidate ? [snapCandidate.guide] : []);
+    setActiveSpacingGuides([]);
     setPhotos((current) =>
       current.map((currentPhoto) =>
         currentPhoto.id === currentResizeState.photoId
@@ -790,6 +990,15 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
               className={styles.guideLine}
               data-axis={guide.axis}
               style={guideStyles[index]}
+              aria-hidden="true"
+            />
+          ))}
+          {activeSpacingGuides.map((guide, index) => (
+            <div
+              key={`${guide.axis}-${guide.start}-${guide.end}-${index}`}
+              className={styles.spacingGuide}
+              data-axis={guide.axis}
+              style={spacingGuideStyles[index]}
               aria-hidden="true"
             />
           ))}

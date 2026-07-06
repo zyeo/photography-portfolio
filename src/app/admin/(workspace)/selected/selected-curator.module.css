@@ -99,6 +99,62 @@
   background: rgba(125, 46, 32, 0.72);
 }
 
+.spacingGuide {
+  position: absolute;
+  z-index: 36;
+  pointer-events: none;
+}
+
+.spacingGuide::before,
+.spacingGuide::after {
+  position: absolute;
+  content: "";
+  background: rgba(125, 46, 32, 0.78);
+}
+
+.spacingGuide[data-axis="x"] {
+  top: calc(var(--selected-spacing-cross, 0) * 1cqw);
+  height: 0;
+  border-top: 2px solid rgba(125, 46, 32, 0.78);
+}
+
+.spacingGuide[data-axis="x"]::before,
+.spacingGuide[data-axis="x"]::after {
+  top: -0.28rem;
+  width: 1px;
+  height: 0.55rem;
+}
+
+.spacingGuide[data-axis="x"]::before {
+  left: 0;
+}
+
+.spacingGuide[data-axis="x"]::after {
+  right: 0;
+}
+
+.spacingGuide[data-axis="y"] {
+  top: calc(var(--selected-spacing-start, 0) * 1cqw);
+  height: calc(var(--selected-spacing-length, 0) * 1cqw);
+  width: 0;
+  border-left: 2px solid rgba(125, 46, 32, 0.78);
+}
+
+.spacingGuide[data-axis="y"]::before,
+.spacingGuide[data-axis="y"]::after {
+  left: -0.28rem;
+  width: 0.55rem;
+  height: 1px;
+}
+
+.spacingGuide[data-axis="y"]::before {
+  top: 0;
+}
+
+.spacingGuide[data-axis="y"]::after {
+  bottom: 0;
+}
+
 .artboardItem {
   position: absolute;
   top: calc(var(--selected-editor-top, 0) * 1cqw);
