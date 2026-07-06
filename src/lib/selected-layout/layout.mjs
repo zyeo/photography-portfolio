@@ -52,11 +52,6 @@ function aspectRatio(photo) {
   return photo.image_width && photo.image_height ? photo.image_width / photo.image_height : 1.3;
 }
 
-function itemHeight(item, photo) {
-  const captionHeight = item.caption ? 3.75 : 0;
-  return (item.desktop_width * 0.92) / aspectRatio(photo) + captionHeight;
-}
-
 function desktopWidth(index, photo) {
   const ratio = aspectRatio(photo);
 
@@ -75,7 +70,7 @@ function desktopX(index, width) {
 }
 
 function estimatedHeight(width, photo) {
-  return (width * 0.92) / aspectRatio(photo);
+  return width / aspectRatio(photo);
 }
 
 export function buildDefaultSelectedLayoutItems(photos) {
@@ -96,26 +91,6 @@ export function buildDefaultSelectedLayoutItems(photos) {
     nextY = item.desktop_y + estimatedHeight(item.desktop_width, photo) + 7;
     return item;
   });
-}
-
-export function resolveSelectedLayoutCollisions(photos, items, gap = 7) {
-  const photoById = new Map(photos.map((photo) => [String(photo.id), photo]));
-  let nextY = 0;
-
-  return [...items]
-    .map((item) => normalizeSelectedLayoutItem(item))
-    .sort((a, b) => (a.mobile_order ?? 999) - (b.mobile_order ?? 999) || a.desktop_y - b.desktop_y)
-    .map((item) => {
-      const photo = photoById.get(item.photo_id);
-      if (!photo) return item;
-
-      const resolved = {
-        ...item,
-        desktop_y: Math.max(item.desktop_y, nextY),
-      };
-      nextY = resolved.desktop_y + itemHeight(resolved, photo) + gap;
-      return resolved;
-    });
 }
 
 export function validateSelectedLayoutItems(items, selectedPhotoIds) {

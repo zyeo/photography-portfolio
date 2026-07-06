@@ -35,11 +35,6 @@ export function validateSelectedLayoutItems(
   items: SelectedLayoutItemInput[],
   selectedPhotoIds: Set<string>,
 ): { ok: true; errors: [] } | { ok: false; errors: string[] };
-export function resolveSelectedLayoutCollisions(
-  photos: SelectedLayoutPhoto[],
-  items: SelectedLayoutItemInput[],
-  gap?: number,
-): SelectedLayoutItem[];
 export function mergeSelectedLayoutItems(
   photos: SelectedLayoutPhoto[],
   existingItems: SelectedLayoutItemInput[],

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import type { PointerEvent } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import { buildDefaultSelectedLayoutItems } from "@/lib/selected-layout/layout.mjs";
 import styles from "./selected-curator.module.css";
@@ -30,7 +30,7 @@ type Photo = {
 type DragState = {
   photoId: string;
   grabXPercent: number;
-  grabYRem: number;
+  grabYCanvas: number;
 };
 
 const SNAP_X = 2;
@@ -38,11 +38,6 @@ const SNAP_Y = 1;
 const SNAP_WIDTH = 2;
 const MIN_WIDTH = 12;
 const MAX_WIDTH = 92;
-
-function remSize() {
-  if (typeof window === "undefined") return 16;
-  return Number.parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
-}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
@@ -57,8 +52,8 @@ function aspectRatio(photo: Photo) {
 }
 
 function estimateBottom(photo: Photo) {
-  const captionHeight = photo.caption ? 3.75 : 0;
-  return photo.desktop_y + (photo.desktop_width * 0.92) / aspectRatio(photo) + captionHeight;
+  const captionHeight = photo.caption ? 4 : 0;
+  return photo.desktop_y + photo.desktop_width / aspectRatio(photo) + captionHeight;
 }
 
 function normalizeMobileOrder(photos: Photo[]) {
@@ -149,15 +144,14 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     if (!artboard || pending) return;
 
     const rect = artboard.getBoundingClientRect();
-    const rem = remSize();
     const artboardXPercent = ((event.clientX - rect.left + artboard.scrollLeft) / rect.width) * 100;
-    const artboardYRem = (event.clientY - rect.top + artboard.scrollTop) / rem;
+    const artboardYCanvas = ((event.clientY - rect.top + artboard.scrollTop) / rect.width) * 100;
 
     setActiveId(photo.id);
     setDragState({
       photoId: photo.id,
       grabXPercent: artboardXPercent - photo.desktop_x,
-      grabYRem: artboardYRem - photo.desktop_y,
+      grabYCanvas: artboardYCanvas - photo.desktop_y,
     });
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -167,12 +161,11 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
     if (!artboard || !dragState || pending) return;
 
     const rect = artboard.getBoundingClientRect();
-    const rem = remSize();
     const photo = photos.find((current) => current.id === dragState.photoId);
     if (!photo) return;
 
     const nextX = ((event.clientX - rect.left + artboard.scrollLeft) / rect.width) * 100 - dragState.grabXPercent;
-    const nextY = (event.clientY - rect.top + artboard.scrollTop) / rem - dragState.grabYRem;
+    const nextY = ((event.clientY - rect.top + artboard.scrollTop) / rect.width) * 100 - dragState.grabYCanvas;
     setPhotos((current) =>
       current.map((currentPhoto) =>
         currentPhoto.id === dragState.photoId
@@ -279,7 +272,11 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
         </div>
         {error ? <p className={styles.error} role="alert">{error}</p> : null}
         {status ? <p className={styles.status} role="status">{status}</p> : null}
-        <div ref={artboardRef} className={styles.artboard} style={{ minHeight: `${artboardHeight}rem` }}>
+        <div
+          ref={artboardRef}
+          className={styles.artboard}
+          style={{ "--selected-editor-height": artboardHeight } as CSSProperties}
+        >
           {photos.map((photo) => {
             const thumbnailUrl = getPublicImageUrl(photo.gallery_image_path);
             const selected = photo.id === activePhoto?.id;
@@ -292,10 +289,10 @@ export function SelectedCurator({ initialPhotos }: { initialPhotos: Photo[] }) {
                 data-active={selected}
                 style={{
                   left: `${photo.desktop_x}%`,
-                  top: `${photo.desktop_y}rem`,
                   width: `${photo.desktop_width}%`,
                   zIndex: selected ? 10 : photo.desktop_z_index,
-                }}
+                  "--selected-editor-top": photo.desktop_y,
+                } as CSSProperties}
                 onClick={() => setActiveId(photo.id)}
                 onPointerDown={(event) => onPointerDown(event, photo)}
                 onPointerMove={onPointerMove}

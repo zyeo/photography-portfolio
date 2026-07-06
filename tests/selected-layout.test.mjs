@@ -5,7 +5,6 @@ import {
   buildDefaultSelectedLayoutItems,
   mergeSelectedLayoutItems,
   normalizeSelectedLayoutItem,
-  resolveSelectedLayoutCollisions,
   validateSelectedLayoutItems,
 } from "../src/lib/selected-layout/layout.mjs";
 
@@ -34,6 +33,13 @@ test("buildDefaultSelectedLayoutItems creates a desktop spread and mobile order"
   );
 });
 
+test("default desktop y uses the same canvas-width unit as desktop width", () => {
+  const items = buildDefaultSelectedLayoutItems(photos);
+
+  assert.equal(items[1].desktop_y, items[0].desktop_width / (1600 / 1000) + 7);
+  assert.equal(items[2].desktop_y, items[1].desktop_y + items[1].desktop_width / (900 / 1400) + 7);
+});
+
 test("normalizeSelectedLayoutItem clamps unsafe values and trims captions", () => {
   const item = normalizeSelectedLayoutItem({
     photo_id: "lead",
@@ -51,20 +57,6 @@ test("normalizeSelectedLayoutItem clamps unsafe values and trims captions", () =
   assert.equal(item.desktop_z_index, 4);
   assert.equal(item.mobile_order, null);
   assert.equal(item.caption.length, 280);
-});
-
-test("resolveSelectedLayoutCollisions preserves x and width but pushes overlapping rows down", () => {
-  const items = resolveSelectedLayoutCollisions(photos, [
-    { photo_id: "lead", desktop_x: 0, desktop_y: 0, desktop_width: 70, mobile_order: 1 },
-    { photo_id: "portrait", desktop_x: 10, desktop_y: 17, desktop_width: 28, mobile_order: 2 },
-    { photo_id: "wide", desktop_x: 50, desktop_y: 17, desktop_width: 46, mobile_order: 3 },
-  ]);
-
-  assert.equal(items[1].desktop_x, 10);
-  assert.equal(items[2].desktop_x, 50);
-  assert.equal(items[2].desktop_width, 46);
-  assert.equal(items[1].desktop_y > items[0].desktop_y, true);
-  assert.equal(items[2].desktop_y > items[1].desktop_y, true);
 });
 
 test("mergeSelectedLayoutItems preserves explicit saved positions", () => {

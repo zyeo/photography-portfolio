@@ -32,11 +32,6 @@ function toCssPercent(value: number | string | null | undefined) {
   return typeof value === "number" ? `${value}%` : value;
 }
 
-function toCssRem(value: number | string | null | undefined) {
-  if (value === null || value === undefined) return undefined;
-  return typeof value === "number" ? `${value}rem` : value;
-}
-
 function toCssNumber(value: number | string | null | undefined) {
   if (value === null || value === undefined) return undefined;
   return typeof value === "number" ? String(value) : value;
@@ -61,8 +56,8 @@ function getEstimatedDesktopHeight(item: SelectedLayoutGalleryItem) {
 
   if (!widthValue || !imageRatio) return 0;
 
-  const captionHeight = item.layout?.caption ? 3.5 : 0;
-  return Math.ceil(toNumericValue(item.layout?.desktop_y) + (widthValue * 0.96) / imageRatio + captionHeight);
+  const captionHeight = item.layout?.caption ? 4 : 0;
+  return Math.ceil(toNumericValue(item.layout?.desktop_y) + widthValue / imageRatio + captionHeight);
 }
 
 export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGalleryItem[] }) {
@@ -138,7 +133,7 @@ export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGaller
     <>
       <div
         className={styles.gallery}
-        style={desktopMinHeight > 0 ? ({ minHeight: `${desktopMinHeight}rem` } as CSSProperties) : undefined}
+        style={desktopMinHeight > 0 ? ({ "--selected-gallery-height": desktopMinHeight } as CSSProperties) : undefined}
       >
         {photos.map((photo, index) => {
           const galleryImageUrl = getPublicImageUrl(photo.gallery_image_path);
@@ -147,7 +142,7 @@ export function SelectedLayoutGallery({ photos }: { photos: SelectedLayoutGaller
           const itemStyle = {
             order,
             "--selected-gallery-left": toCssPercent(photo.layout?.desktop_x),
-            "--selected-gallery-top": toCssRem(photo.layout?.desktop_y),
+            "--selected-gallery-top": toCssNumber(photo.layout?.desktop_y),
             "--selected-gallery-width": toCssPercent(photo.layout?.desktop_width),
             "--selected-gallery-z": toCssNumber(photo.layout?.desktop_z_index),
           } as CSSProperties;

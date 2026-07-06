@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: .75rem;
+  container-type: inline-size;
 }
 .item {
   display: block;
@@ -106,11 +107,12 @@
 @media (min-width: 48rem) {
   .gallery {
     display: block;
+    min-height: calc(var(--selected-gallery-height, 0) * 1cqw);
   }
   .item {
     position: absolute;
     left: var(--selected-gallery-left);
-    top: var(--selected-gallery-top);
+    top: calc(var(--selected-gallery-top, 0) * 1cqw);
     width: var(--selected-gallery-width, 100%);
     z-index: var(--selected-gallery-z, 1);
   }

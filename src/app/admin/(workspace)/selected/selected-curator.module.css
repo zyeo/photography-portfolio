@@ -57,11 +57,13 @@
     linear-gradient(90deg, rgba(33, 31, 27, 0.055) 1px, transparent 1px),
     var(--paper-deep);
   background-size: 4% 1rem;
-  min-height: 34rem;
+  container-type: inline-size;
+  min-height: max(34rem, calc(var(--selected-editor-height, 34) * 1cqw));
 }
 
 .artboardItem {
   position: absolute;
+  top: calc(var(--selected-editor-top, 0) * 1cqw);
   display: block;
   border: 1px solid transparent;
   padding: 0;
