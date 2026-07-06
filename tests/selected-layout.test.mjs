@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildDefaultSelectedLayoutItems,
+  mergeSelectedLayoutItems,
   normalizeSelectedLayoutItem,
   resolveSelectedLayoutCollisions,
   validateSelectedLayoutItems,
@@ -64,6 +65,17 @@ test("resolveSelectedLayoutCollisions preserves x and width but pushes overlappi
   assert.equal(items[2].desktop_width, 46);
   assert.equal(items[1].desktop_y > items[0].desktop_y, true);
   assert.equal(items[2].desktop_y > items[1].desktop_y, true);
+});
+
+test("mergeSelectedLayoutItems preserves explicit saved positions", () => {
+  const items = mergeSelectedLayoutItems(photos, [
+    { photo_id: "lead", desktop_x: 0, desktop_y: 0, desktop_width: 70, mobile_order: 1 },
+    { photo_id: "portrait", desktop_x: 10, desktop_y: 17, desktop_width: 28, mobile_order: 2 },
+    { photo_id: "wide", desktop_x: 50, desktop_y: 17, desktop_width: 46, mobile_order: 3 },
+  ]);
+
+  assert.equal(items[1].desktop_y, 17);
+  assert.equal(items[2].desktop_y, 17);
 });
 
 test("validateSelectedLayoutItems rejects duplicate and unknown photos", () => {

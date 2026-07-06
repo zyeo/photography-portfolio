@@ -146,12 +146,10 @@ export function validateSelectedLayoutItems(items, selectedPhotoIds) {
 
 export function mergeSelectedLayoutItems(photos, existingItems) {
   const existingByPhotoId = new Map(existingItems.map((item) => [item.photo_id, item]));
-  const items = buildDefaultSelectedLayoutItems(photos).map((defaultItem) =>
+  return buildDefaultSelectedLayoutItems(photos).map((defaultItem) =>
     normalizeSelectedLayoutItem({
       ...defaultItem,
       ...(existingByPhotoId.get(defaultItem.photo_id) ?? {}),
     }),
   );
-
-  return resolveSelectedLayoutCollisions(photos, items);
 }
