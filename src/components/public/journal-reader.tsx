@@ -11,6 +11,7 @@ type JournalReaderProps = {
   entry: JournalReaderEntry;
   older: JournalReaderEntry | null;
   newer: JournalReaderEntry | null;
+  preloadEntries: JournalReaderEntry[];
 };
 
 function getImageUrl(entry: JournalReaderEntry) {
@@ -37,11 +38,10 @@ function NeighborFrame({
     <Link className={styles.ghost} href={getJournalHref(entry)} data-direction={direction} aria-label={`${label}: ${entry.title}`}>
       <figure>
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt=""
-            width={entry.photos?.image_width ?? undefined}
-            height={entry.photos?.image_height ?? undefined}
+          <span
+            className={styles.ghostImage}
+            aria-hidden="true"
+            style={{ backgroundImage: `url(${imageUrl}), ${getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date)}` }}
           />
         ) : (
           <span aria-hidden="true" style={{ background: getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date) }} />
@@ -52,9 +52,16 @@ function NeighborFrame({
   );
 }
 
-export function JournalReader({ entry, older, newer }: JournalReaderProps) {
+export function JournalReader({ entry, older, newer, preloadEntries }: JournalReaderProps) {
   const router = useRouter();
   const imageUrl = getImageUrl(entry);
+  const preloadUrls = [
+    ...new Set(
+      preloadEntries
+        .map((preloadEntry) => getImageUrl(preloadEntry))
+        .filter((url): url is string => Boolean(url)),
+    ),
+  ];
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -89,12 +96,10 @@ export function JournalReader({ entry, older, newer }: JournalReaderProps) {
         <NeighborFrame entry={older} direction="older" />
         <figure className={styles.stage}>
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt=""
-              width={entry.photos?.image_width ?? undefined}
-              height={entry.photos?.image_height ?? undefined}
-              fetchPriority="high"
+            <span
+              className={styles.stageImage}
+              aria-hidden="true"
+              style={{ backgroundImage: `url(${imageUrl}), ${getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date)}` }}
             />
           ) : (
             <span aria-hidden="true" style={{ background: getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date) }} />
@@ -122,6 +127,11 @@ export function JournalReader({ entry, older, newer }: JournalReaderProps) {
         <Link href="/journal/archive">Archive</Link>
         {newer ? <Link href={getJournalHref(newer)}>Newer</Link> : <span />}
       </nav>
+      <div className={styles.preload} aria-hidden="true">
+        {preloadUrls.map((url) => (
+          <img key={url} src={url} alt="" loading="eager" />
+        ))}
+      </div>
     </main>
   );
 }

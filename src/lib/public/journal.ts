@@ -25,9 +25,10 @@ export type JournalReaderData = {
   entry: JournalReaderEntry | null;
   older: JournalReaderEntry | null;
   newer: JournalReaderEntry | null;
+  preloadEntries: JournalReaderEntry[];
 };
 
-async function getOlderNeighbor(
+async function getOlderNeighbors(
   supabase: Awaited<ReturnType<typeof createClient>>,
   entryDate: string,
 ) {
@@ -37,13 +38,12 @@ async function getOlderNeighbor(
     .eq("published", true)
     .lt("entry_date", entryDate)
     .order("entry_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(3);
 
-  return (data ?? null) as JournalReaderEntry | null;
+  return (data ?? []) as JournalReaderEntry[];
 }
 
-async function getNewerNeighbor(
+async function getNewerNeighbors(
   supabase: Awaited<ReturnType<typeof createClient>>,
   entryDate: string,
 ) {
@@ -53,10 +53,9 @@ async function getNewerNeighbor(
     .eq("published", true)
     .gt("entry_date", entryDate)
     .order("entry_date", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .limit(3);
 
-  return (data ?? null) as JournalReaderEntry | null;
+  return (data ?? []) as JournalReaderEntry[];
 }
 
 export async function getJournalReaderData(entryDate?: string): Promise<JournalReaderData> {
@@ -77,12 +76,17 @@ export async function getJournalReaderData(entryDate?: string): Promise<JournalR
         .maybeSingle();
 
   const entry = (data ?? null) as JournalReaderEntry | null;
-  if (!entry) return { entry: null, older: null, newer: null };
+  if (!entry) return { entry: null, older: null, newer: null, preloadEntries: [] };
 
-  const [older, newer] = await Promise.all([
-    getOlderNeighbor(supabase, entry.entry_date),
-    getNewerNeighbor(supabase, entry.entry_date),
+  const [olderEntries, newerEntries] = await Promise.all([
+    getOlderNeighbors(supabase, entry.entry_date),
+    getNewerNeighbors(supabase, entry.entry_date),
   ]);
 
-  return { entry, older, newer };
+  return {
+    entry,
+    older: olderEntries[0] ?? null,
+    newer: newerEntries[0] ?? null,
+    preloadEntries: [...olderEntries, ...newerEntries],
+  };
 }
