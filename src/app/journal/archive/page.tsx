@@ -5,111 +5,150 @@ import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./page.module.css";
 
-type JournalPageProps = { searchParams: Promise<{ page?: string }> };
-const ARCHIVE_PAGE_SIZE = 24;
+type JournalArchiveProps = { searchParams: Promise<{ month?: string }> };
 
-function getPageNumber(value: string | undefined) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 1 ? parsed : 1;
+type CalendarEntry = {
+  entry_date: string;
+  title: string;
+  photos: {
+    id: string;
+    gallery_image_path: string | null;
+    location_name: string | null;
+  } | null;
+};
+type CalendarCell =
+  | { key: string; type: "blank" }
+  | { key: string; type: "day"; day: number; date: string; entry: CalendarEntry | undefined };
+
+const monthFormatter = new Intl.DateTimeFormat("en", {
+  month: "long",
+  timeZone: "UTC",
+  year: "numeric",
+});
+const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function isValidMonth(value: string | undefined) {
+  if (!value || !/^\d{4}-\d{2}$/.test(value)) return false;
+  const monthNumber = Number(value.slice(5, 7));
+  return monthNumber >= 1 && monthNumber <= 12;
 }
 
-function getExcerpt(reflection: string) {
-  return reflection.length > 150 ? `${reflection.slice(0, 147).trim()}...` : reflection;
+function getMonthStart(month: string) {
+  return new Date(`${month}-01T00:00:00.000Z`);
 }
 
-export default async function JournalArchivePage({ searchParams }: JournalPageProps) {
+function getMonthKey(date: Date) {
+  return date.toISOString().slice(0, 7);
+}
+
+function addMonths(date: Date, amount: number) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + amount, 1));
+}
+
+function getDaysInMonth(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+}
+
+function getLeadingBlankCount(date: Date) {
+  return (date.getUTCDay() + 6) % 7;
+}
+
+export default async function JournalArchivePage({ searchParams }: JournalArchiveProps) {
   const params = await searchParams;
-  const page = getPageNumber(params.page);
-  const from = page === 1 ? 0 : 1 + (page - 1) * ARCHIVE_PAGE_SIZE;
-  const to = page === 1 ? ARCHIVE_PAGE_SIZE : from + ARCHIVE_PAGE_SIZE - 1;
   const supabase = await createClient();
-  const { data: entries, count } = await supabase
+  const { data: latestEntry } = await supabase
     .from("journal_entries")
-    .select("entry_date, title, reflection, photos(id, gallery_image_path, image_width, image_height, location_name)", { count: "exact" })
+    .select("entry_date")
     .eq("published", true)
     .order("entry_date", { ascending: false })
-    .range(from, to);
-  const journalEntries = (entries ?? []) as Array<{
-    entry_date: string;
-    title: string;
-    reflection: string;
-    photos: { id: string; gallery_image_path: string | null; image_width: number | null; image_height: number | null; location_name: string | null } | null;
-  }>;
-  const latest = page === 1 ? journalEntries[0] : null;
-  const latestImageUrl = getPublicImageUrl(latest?.photos?.gallery_image_path ?? null);
-  const archiveEntries = page === 1 ? journalEntries.slice(1) : journalEntries;
-  const hasOlder = typeof count === "number" && to + 1 < count;
-  const hasNewer = page > 1;
+    .limit(1)
+    .maybeSingle();
+  const latestMonth = latestEntry?.entry_date?.slice(0, 7) ?? getMonthKey(new Date());
+  const month = isValidMonth(params.month) ? params.month! : latestMonth;
+  const monthStart = getMonthStart(month);
+  const nextMonthStart = addMonths(monthStart, 1);
+  const previousMonth = getMonthKey(addMonths(monthStart, -1));
+  const nextMonth = getMonthKey(nextMonthStart);
+  const monthStartDate = `${month}-01`;
+  const nextMonthStartDate = `${nextMonth}-01`;
+  const daysInMonth = getDaysInMonth(monthStart);
+  const leadingBlankCount = getLeadingBlankCount(monthStart);
+
+  const { data: entries } = await supabase
+    .from("journal_entries")
+    .select("entry_date, title, photos(id, gallery_image_path, location_name)")
+    .eq("published", true)
+    .gte("entry_date", monthStartDate)
+    .lt("entry_date", nextMonthStartDate)
+    .order("entry_date", { ascending: true });
+  const entryByDate = new Map(
+    ((entries ?? []) as CalendarEntry[]).map((entry) => [entry.entry_date, entry]),
+  );
+  const calendarCells: CalendarCell[] = [
+    ...Array.from({ length: leadingBlankCount }, (_, index) => ({ key: `blank-${index}`, type: "blank" as const })),
+    ...Array.from({ length: daysInMonth }, (_, index) => {
+      const day = index + 1;
+      const date = `${month}-${String(day).padStart(2, "0")}`;
+      return { key: date, type: "day" as const, day, date, entry: entryByDate.get(date) };
+    }),
+  ];
 
   return (
     <>
       <SiteHeader />
       <main className={`${styles.page} shell`}>
-        <h1 className="display">Journal Archive</h1>
-        <p className="page-kicker">A journal of photographs, places, and the practice of noticing.</p>
-        {latest ? (
-          <article className={styles.featured}>
-            <figure>
-              {latestImageUrl ? (
-                <img
-                  src={latestImageUrl}
-                  alt=""
-                  width={latest.photos?.image_width ?? undefined}
-                  height={latest.photos?.image_height ?? undefined}
-                />
-              ) : (
-                <span aria-hidden="true" style={{ background: getPhotoVisualStyle(latest.photos?.id ?? latest.entry_date) }} />
-              )}
-            </figure>
-            <section>
-              <span>{latest.entry_date}</span>
-              <h2 className="display">{latest.title}</h2>
-              <p className="serif">{latest.reflection}</p>
-              <Link className="utility-link" href={`/journal/${latest.entry_date}`}>Read entry</Link>
-            </section>
-          </article>
-        ) : null}
-        {archiveEntries.length ? (
-          <ol className={styles.archive}>
-            {archiveEntries.map((entry) => {
-              const thumbnailUrl = getPublicImageUrl(entry.photos?.gallery_image_path ?? null);
+        <div className={styles.heading}>
+          <div>
+            <h1 className="display">Journal Archive</h1>
+            <p className="page-kicker">A calendar of photographs, places, and the practice of noticing.</p>
+          </div>
+          <Link className="utility-link" href="/journal">Latest entry</Link>
+        </div>
 
-              return (
-                <li key={entry.entry_date}>
-                  <Link href={`/journal/${entry.entry_date}`} aria-label={`Read ${entry.title}`}>
+        <nav className={styles.monthNav} aria-label="Journal archive month navigation">
+          <Link href={`/journal/archive?month=${previousMonth}`}>Previous</Link>
+          <strong className="display">{monthFormatter.format(monthStart)}</strong>
+          <Link href={`/journal/archive?month=${nextMonth}`}>Next</Link>
+        </nav>
+
+        <div className={styles.weekdays} aria-hidden="true">
+          {weekdayLabels.map((label) => <span key={label}>{label}</span>)}
+        </div>
+
+        <ol className={styles.calendar}>
+          {calendarCells.map((cell) => {
+            if (cell.type === "blank") return <li key={cell.key} aria-hidden="true" className={styles.blank} />;
+
+            const entry = cell.entry;
+            const imageUrl = getPublicImageUrl(entry?.photos?.gallery_image_path ?? null);
+
+            return (
+              <li key={cell.key} data-has-entry={Boolean(entry)}>
+                {entry ? (
+                  <Link href={`/journal/${entry.entry_date}`} aria-label={`Open ${entry.title}`}>
+                    <span className={styles.day}>{cell.day}</span>
                     <figure>
-                      {thumbnailUrl ? (
-                        <img
-                          src={thumbnailUrl}
-                          alt=""
-                          width={entry.photos?.image_width ?? undefined}
-                          height={entry.photos?.image_height ?? undefined}
-                          loading="lazy"
-                        />
+                      {imageUrl ? (
+                        <img src={imageUrl} alt="" loading="lazy" />
                       ) : (
                         <span aria-hidden="true" style={{ background: getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date) }} />
                       )}
                     </figure>
-                    <section>
-                      <span>{entry.entry_date}</span>
+                    <div>
                       <strong className="serif">{entry.title}</strong>
                       <em>{entry.photos?.location_name ?? "Tokyo"}</em>
-                      <p>{getExcerpt(entry.reflection)}</p>
-                    </section>
+                    </div>
                   </Link>
-                </li>
-              );
-            })}
-          </ol>
-        ) : null}
-        {!latest && !archiveEntries.length ? (
-          <p className={`${styles.empty} serif`}>The journal is quiet for now. Daily entries will appear here once published.</p>
-        ) : null}
-        {hasNewer || hasOlder ? (
-          <nav className={styles.pagination} aria-label="Journal archive pagination">
-            {hasNewer ? <Link href={page === 2 ? "/journal/archive" : `/journal/archive?page=${page - 1}`}>← Newer entries</Link> : <span />}
-            {hasOlder ? <Link href={`/journal/archive?page=${page + 1}`}>Older entries →</Link> : null}
-          </nav>
+                ) : (
+                  <span className={styles.day}>{cell.day}</span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+
+        {!entryByDate.size ? (
+          <p className={`${styles.empty} serif`}>No entries for this month.</p>
         ) : null}
       </main>
       <SiteFooter />
