@@ -14,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/selected",
     "/journal",
+    "/journal/archive",
     "/collections",
     "/about",
     ...(entries ?? []).map((entry) => `/journal/${entry.entry_date}`),
