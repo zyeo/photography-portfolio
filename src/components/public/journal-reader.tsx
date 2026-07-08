@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { ContactIconLinks } from "@/components/contact-icon-links";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import type { JournalReaderEntry } from "@/lib/public/journal";
 import styles from "./journal-reader.module.css";
@@ -165,6 +166,12 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
         <Link href="/journal/archive">Archive</Link>
         {newer ? <Link href={getJournalHref(newer)}>Newer</Link> : <span />}
       </nav>
+
+      <footer className={styles.readerFooter}>
+        <p>Made with ❤️ in Tokyo, Japan.</p>
+        <ContactIconLinks className={styles.readerFooterLinks} />
+      </footer>
+
       <div className={styles.preload} aria-hidden="true">
         {preloadUrls.map((url) => (
           <img key={url} src={url} alt="" loading="eager" />

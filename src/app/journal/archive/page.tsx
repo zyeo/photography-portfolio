@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import { createClient } from "@/lib/supabase/server";
@@ -33,6 +32,12 @@ function isValidMonth(value: string | undefined) {
   return monthNumber >= 1 && monthNumber <= 12;
 }
 
+function clampMonth(month: string, firstMonth: string, lastMonth: string) {
+  if (month < firstMonth) return firstMonth;
+  if (month > lastMonth) return lastMonth;
+  return month;
+}
+
 function getMonthStart(month: string) {
   return new Date(`${month}-01T00:00:00.000Z`);
 }
@@ -56,19 +61,31 @@ function getLeadingBlankCount(date: Date) {
 export default async function JournalArchivePage({ searchParams }: JournalArchiveProps) {
   const params = await searchParams;
   const supabase = await createClient();
-  const { data: latestEntry } = await supabase
-    .from("journal_entries")
-    .select("entry_date")
-    .eq("published", true)
-    .order("entry_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const [{ data: latestEntry }, { data: earliestEntry }] = await Promise.all([
+    supabase
+      .from("journal_entries")
+      .select("entry_date")
+      .eq("published", true)
+      .order("entry_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("journal_entries")
+      .select("entry_date")
+      .eq("published", true)
+      .order("entry_date", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
   const latestMonth = latestEntry?.entry_date?.slice(0, 7) ?? getMonthKey(new Date());
-  const month = isValidMonth(params.month) ? params.month! : latestMonth;
+  const earliestMonth = earliestEntry?.entry_date?.slice(0, 7) ?? latestMonth;
+  const month = clampMonth(isValidMonth(params.month) ? params.month! : latestMonth, earliestMonth, latestMonth);
   const monthStart = getMonthStart(month);
   const nextMonthStart = addMonths(monthStart, 1);
   const previousMonth = getMonthKey(addMonths(monthStart, -1));
   const nextMonth = getMonthKey(nextMonthStart);
+  const hasPreviousMonth = month > earliestMonth;
+  const hasNextMonth = month < latestMonth;
   const monthStartDate = `${month}-01`;
   const nextMonthStartDate = `${nextMonth}-01`;
   const daysInMonth = getDaysInMonth(monthStart);
@@ -84,6 +101,8 @@ export default async function JournalArchivePage({ searchParams }: JournalArchiv
   const entryByDate = new Map(
     ((entries ?? []) as CalendarEntry[]).map((entry) => [entry.entry_date, entry]),
   );
+  const visibleDayCells = leadingBlankCount + daysInMonth;
+  const trailingBlankCount = Math.max(0, 42 - visibleDayCells);
   const calendarCells: CalendarCell[] = [
     ...Array.from({ length: leadingBlankCount }, (_, index) => ({ key: `blank-${index}`, type: "blank" as const })),
     ...Array.from({ length: daysInMonth }, (_, index) => {
@@ -91,6 +110,7 @@ export default async function JournalArchivePage({ searchParams }: JournalArchiv
       const date = `${month}-${String(day).padStart(2, "0")}`;
       return { key: date, type: "day" as const, day, date, entry: entryByDate.get(date) };
     }),
+    ...Array.from({ length: trailingBlankCount }, (_, index) => ({ key: `blank-end-${index}`, type: "blank" as const })),
   ];
 
   return (
@@ -106,9 +126,17 @@ export default async function JournalArchivePage({ searchParams }: JournalArchiv
         </div>
 
         <nav className={styles.monthNav} aria-label="Journal archive month navigation">
-          <Link href={`/journal/archive?month=${previousMonth}`}>Previous</Link>
+          {hasPreviousMonth ? (
+            <Link href={`/journal/archive?month=${previousMonth}`}>Previous</Link>
+          ) : (
+            <span aria-disabled="true">Previous</span>
+          )}
           <strong className="display">{monthFormatter.format(monthStart)}</strong>
-          <Link href={`/journal/archive?month=${nextMonth}`}>Next</Link>
+          {hasNextMonth ? (
+            <Link href={`/journal/archive?month=${nextMonth}`}>Next</Link>
+          ) : (
+            <span aria-disabled="true">Next</span>
+          )}
         </nav>
 
         <div className={styles.weekdays} aria-hidden="true">
@@ -151,7 +179,6 @@ export default async function JournalArchivePage({ searchParams }: JournalArchiv
           <p className={`${styles.empty} serif`}>No entries for this month.</p>
         ) : null}
       </main>
-      <SiteFooter />
     </>
   );
 }
