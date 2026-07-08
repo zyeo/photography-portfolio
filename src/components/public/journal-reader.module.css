@@ -90,7 +90,8 @@
 }
 
 .readMoreRow {
-  min-height: 1.05rem;
+  height: 1.05rem;
+  line-height: 1;
 }
 
 .readMore {
@@ -112,6 +113,11 @@
 .readMore:hover,
 .readMore:focus-visible {
   color: var(--ink);
+}
+
+.readMore:disabled {
+  cursor: default;
+  visibility: hidden;
 }
 
 .caption dl {

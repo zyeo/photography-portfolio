@@ -140,17 +140,18 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
         <h1 className="display">{entry.title}</h1>
         <p ref={reflectionPreviewRef} className={`${styles.reflection} serif`}>{entry.reflection}</p>
         <div className={styles.readMoreRow}>
-          {canExpandReflection ? (
-            <button
-              className={styles.readMore}
-              type="button"
-              aria-controls={reflectionId}
-              aria-expanded={isReflectionOpen}
-              onClick={() => setIsReflectionOpen(true)}
-            >
-              Read more
-            </button>
-          ) : null}
+          <button
+            className={styles.readMore}
+            type="button"
+            aria-controls={reflectionId}
+            aria-expanded={isReflectionOpen}
+            aria-hidden={!canExpandReflection}
+            disabled={!canExpandReflection}
+            tabIndex={canExpandReflection ? undefined : -1}
+            onClick={() => setIsReflectionOpen(true)}
+          >
+            Read more
+          </button>
         </div>
         <dl>
           <div><dt>Aperture</dt><dd>{entry.photos?.aperture ?? "-"}</dd></div>
