@@ -62,7 +62,7 @@
 .date,
 .caption dt {
   color: var(--ink-soft);
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
@@ -73,7 +73,7 @@
 
 .caption h1 {
   margin: 0;
-  font-size: clamp(1.85rem, 1.45rem + 1.6vw, 3.1rem);
+  font-size: clamp(1.7rem, 1.3rem + 1.3vw, 2.7rem);
   line-height: 1;
 }
 
