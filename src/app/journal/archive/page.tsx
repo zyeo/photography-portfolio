@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContactIconLinks } from "@/components/contact-icon-links";
 import { SiteHeader } from "@/components/site-header";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import { createClient } from "@/lib/supabase/server";
@@ -178,6 +179,11 @@ export default async function JournalArchivePage({ searchParams }: JournalArchiv
         {!entryByDate.size ? (
           <p className={`${styles.empty} serif`}>No entries for this month.</p>
         ) : null}
+
+        <footer className={styles.archiveFooter}>
+          <p>Made with ❤️ in Tokyo, Japan.</p>
+          <ContactIconLinks className={styles.archiveFooterLinks} />
+        </footer>
       </main>
     </>
   );

@@ -27,7 +27,10 @@ html {
 }
 
 body {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  min-height: 100svh;
   margin: 0;
   background: var(--paper);
   color: var(--ink);
@@ -35,6 +38,15 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body > main {
+  flex: 1 0 auto;
+}
+
+body > header,
+body > footer {
+  flex: 0 0 auto;
 }
 
 a {
