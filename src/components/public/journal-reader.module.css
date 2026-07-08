@@ -88,6 +88,27 @@
   -webkit-line-clamp: 3;
 }
 
+.readMore {
+  justify-self: start;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  margin: -0.1rem 0 0;
+  padding: 0 0 0.12rem;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.readMore:hover,
+.readMore:focus-visible {
+  color: var(--ink);
+}
+
 .caption dl {
   display: flex;
   flex-wrap: wrap;
@@ -134,6 +155,64 @@
 .preload img {
   width: 1px;
   height: 1px;
+}
+
+.sheetLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  align-items: end;
+  background: rgba(19, 17, 14, 0.24);
+}
+
+.sheet {
+  width: min(100% - 2rem, 48rem);
+  max-height: min(58vh, 32rem);
+  margin: 0 auto 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(33, 31, 27, 0.12);
+  background: var(--paper);
+  box-shadow: 0 -1rem 4rem rgba(33, 31, 27, 0.14);
+  padding: clamp(1rem, 2.4vw, 1.6rem);
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+}
+
+.sheetHeader h2 {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.7rem, 1.35rem + 1.4vw, 2.8rem);
+  line-height: 1;
+}
+
+.sheetHeader button {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding: 0 0 0.12rem;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.sheetReflection {
+  margin: 0;
+  font-size: clamp(1.05rem, 0.98rem + 0.35vw, 1.26rem);
+  line-height: 1.65;
+  white-space: pre-wrap;
 }
 
 @media (min-width: 56rem) {
@@ -259,7 +338,21 @@
 
   .date,
   .caption dt,
-  .mobileNav {
+  .mobileNav,
+  .readMore {
     font-size: 0.62rem;
+  }
+
+  .sheet {
+    width: 100%;
+    max-height: 62vh;
+    margin-bottom: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+  }
+
+  .sheetHeader {
+    gap: 0.8rem;
   }
 }

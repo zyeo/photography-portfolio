@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import type { JournalReaderEntry } from "@/lib/public/journal";
 import styles from "./journal-reader.module.css";
@@ -54,7 +54,10 @@ function NeighborFrame({
 
 export function JournalReader({ entry, older, newer, preloadEntries }: JournalReaderProps) {
   const router = useRouter();
+  const [isReflectionOpen, setIsReflectionOpen] = useState(false);
   const imageUrl = getImageUrl(entry);
+  const reflectionId = `journal-reflection-${entry.entry_date}`;
+  const canExpandReflection = entry.reflection.length > 120;
   const preloadUrls = [
     ...new Set(
       preloadEntries
@@ -62,6 +65,10 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
         .filter((url): url is string => Boolean(url)),
     ),
   ];
+
+  useEffect(() => {
+    setIsReflectionOpen(false);
+  }, [entry.entry_date]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -84,11 +91,15 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
         event.preventDefault();
         router.push(getJournalHref(newer));
       }
+      if (event.key === "Escape" && isReflectionOpen) {
+        event.preventDefault();
+        setIsReflectionOpen(false);
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [older, newer, router]);
+  }, [isReflectionOpen, older, newer, router]);
 
   return (
     <main className={styles.reader}>
@@ -115,6 +126,17 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
         </p>
         <h1 className="display">{entry.title}</h1>
         <p className={`${styles.reflection} serif`}>{entry.reflection}</p>
+        {canExpandReflection ? (
+          <button
+            className={styles.readMore}
+            type="button"
+            aria-controls={reflectionId}
+            aria-expanded={isReflectionOpen}
+            onClick={() => setIsReflectionOpen(true)}
+          >
+            Read more
+          </button>
+        ) : null}
         <dl>
           <div><dt>Aperture</dt><dd>{entry.photos?.aperture ?? "-"}</dd></div>
           <div><dt>Shutter</dt><dd>{entry.photos?.shutter_speed ?? "-"}</dd></div>
@@ -132,6 +154,30 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
           <img key={url} src={url} alt="" loading="eager" />
         ))}
       </div>
+      {isReflectionOpen ? (
+        <div className={styles.sheetLayer} role="presentation" onClick={() => setIsReflectionOpen(false)}>
+          <section
+            className={styles.sheet}
+            id={reflectionId}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${reflectionId}-title`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className={styles.sheetHeader}>
+              <div>
+                <p className={styles.date}>
+                  {entry.entry_date} · {entry.photos?.location_name ?? "Tokyo"}
+                  {entry.weather ? ` · ${entry.weather}` : ""}
+                </p>
+                <h2 className="display" id={`${reflectionId}-title`}>{entry.title}</h2>
+              </div>
+              <button type="button" onClick={() => setIsReflectionOpen(false)}>Close</button>
+            </div>
+            <p className={`${styles.sheetReflection} serif`}>{entry.reflection}</p>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }
