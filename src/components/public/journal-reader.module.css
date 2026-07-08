@@ -80,12 +80,17 @@
 .reflection {
   display: -webkit-box;
   margin: 0;
+  min-height: calc(2lh);
   overflow: hidden;
   color: var(--ink);
   font-size: clamp(0.98rem, 0.94rem + 0.25vw, 1.14rem);
   line-height: 1.45;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
+}
+
+.readMoreRow {
+  min-height: 1.05rem;
 }
 
 .readMore {
@@ -327,9 +332,10 @@
   }
 
   .reflection {
+    min-height: calc(2lh);
     font-size: 0.98rem;
     line-height: 1.38;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
   }
 
   .caption dl {

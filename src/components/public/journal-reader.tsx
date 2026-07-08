@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import type { JournalReaderEntry } from "@/lib/public/journal";
 import styles from "./journal-reader.module.css";
@@ -55,9 +55,10 @@ function NeighborFrame({
 export function JournalReader({ entry, older, newer, preloadEntries }: JournalReaderProps) {
   const router = useRouter();
   const [isReflectionOpen, setIsReflectionOpen] = useState(false);
+  const [canExpandReflection, setCanExpandReflection] = useState(false);
+  const reflectionPreviewRef = useRef<HTMLParagraphElement>(null);
   const imageUrl = getImageUrl(entry);
   const reflectionId = `journal-reflection-${entry.entry_date}`;
-  const canExpandReflection = entry.reflection.length > 120;
   const preloadUrls = [
     ...new Set(
       preloadEntries
@@ -69,6 +70,18 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
   useEffect(() => {
     setIsReflectionOpen(false);
   }, [entry.entry_date]);
+
+  useEffect(() => {
+    function updateReflectionOverflow() {
+      const element = reflectionPreviewRef.current;
+      if (!element) return;
+      setCanExpandReflection(element.scrollHeight > element.clientHeight + 1);
+    }
+
+    updateReflectionOverflow();
+    window.addEventListener("resize", updateReflectionOverflow);
+    return () => window.removeEventListener("resize", updateReflectionOverflow);
+  }, [entry.reflection]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -125,18 +138,20 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
           {entry.weather ? ` · ${entry.weather}` : ""}
         </p>
         <h1 className="display">{entry.title}</h1>
-        <p className={`${styles.reflection} serif`}>{entry.reflection}</p>
-        {canExpandReflection ? (
-          <button
-            className={styles.readMore}
-            type="button"
-            aria-controls={reflectionId}
-            aria-expanded={isReflectionOpen}
-            onClick={() => setIsReflectionOpen(true)}
-          >
-            Read more
-          </button>
-        ) : null}
+        <p ref={reflectionPreviewRef} className={`${styles.reflection} serif`}>{entry.reflection}</p>
+        <div className={styles.readMoreRow}>
+          {canExpandReflection ? (
+            <button
+              className={styles.readMore}
+              type="button"
+              aria-controls={reflectionId}
+              aria-expanded={isReflectionOpen}
+              onClick={() => setIsReflectionOpen(true)}
+            >
+              Read more
+            </button>
+          ) : null}
+        </div>
         <dl>
           <div><dt>Aperture</dt><dd>{entry.photos?.aperture ?? "-"}</dd></div>
           <div><dt>Shutter</dt><dd>{entry.photos?.shutter_speed ?? "-"}</dd></div>
