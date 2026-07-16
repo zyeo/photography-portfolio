@@ -8,22 +8,24 @@ export default function AboutPage() {
       <SiteHeader />
       <main className={`${styles.page} shell`}>
         <section className={styles.copy}>
-          <p className="eyebrow">About</p>
-          <h1 className="display">Zach Yeo</h1>
+          <h1 className={`eyebrow ${styles.title}`}>About</h1>
           <div className={styles.bio}>
             <p className="serif">
-              I’m a Tokyo-based photographer drawn to street, portrait, and documentary-style work.
+              Hello there! I’m <strong>Zach</strong>. I like taking photos of things. People. And
+              places!
             </p>
             <p className="serif">
-              My work focuses on everyday scenes, natural moments, and the small details that give
-              people and places their character.
+              <strong>Where?</strong> I like taking photos in nature and in cities.
             </p>
             <p className="serif">
-              Alongside my portfolio, I keep a photo journal as a daily challenge: a photo a day, a
-              way to stay consistent and keep learning.
+              I also run a daily photo journal here as a way of staying consistent. But some days I
+              forget to take photos. So I need to find a way of keeping myself accountable. If you
+              have any ideas, please do let me know!
             </p>
             <p className={`serif ${styles.availability}`}>
-              Available for portrait, editorial, and creative inquiries.
+              I’m currently based in Tokyo. If you would like to work with me, please send me a
+              message. I’m sure I would like to work with you too. {" "}
+              <span className={styles.smiley}>:-)</span>
             </p>
           </div>
         </section>

@@ -8,10 +8,9 @@
   max-width: 38rem;
 }
 
-.page h1 {
-  margin: 0.35rem 0 var(--space-3);
-  font-size: clamp(2.3rem, 1.63rem + 2.85vw, 4rem);
-  line-height: 0.95;
+.title {
+  margin: 0 0 var(--space-3);
+  font-weight: 400;
 }
 
 .bio {
@@ -28,6 +27,10 @@
 
 .availability {
   color: var(--ink-soft);
+}
+
+.smiley {
+  color: #b23a32;
 }
 
 @media (min-width: 56rem) {
