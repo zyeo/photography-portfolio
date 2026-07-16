@@ -33,6 +33,17 @@
   color: #b23a32;
 }
 
+.portrait {
+  width: min(100%, 24rem);
+  margin: 0;
+}
+
+.portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 @media (min-width: 56rem) {
   .page {
     grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);

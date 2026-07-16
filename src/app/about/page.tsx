@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import styles from "./page.module.css";
@@ -29,6 +30,15 @@ export default function AboutPage() {
             </p>
           </div>
         </section>
+        <figure className={styles.portrait}>
+          <Image
+            src="/about/zach-profile.webp"
+            alt="Zach sitting in a forest with a camera"
+            width={960}
+            height={1280}
+            sizes="(min-width: 56rem) 24rem, calc(100vw - 2rem)"
+          />
+        </figure>
       </main>
       <SiteFooter />
     </>
