@@ -7,15 +7,26 @@ export default function AboutPage() {
     <>
       <SiteHeader />
       <main className={`${styles.page} shell`}>
-        <p className="eyebrow">About</p>
-        <h1 className="display">Zach Yeo</h1>
-        <p className="serif">
-          I photograph the ordinary pressure of days: street corners, weather, transit,
-          and the brief alignments that make a place feel newly visible.
-        </p>
-        <p className="serif">
-          Based in Tokyo. Quietly available for portrait and editorial inquiries.
-        </p>
+        <section className={styles.copy}>
+          <p className="eyebrow">About</p>
+          <h1 className="display">Zach Yeo</h1>
+          <div className={styles.bio}>
+            <p className="serif">
+              I’m a Tokyo-based photographer drawn to street, portrait, and documentary-style work.
+            </p>
+            <p className="serif">
+              My work focuses on everyday scenes, natural moments, and the small details that give
+              people and places their character.
+            </p>
+            <p className="serif">
+              Alongside my portfolio, I keep a photo journal as a daily challenge: a photo a day, a
+              way to stay consistent and keep learning.
+            </p>
+            <p className={`serif ${styles.availability}`}>
+              Available for portrait, editorial, and creative inquiries.
+            </p>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </>
