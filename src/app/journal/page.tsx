@@ -4,13 +4,13 @@ import { getJournalReaderData } from "@/lib/public/journal";
 import styles from "./page.module.css";
 
 export default async function JournalPage() {
-  const { entry, older, newer, preloadEntries } = await getJournalReaderData();
+  const { entry, older, newer, readerEntries } = await getJournalReaderData();
 
   return (
     <>
       <SiteHeader />
       {entry ? (
-        <JournalReader entry={entry} older={older} newer={newer} preloadEntries={preloadEntries} />
+        <JournalReader entry={entry} older={older} newer={newer} entries={readerEntries} />
       ) : (
         <main className={`${styles.emptyPage} shell`}>
           <h1 className="display">Journal</h1>

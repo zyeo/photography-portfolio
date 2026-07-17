@@ -7,14 +7,14 @@ type PageProps = { params: Promise<{ date: string }> };
 
 export default async function JournalEntryPage({ params }: PageProps) {
   const { date } = await params;
-  const { entry, older, newer, preloadEntries } = await getJournalReaderData(date);
+  const { entry, older, newer, readerEntries } = await getJournalReaderData(date);
 
   if (!entry) notFound();
 
   return (
     <>
       <SiteHeader />
-      <JournalReader entry={entry} older={older} newer={newer} preloadEntries={preloadEntries} />
+      <JournalReader entry={entry} older={older} newer={newer} entries={readerEntries} />
     </>
   );
 }

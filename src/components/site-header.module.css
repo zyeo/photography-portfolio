@@ -24,6 +24,20 @@
   letter-spacing:.2em;
   text-transform:uppercase;
 }
+.header nav a {
+  display:inline-block;
+  transition:color .18s ease, transform .18s ease;
+}
+.header nav a:hover,
+.header nav a:focus-visible {
+  color:var(--ink);
+  transform:translateY(-2px) scale(1.035);
+}
+@media (prefers-reduced-motion:reduce){
+  .header nav a { transition:color .18s ease; }
+  .header nav a:hover,
+  .header nav a:focus-visible { transform:none; }
+}
 @media (max-width:42rem){
   .header { grid-template-columns:1fr; justify-items:center; gap:.8rem; padding-block:1rem; }
   .header nav { justify-self:center; justify-content:center; row-gap:.5rem; max-width:100%; }

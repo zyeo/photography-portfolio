@@ -25,8 +25,10 @@ export type JournalReaderData = {
   entry: JournalReaderEntry | null;
   older: JournalReaderEntry | null;
   newer: JournalReaderEntry | null;
-  preloadEntries: JournalReaderEntry[];
+  readerEntries: JournalReaderEntry[];
 };
+
+const READER_CACHE_SIZE = 50;
 
 async function getOlderNeighbors(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -38,7 +40,7 @@ async function getOlderNeighbors(
     .eq("published", true)
     .lt("entry_date", entryDate)
     .order("entry_date", { ascending: false })
-    .limit(3);
+    .limit(READER_CACHE_SIZE);
 
   return (data ?? []) as JournalReaderEntry[];
 }
@@ -53,7 +55,7 @@ async function getNewerNeighbors(
     .eq("published", true)
     .gt("entry_date", entryDate)
     .order("entry_date", { ascending: true })
-    .limit(3);
+    .limit(READER_CACHE_SIZE);
 
   return (data ?? []) as JournalReaderEntry[];
 }
@@ -76,7 +78,7 @@ export async function getJournalReaderData(entryDate?: string): Promise<JournalR
         .maybeSingle();
 
   const entry = (data ?? null) as JournalReaderEntry | null;
-  if (!entry) return { entry: null, older: null, newer: null, preloadEntries: [] };
+  if (!entry) return { entry: null, older: null, newer: null, readerEntries: [] };
 
   const [olderEntries, newerEntries] = await Promise.all([
     getOlderNeighbors(supabase, entry.entry_date),
@@ -87,6 +89,6 @@ export async function getJournalReaderData(entryDate?: string): Promise<JournalR
     entry,
     older: olderEntries[0] ?? null,
     newer: newerEntries[0] ?? null,
-    preloadEntries: [...olderEntries, ...newerEntries],
+    readerEntries: [...olderEntries, ...newerEntries],
   };
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ContactIconLinks } from "@/components/contact-icon-links";
 import { getPhotoVisualStyle, getPublicImageUrl } from "@/lib/public/visuals";
 import type { JournalReaderEntry } from "@/lib/public/journal";
@@ -12,7 +12,13 @@ type JournalReaderProps = {
   entry: JournalReaderEntry;
   older: JournalReaderEntry | null;
   newer: JournalReaderEntry | null;
-  preloadEntries: JournalReaderEntry[];
+  entries: JournalReaderEntry[];
+};
+
+type ImageTransition = {
+  entry: JournalReaderEntry;
+  direction: "earlier" | "later";
+  id: number;
 };
 
 function getImageUrl(entry: JournalReaderEntry) {
@@ -26,17 +32,30 @@ function getJournalHref(entry: JournalReaderEntry) {
 function NeighborFrame({
   entry,
   direction,
+  onSelect,
 }: {
   entry: JournalReaderEntry | null;
   direction: "older" | "newer";
+  onSelect: (entry: JournalReaderEntry) => void;
 }) {
   if (!entry) return <div className={styles.emptyGhost} aria-hidden="true" data-direction={direction} />;
 
   const imageUrl = getImageUrl(entry);
-  const label = direction === "older" ? "Older entry" : "Newer entry";
+  const label = direction === "older" ? "Earlier entry" : "Later entry";
 
   return (
-    <Link className={styles.ghost} href={getJournalHref(entry)} data-direction={direction} aria-label={`${label}: ${entry.title}`}>
+    <Link
+      className={styles.ghost}
+      href={getJournalHref(entry)}
+      prefetch={false}
+      data-direction={direction}
+      aria-label={`${label}: ${entry.title}`}
+      onClick={(event) => {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+        event.preventDefault();
+        onSelect(entry);
+      }}
+    >
       <figure>
         {imageUrl ? (
           <span
@@ -48,41 +67,92 @@ function NeighborFrame({
           <span aria-hidden="true" style={{ background: getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date) }} />
         )}
       </figure>
-      <span>{direction === "older" ? "Older" : "Newer"}</span>
+      <span>{direction === "older" ? "Earlier" : "Later"}</span>
     </Link>
   );
 }
 
-export function JournalReader({ entry, older, newer, preloadEntries }: JournalReaderProps) {
+export function JournalReader({ entry, older, newer, entries }: JournalReaderProps) {
   const router = useRouter();
-  const [isReflectionOpen, setIsReflectionOpen] = useState(false);
-  const [canExpandReflection, setCanExpandReflection] = useState(false);
-  const reflectionPreviewRef = useRef<HTMLParagraphElement>(null);
-  const imageUrl = getImageUrl(entry);
-  const reflectionId = `journal-reflection-${entry.entry_date}`;
+  const cachedEntries = useMemo(() => {
+    const entriesByDate = new Map<string, JournalReaderEntry>();
+    [entry, older, newer, ...entries].forEach((cachedEntry) => {
+      if (cachedEntry) entriesByDate.set(cachedEntry.entry_date, cachedEntry);
+    });
+    return [...entriesByDate.values()].sort((first, second) =>
+      first.entry_date.localeCompare(second.entry_date),
+    );
+  }, [entries, entry, newer, older]);
+  const [activeDate, setActiveDate] = useState(entry.entry_date);
+  const [imageTransition, setImageTransition] = useState<ImageTransition | null>(null);
+  const transitionIdRef = useRef(0);
+  const activeIndex = Math.max(
+    0,
+    cachedEntries.findIndex((cachedEntry) => cachedEntry.entry_date === activeDate),
+  );
+  const activeEntry = cachedEntries[activeIndex] ?? entry;
+  const activeOlder = activeIndex > 0 ? cachedEntries[activeIndex - 1] : null;
+  const activeNewer = activeIndex < cachedEntries.length - 1 ? cachedEntries[activeIndex + 1] : null;
+  const imageUrl = getImageUrl(activeEntry);
+  const outgoingImageUrl = imageTransition ? getImageUrl(imageTransition.entry) : null;
+  const nearbyEntries = cachedEntries.slice(
+    Math.max(0, activeIndex - 3),
+    Math.min(cachedEntries.length, activeIndex + 4),
+  );
   const preloadUrls = [
     ...new Set(
-      preloadEntries
+      nearbyEntries
+        .filter((nearbyEntry) => nearbyEntry.entry_date !== activeEntry.entry_date)
         .map((preloadEntry) => getImageUrl(preloadEntry))
         .filter((url): url is string => Boolean(url)),
     ),
   ];
 
+  const selectEntry = useCallback((nextEntry: JournalReaderEntry) => {
+    if (nextEntry.entry_date === activeEntry.entry_date) return;
+    setImageTransition({
+      entry: activeEntry,
+      direction: nextEntry.entry_date < activeEntry.entry_date ? "earlier" : "later",
+      id: ++transitionIdRef.current,
+    });
+    setActiveDate(nextEntry.entry_date);
+    const href = getJournalHref(nextEntry);
+    if (window.location.pathname !== href) window.history.pushState(null, "", href);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [activeEntry]);
+
   useEffect(() => {
-    setIsReflectionOpen(false);
+    setImageTransition(null);
+    setActiveDate(entry.entry_date);
   }, [entry.entry_date]);
 
   useEffect(() => {
-    function updateReflectionOverflow() {
-      const element = reflectionPreviewRef.current;
-      if (!element) return;
-      setCanExpandReflection(element.scrollHeight > element.clientHeight + 1);
+    if (!imageTransition) return;
+    const transitionId = imageTransition.id;
+    const timeout = window.setTimeout(() => {
+      setImageTransition((current) => current?.id === transitionId ? null : current);
+    }, 180);
+    return () => window.clearTimeout(timeout);
+  }, [imageTransition]);
+
+  useEffect(() => {
+    function handlePopState() {
+      const dateFromPath = window.location.pathname.match(/^\/journal\/(\d{4}-\d{2}-\d{2})$/)?.[1];
+      const nextDate = window.location.pathname === "/journal" ? entry.entry_date : dateFromPath;
+      const cachedEntry = cachedEntries.find((candidate) => candidate.entry_date === nextDate);
+
+      if (cachedEntry) {
+        setImageTransition(null);
+        setActiveDate(cachedEntry.entry_date);
+        window.scrollTo({ top: 0, behavior: "auto" });
+      } else if (nextDate) {
+        router.refresh();
+      }
     }
 
-    updateReflectionOverflow();
-    window.addEventListener("resize", updateReflectionOverflow);
-    return () => window.removeEventListener("resize", updateReflectionOverflow);
-  }, [entry.reflection]);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [cachedEntries, entry.entry_date, router]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -97,74 +167,122 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
         return;
       }
 
-      if (event.key === "ArrowLeft" && older) {
+      if (event.key === "ArrowLeft" && activeOlder) {
         event.preventDefault();
-        router.push(getJournalHref(older));
+        selectEntry(activeOlder);
       }
-      if (event.key === "ArrowRight" && newer) {
+      if (event.key === "ArrowRight" && activeNewer) {
         event.preventDefault();
-        router.push(getJournalHref(newer));
-      }
-      if (event.key === "Escape" && isReflectionOpen) {
-        event.preventDefault();
-        setIsReflectionOpen(false);
+        selectEntry(activeNewer);
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isReflectionOpen, older, newer, router]);
+  }, [activeNewer, activeOlder, selectEntry]);
 
   return (
     <main className={styles.reader}>
       <div className={styles.stageWrap}>
-        <NeighborFrame entry={older} direction="older" />
+        <NeighborFrame entry={activeOlder} direction="older" onSelect={selectEntry} />
         <figure className={styles.stage}>
+          {imageTransition ? (
+            <span
+              key={`outgoing-${imageTransition.id}`}
+              className={`${styles.stageVisual} ${outgoingImageUrl ? styles.stageImage : ""} ${
+                imageTransition.direction === "later" ? styles.imageExitLater : styles.imageExitEarlier
+              }`}
+              aria-hidden="true"
+              style={outgoingImageUrl
+                ? { backgroundImage: `url(${outgoingImageUrl}), ${getPhotoVisualStyle(imageTransition.entry.photos?.id ?? imageTransition.entry.entry_date)}` }
+                : { background: getPhotoVisualStyle(imageTransition.entry.photos?.id ?? imageTransition.entry.entry_date) }}
+            />
+          ) : null}
           {imageUrl ? (
             <span
-              className={styles.stageImage}
+              key={activeEntry.entry_date}
+              className={`${styles.stageVisual} ${styles.stageImage} ${
+                imageTransition
+                  ? imageTransition.direction === "later"
+                    ? styles.imageEnterLater
+                    : styles.imageEnterEarlier
+                  : ""
+              }`}
               aria-hidden="true"
-              style={{ backgroundImage: `url(${imageUrl}), ${getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date)}` }}
+              style={{ backgroundImage: `url(${imageUrl}), ${getPhotoVisualStyle(activeEntry.photos?.id ?? activeEntry.entry_date)}` }}
             />
           ) : (
-            <span aria-hidden="true" style={{ background: getPhotoVisualStyle(entry.photos?.id ?? entry.entry_date) }} />
+            <span
+              key={activeEntry.entry_date}
+              className={`${styles.stageVisual} ${
+                imageTransition
+                  ? imageTransition.direction === "later"
+                    ? styles.imageEnterLater
+                    : styles.imageEnterEarlier
+                  : ""
+              }`}
+              aria-hidden="true"
+              style={{ background: getPhotoVisualStyle(activeEntry.photos?.id ?? activeEntry.entry_date) }}
+            />
           )}
         </figure>
-        <NeighborFrame entry={newer} direction="newer" />
+        <NeighborFrame entry={activeNewer} direction="newer" onSelect={selectEntry} />
       </div>
 
       <article className={styles.caption}>
-        <p className={styles.date}>
-          {entry.entry_date} · {entry.photos?.location_name ?? "Tokyo"}
-          {entry.weather ? ` · ${entry.weather}` : ""}
-        </p>
-        <h1 className="display">{entry.title}</h1>
-        <p ref={reflectionPreviewRef} className={`${styles.reflection} serif`}>{entry.reflection}</p>
-        <div className={styles.readMoreRow}>
-          <button
-            className={styles.readMore}
-            type="button"
-            aria-controls={reflectionId}
-            aria-expanded={isReflectionOpen}
-            aria-hidden={!canExpandReflection}
-            disabled={!canExpandReflection}
-            tabIndex={canExpandReflection ? undefined : -1}
-            onClick={() => setIsReflectionOpen(true)}
-          >
-            Read more
-          </button>
+        <div className={styles.metadata}>
+          <dl>
+            <div><dt>Aperture</dt><dd>{activeEntry.photos?.aperture ?? "-"}</dd></div>
+            <div><dt>Shutter</dt><dd>{activeEntry.photos?.shutter_speed ?? "-"}</dd></div>
+            <div><dt>ISO</dt><dd>{activeEntry.photos?.iso ?? "-"}</dd></div>
+          </dl>
+          <p className={styles.date}>
+            {activeEntry.entry_date} · {activeEntry.photos?.location_name ?? "Tokyo"}
+            {activeEntry.weather ? ` · ${activeEntry.weather}` : ""}
+          </p>
         </div>
-        <dl>
-          <div><dt>Aperture</dt><dd>{entry.photos?.aperture ?? "-"}</dd></div>
-          <div><dt>Shutter</dt><dd>{entry.photos?.shutter_speed ?? "-"}</dd></div>
-          <div><dt>ISO</dt><dd>{entry.photos?.iso ?? "-"}</dd></div>
-        </dl>
+        <h1 className="display">{activeEntry.title}</h1>
+        <p className={`${styles.reflection} serif`}>{activeEntry.reflection}</p>
       </article>
 
       <nav className={styles.mobileNav} aria-label="Journal entry navigation">
-        {older ? <Link href={getJournalHref(older)}>Older</Link> : <span />}
-        <Link href="/journal/archive">Archive</Link>
-        {newer ? <Link href={getJournalHref(newer)}>Newer</Link> : <span />}
+        <span className={styles.navGroup} data-direction="earlier">
+          {activeOlder ? (
+            <>
+              <Link
+                href={getJournalHref(activeOlder)}
+                prefetch={false}
+                onClick={(event) => {
+                  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+                  event.preventDefault();
+                  selectEntry(activeOlder);
+                }}
+              >
+                Earlier
+              </Link>
+              <span className={styles.navSeparator} aria-hidden="true">•</span>
+            </>
+          ) : null}
+        </span>
+        <Link href="/journal/archive">Calendar</Link>
+        <span className={styles.navGroup} data-direction="later">
+          {activeNewer ? (
+            <>
+              <span className={styles.navSeparator} aria-hidden="true">•</span>
+              <Link
+                href={getJournalHref(activeNewer)}
+                prefetch={false}
+                onClick={(event) => {
+                  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+                  event.preventDefault();
+                  selectEntry(activeNewer);
+                }}
+              >
+                Later
+              </Link>
+            </>
+          ) : null}
+        </span>
       </nav>
 
       <footer className={styles.readerFooter}>
@@ -177,30 +295,6 @@ export function JournalReader({ entry, older, newer, preloadEntries }: JournalRe
           <img key={url} src={url} alt="" loading="eager" />
         ))}
       </div>
-      {isReflectionOpen ? (
-        <div className={styles.sheetLayer} role="presentation" onClick={() => setIsReflectionOpen(false)}>
-          <section
-            className={styles.sheet}
-            id={reflectionId}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={`${reflectionId}-title`}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className={styles.sheetHeader}>
-              <div>
-                <p className={styles.date}>
-                  {entry.entry_date} · {entry.photos?.location_name ?? "Tokyo"}
-                  {entry.weather ? ` · ${entry.weather}` : ""}
-                </p>
-                <h2 className="display" id={`${reflectionId}-title`}>{entry.title}</h2>
-              </div>
-              <button type="button" onClick={() => setIsReflectionOpen(false)}>Close</button>
-            </div>
-            <p className={`${styles.sheetReflection} serif`}>{entry.reflection}</p>
-          </section>
-        </div>
-      ) : null}
     </main>
   );
 }
